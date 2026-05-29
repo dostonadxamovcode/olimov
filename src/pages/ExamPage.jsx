@@ -290,9 +290,9 @@ export default function ExamPage() {
         <h2 className="text-xl font-bold text-white mb-2">Test topilmadi</h2>
         <p className="text-slate-400 mb-6">{error}</p>
         <div className="flex gap-3 justify-center">
-          <button onClick={() => navigate(`/levels/${levelId || 'a1'}`)}
+          <button onClick={() => navigate('/level')}
             className="px-6 py-2.5 rounded-xl bg-indigo-500 text-white font-semibold hover:bg-indigo-600 transition-colors">
-            Back to Level
+            Back to Levels
           </button>
           <button onClick={() => navigate('/level')}
             className="px-6 py-2.5 rounded-xl border border-slate-600 text-slate-300 font-semibold hover:bg-slate-700 transition-colors">

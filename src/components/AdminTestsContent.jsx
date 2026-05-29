@@ -12,6 +12,7 @@ import {
 import { toastError, toastSuccess } from '../utils/errorHandler'
 import { LoadingSpinner } from '../components/ui/SkeletonLoader'
 import CustomSelect from '../components/ui/CustomSelect'
+import ConfirmModal from '../components/ui/ConfirmModal'
 
 const ADMIN_LEVEL_OPTIONS = [
   { value: 'all',   label: 'All Levels' },
@@ -56,6 +57,7 @@ export default function AdminTestsContent() {
   const [searchQuery, setSearchQuery] = useState('')
   const [levelFilter, setLevelFilter] = useState('all')
   const [deletingId, setDeletingId] = useState(null)
+  const [pendingDelete, setPendingDelete] = useState(null)
 
   useEffect(() => {
     fetchAllTests()
@@ -92,13 +94,11 @@ export default function AdminTestsContent() {
     }
   }
 
-  const handleDelete = async (test) => {
-    if (!window.confirm('Delete this test?')) {
-      return
-    }
+  const handleDeleteConfirm = async () => {
+    if (!pendingDelete) return;
+    const test = pendingDelete;
+    setDeletingId(test.id);
 
-    setDeletingId(test.id)
-    
     try {
       const { deleteDoc, doc } = await import('firebase/firestore')
       const { db: firestoreDb } = await import('../firebase')
@@ -106,8 +106,7 @@ export default function AdminTestsContent() {
       await deleteDoc(doc(firestoreDb, test.collectionName, test.id))
 
       toastSuccess("Test muvaffaqiyatli o'chirildi.")
-
-      // Refresh the list
+      setPendingDelete(null)
       await fetchAllTests()
     } catch (error) {
       toastError("O'chirishda xatolik yuz berdi.")
@@ -245,9 +244,9 @@ export default function AdminTestsContent() {
 
       {/* Tests List */}
       {!loading && filteredTests.length > 0 && (
-        <div style={{
+        <div className="tests-grid" style={{
           display: 'grid', gap: 16,
-          gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(min(350px, 100%), 1fr))',
         }}>
           {filteredTests.map((test) => {
             const levelConfig = LEVEL_CONFIG[test.levelKey] || LEVEL_CONFIG.a1
@@ -351,7 +350,7 @@ export default function AdminTestsContent() {
                     <Edit2 size={12} /> Edit
                   </button>
                   <button
-                    onClick={() => handleDelete(test)}
+                    onClick={() => setPendingDelete(test)}
                     disabled={deletingId === test.id}
                     style={{
                       flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
@@ -380,7 +379,7 @@ export default function AdminTestsContent() {
 
       {/* Stats */}
       {!loading && tests.length > 0 && (
-        <div style={{
+        <div className="admin-stats-bar" style={{
           position: 'fixed',
           bottom: 0,
           left: 220,
@@ -427,6 +426,17 @@ export default function AdminTestsContent() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        open={!!pendingDelete}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={handleDeleteConfirm}
+        loading={!!deletingId}
+        variant="danger"
+        title="Testni o'chirish"
+        message={`"${pendingDelete?.title || 'Bu test'}" ni rostan ham o'chirmoqchimisiz? Bu amalni qaytarib bo'lmaydi.`}
+        confirmLabel="O'chirish"
+      />
     </div>
   )
 }

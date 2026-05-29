@@ -54,7 +54,7 @@ export default function TestResultPage() {
           <h2 className="text-2xl font-bold text-white mb-2">No Results Found</h2>
           <p className="text-slate-400 mb-6">Please complete a test to see your results.</p>
           <button 
-            onClick={() => navigate('/tests')}
+            onClick={() => navigate('/level')}
             className="px-6 py-3 rounded-xl bg-indigo-500 text-white font-semibold hover:bg-indigo-600 transition-colors"
           >
             Go to Tests
@@ -111,10 +111,10 @@ export default function TestResultPage() {
         {/* Header */}
         <div className="mb-8">
           <button
-            onClick={() => navigate('/tests')}
+            onClick={() => navigate('/level')}
             className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-4"
           >
-            <ArrowLeft className="w-4 h-4" /> Back to Tests
+            <ArrowLeft className="w-4 h-4" /> Back to Home
           </button>
           <div className="text-center">
             <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">

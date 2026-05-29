@@ -199,17 +199,30 @@ export default function AdminDashboard() {
       >
         {/* Logo */}
         <div style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-          <div style={{ padding: '20px 20px 28px', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ padding: '16px 16px 18px', display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{
-              width: 36, height: 36, borderRadius: 10,
+              width: 34, height: 34, borderRadius: 10, flexShrink: 0,
               background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontWeight: 800, fontSize: 14, color: '#fff'
             }}>C</div>
-            <div>
+            <div style={{ flex: 1 }}>
               <span style={{ fontWeight: 800, fontSize: 16, color: '#fff' }}>CEFR</span>
               <span style={{ fontWeight: 800, fontSize: 16, color: '#60a5fa' }}>Pro</span>
             </div>
+            {/* Mobile close button */}
+            <button
+              className="sidebar-close"
+              onClick={() => setSidebarOpen(false)}
+              style={{
+                display: 'none', alignItems: 'center', justifyContent: 'center',
+                width: 30, height: 30, borderRadius: 8, flexShrink: 0,
+                background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+                cursor: 'pointer', color: '#64748b',
+              }}
+            >
+              <X size={16} />
+            </button>
           </div>
         </div>
 
@@ -223,6 +236,7 @@ export default function AdminDashboard() {
                 else if (id === 'tests') navigate('/admin/tests')
                 else if (id === 'students') setActive(id)
                 else setActive(id)
+                setSidebarOpen(false)
               }}
               style={{
                 display: 'flex', alignItems: 'center', gap: 12,
@@ -258,7 +272,7 @@ export default function AdminDashboard() {
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
           <div style={{ padding: '16px 12px' }}>
             <button
-              onClick={() => navigate('/')}
+              onClick={() => { navigate('/'); setSidebarOpen(false); }}
               style={{
                 display: 'flex', alignItems: 'center', gap: 12,
                 width: '100%', padding: '12px 14px', borderRadius: 8,
@@ -288,23 +302,45 @@ export default function AdminDashboard() {
       {sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 99 }}
+          style={{
+            position: 'fixed', inset: 0,
+            background: 'rgba(0,0,0,0.6)',
+            backdropFilter: 'blur(2px)',
+            zIndex: 99,
+            cursor: 'pointer',
+          }}
         />
       )}
 
       {/* Main */}
-      <div style={{ marginLeft: 220, flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      <div className="main-content" style={{ marginLeft: 220, flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
 
         {/* Topbar */}
         <header style={{
           height: 64, display: 'flex', alignItems: 'center',
-          padding: '42px 24px', gap: 16,
+          padding: '0 16px 0 24px', gap: 12,
           borderBottom: '1px solid rgba(255,255,255,0.08)',
           background: 'rgba(13,27,42,0.95)',
           backdropFilter: 'blur(12px)',
           position: 'sticky', top: 0, zIndex: 50,
+          flexShrink: 0,
         }}>
-          <div style={{
+          {/* Hamburger — mobile only */}
+          <button
+            className="sidebar-toggle"
+            onClick={() => setSidebarOpen(true)}
+            style={{
+              display: 'none', alignItems: 'center', justifyContent: 'center',
+              width: 36, height: 36, borderRadius: 9, flexShrink: 0,
+              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+              cursor: 'pointer', color: '#94a3b8',
+            }}
+          >
+            <Menu size={18} />
+          </button>
+
+          {/* Search — hidden on mobile */}
+          <div className="topbar-search" style={{
             flex: 1, maxWidth: 380, display: 'flex', alignItems: 'center', gap: 10,
             background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
             borderRadius: 10, padding: '8px 14px',
@@ -316,9 +352,9 @@ export default function AdminDashboard() {
             />
           </div>
 
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 14 }}>
-            {/* Bell */}
-            <button style={{
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+            {/* Bell — hidden on mobile */}
+            <button className="topbar-bell" style={{
               width: 36, height: 36, borderRadius: 9,
               background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
@@ -333,30 +369,24 @@ export default function AdminDashboard() {
             </button>
 
             {/* User */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{
-                width: 38, height: 38, borderRadius: '50%',
+                width: 36, height: 36, borderRadius: '50%',
                 background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontWeight: 700, fontSize: 14, color: '#fff',
-                overflow: 'hidden',
-                border: '2px solid rgba(59, 130, 246, 0.3)',
+                fontWeight: 700, fontSize: 13, color: '#fff',
+                overflow: 'hidden', flexShrink: 0,
+                border: '2px solid rgba(59,130,246,0.3)',
               }}>
                 {user?.photoURL ? (
-                  <img
-                    src={user.photoURL}
-                    alt="User"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
+                  <img src={user.photoURL} alt="User" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
-                  <span>
-                    {user?.displayName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'G'}
-                  </span>
+                  <span>{user?.displayName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'G'}</span>
                 )}
               </div>
-              <div style={{ textAlign: 'left' }}>
-                <p style={{ fontSize: 12, color: '#94a3b8', margin: 0, fontWeight: 500 }}>Agency</p>
-                <p style={{ fontSize: 14, fontWeight: 600, color: '#f1f5f9', margin: 0 }}>
+              <div className="topbar-userinfo" style={{ textAlign: 'left' }}>
+                <p style={{ fontSize: 11, color: '#94a3b8', margin: 0, fontWeight: 500 }}>Agency</p>
+                <p style={{ fontSize: 13, fontWeight: 600, color: '#f1f5f9', margin: 0, maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {user?.displayName || user?.email || 'Guest'}
                 </p>
               </div>
@@ -365,7 +395,7 @@ export default function AdminDashboard() {
         </header>
 
         {/* Content */}
-        <main style={{ padding: '28px 24px', flex: 1 }}>
+        <main style={{ padding: '28px 24px', flex: 1, minWidth: 0 }}>
           {active === 'tests' ? (
             <AdminTestsContent />
           ) : (
@@ -388,7 +418,7 @@ export default function AdminDashboard() {
               </div>
 
           {/* Stat Cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
+          <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
             {stats.map(({ label, value, change, up, color, icon: Icon }) => (
               <div key={label} style={{
                 background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
@@ -421,7 +451,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Charts Row */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 16, marginBottom: 24 }}>
+          <div className="two-col-grid" style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 16, marginBottom: 24 }}>
 
             {/* Line Chart */}
             <div style={{
@@ -497,7 +527,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Bottom Row */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 16 }}>
+          <div className="two-col-grid" style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 16 }}>
 
             {/* Bar Chart — Top Universities */}
             <div style={{
@@ -564,11 +594,34 @@ export default function AdminDashboard() {
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
         button { font-family: 'DM Sans', sans-serif; }
         input { font-family: 'DM Sans', sans-serif; }
+
+        /* ── Desktop: sidebar always visible ── */
         @media (min-width: 768px) {
           .sidebar { left: 0 !important; }
+          .sidebar-toggle { display: none !important; }
         }
+
+        /* ── Mobile: sidebar hidden by default, hamburger shown ── */
         @media (max-width: 767px) {
           .main-content { margin-left: 0 !important; }
+          .sidebar-toggle { display: flex !important; }
+          .sidebar-close { display: flex !important; }
+          .topbar-search { display: none !important; }
+          .topbar-userinfo { display: none !important; }
+          .topbar-bell { display: none !important; }
+
+          .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .two-col-grid { grid-template-columns: 1fr !important; }
+
+          .admin-stats-bar { left: 0 !important; padding: 0 16px !important; }
+          .tests-grid { grid-template-columns: 1fr !important; }
+
+          .main-content > main { padding: 16px !important; }
+        }
+
+        /* ── Very small screens: single column stats ── */
+        @media (max-width: 480px) {
+          .stats-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
     </div>

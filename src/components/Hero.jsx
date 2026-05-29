@@ -30,18 +30,18 @@ export default function Hero() {
   }, []); // stable — WORDS is module-level constant
 
   return (
-    <section id="top" className="relative flex min-h-screen items-center justify-center overflow-hidden pt-16 animate-hero-fade">
+    <section id="top" className="relative flex min-h-screen items-center justify-center overflow-hidden pt-24 sm:pt-28 animate-hero-fade">
 
       {/* BACKGROUND */}
       <div className="absolute inset-0" style={{ background: '#080c14' }} />
 
-      {/* Animated blobs */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute w-[600px] h-[600px] rounded-full blur-[130px] opacity-20"
+      {/* Background blobs — desktop only, own GPU layer via hero-blob class */}
+      <div className="absolute inset-0 pointer-events-none hidden md:block">
+        <div className="hero-blob absolute w-[600px] h-[600px] rounded-full blur-[130px] opacity-20"
           style={{ background: 'radial-gradient(circle, #3b82f6, transparent)', top: '-10%', left: '20%' }} />
-        <div className="absolute w-[500px] h-[500px] rounded-full blur-[110px] opacity-15"
+        <div className="hero-blob absolute w-[500px] h-[500px] rounded-full blur-[110px] opacity-15"
           style={{ background: 'radial-gradient(circle, #8b5cf6, transparent)', bottom: '0%', right: '10%' }} />
-        <div className="absolute w-[400px] h-[400px] rounded-full blur-[90px] opacity-10"
+        <div className="hero-blob absolute w-[400px] h-[400px] rounded-full blur-[90px] opacity-10"
           style={{ background: 'radial-gradient(circle, #06b6d4, transparent)', bottom: '20%', left: '5%' }} />
       </div>
 

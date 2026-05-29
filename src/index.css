@@ -1,10 +1,21 @@
 
-/* ── Header: backdrop-blur only on desktop (most expensive on mobile) ───── */
-@media (min-width: 768px) {
-  header.header-scrolled {
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-  }
+/* ── Header: GPU compositing layer — reduces scroll repaint cost ─────────── */
+header {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: auto;
+}
+
+/* ── Hero background blobs: own compositor layer — painted once, never again */
+.hero-blob {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* ── Sections: paint containment — isolates section repaints from each other */
+main > section,
+main > div > section {
+  contain: layout style;
 }
 
 @tailwind base;
@@ -1058,13 +1069,15 @@ body {
   .blur-\[60px\],
   .blur-\[78px\],
   .blur-\[82px\],
+  .blur-\[90px\],
   .blur-\[100px\],
   .blur-\[110px\],
   .blur-\[120px\],
+  .blur-\[130px\],
   .dark\:blur-\[110px\],
   .dark\:blur-\[120px\] {
     filter: none !important;
-    opacity: 0.18 !important;
+    opacity: 0 !important;
   }
 
   .backdrop-blur-sm,

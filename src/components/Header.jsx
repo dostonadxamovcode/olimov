@@ -1,9 +1,10 @@
 import { memo, useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, LogOut, User, ChevronDown, PlusCircle, Trophy } from 'lucide-react';
+import { Menu, X, LogOut, User, ChevronDown } from 'lucide-react';
 import { navLinks } from '../data/siteData';
 import { useAuth } from '../context/AuthContext';
-import { toastSuccess } from '../utils/errorHandler'
+import { toastSuccess } from '../utils/errorHandler';
+import ConfirmModal from './ui/ConfirmModal';
 
 const NavItem = memo(function NavItem({ link, className, onClick }) {
   const location = useLocation();
@@ -48,19 +49,19 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { currentUser, userRole, isSuperadmin, logout, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const profileRef = useRef(null);
 
   const handleLogout = async () => {
-    const ok = window.confirm('Log out qilasizmi?');
-    if (!ok) return;
     try {
       await logout();
       toastSuccess("Tizimdan muvaffaqiyatli chiqdingiz.");
       setIsOpen(false);
       setIsProfileOpen(false);
+      setShowLogoutModal(false);
       navigate('/');
     } catch (err) {
       console.error('Logout error:', err);
@@ -136,6 +137,7 @@ export default function Header() {
   }, [isProfileOpen]);
 
   return (
+    <>
     <header
       className={`fixed top-0 left-0 right-0 z-[100] h-14 sm:h-16 transition-all duration-300 ${
         scrolled || isOpen
@@ -217,32 +219,10 @@ export default function Header() {
                       Profile
                     </Link>
 
-                    <Link
-                      to="/result"
-                      className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/6 transition-all duration-150 w-full text-left"
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-amber-500/12 border border-amber-500/20 flex items-center justify-center flex-shrink-0">
-                        <Trophy className="w-4 h-4 text-amber-400" />
-                      </div>
-                      My Results
-                    </Link>
-
-                    {isSuperadmin && (
-                      <Link
-                        to="/admin/add-test"
-                        className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/6 transition-all duration-150 w-full text-left"
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-green-500/12 border border-green-500/20 flex items-center justify-center flex-shrink-0">
-                          <PlusCircle className="w-4 h-4 text-green-400" />
-                        </div>
-                        Add Test
-                      </Link>
-                    )}
-
                     <div className="h-px bg-white/6 my-2" />
 
                     <button
-                      onClick={handleLogout}
+                      onClick={() => setShowLogoutModal(true)}
                       className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-red-400 hover:text-red-300 hover:bg-red-500/8 transition-all duration-150 w-full text-left"
                     >
                       <div className="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center flex-shrink-0">
@@ -348,26 +328,8 @@ export default function Header() {
                   <User className="w-4 h-4" />
                   Profile
                 </Link>
-                <Link
-                  to="/result"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-all duration-200 w-full"
-                >
-                  <Trophy className="w-4 h-4" />
-                  My Results
-                </Link>
-                {isSuperadmin && (
-                  <Link
-                    to="/admin/add-test"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-sm font-medium text-green-400 hover:text-green-300 hover:bg-white/5 transition-all duration-200 w-full"
-                  >
-                    <PlusCircle className="w-4 h-4" />
-                    Add Test
-                  </Link>
-                )}
                 <button
-                  onClick={handleLogout}
+                  onClick={() => setShowLogoutModal(true)}
                   className="flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-sm font-medium text-red-400 hover:text-red-300 hover:bg-white/5 transition-all duration-200 w-full"
                 >
                   <LogOut className="w-4 h-4" />
@@ -398,5 +360,16 @@ export default function Header() {
       </div>
 
     </header>
+
+    <ConfirmModal
+      open={showLogoutModal}
+      onClose={() => setShowLogoutModal(false)}
+      onConfirm={handleLogout}
+      variant="default"
+      title="Tizimdan chiqish"
+      message="Hisobingizdan chiqmoqchimisiz? Landing page ga yo'naltirilasiz."
+      confirmLabel="Chiqish"
+    />
+    </>
   );
 }

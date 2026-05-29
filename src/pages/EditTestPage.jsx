@@ -10,9 +10,8 @@ import CustomSelect from '../components/ui/CustomSelect'
 
 const TEST_TYPES = [
   { value: 'multiple_choice', label: 'Type 1 — Multiple Choice' },
-  { value: 'text_input',      label: 'Type 2 — Text Input' },
-  { value: 'translation',     label: 'Type 3 — Translation' },
-  { value: 'word_order',      label: 'Type 4 — Word Order' },
+  { value: 'translation',     label: 'Type 2 — Translation' },
+  { value: 'word_order',      label: 'Type 3 — Word Order' },
 ]
 
 const OPTION_LABELS = ['A', 'B', 'C', 'D']
@@ -76,7 +75,7 @@ export default function EditTestPage() {
       setCollectionName(test.collectionName)
       setTitle(test.title || '')
       setCategory(test.category || '')
-      setTestType(test.type || 'multiple_choice')
+      setTestType(test.type === 'text_input' ? 'translation' : (test.type || 'multiple_choice'))
 
       if (test.type === 'multiple_choice') {
         const opts = test.options || ['', '', '', '']
@@ -342,21 +341,6 @@ export default function EditTestPage() {
                 {OPTION_LABELS.some((_, i) => errors[`option${i}`]) && (
                   <Err>All 4 options are required</Err>
                 )}
-              </div>
-            )}
-
-            {/* Text Input */}
-            {testType === 'text_input' && (
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Correct Answer *</label>
-                <input
-                  type="text"
-                  value={correctAnswer}
-                  onChange={e => { setCorrectAnswer(e.target.value); clearErr('correctAnswer') }}
-                  placeholder="e.g., Tuesday"
-                  className={fieldCls(errors.correctAnswer)}
-                />
-                {errors.correctAnswer && <Err>{errors.correctAnswer}</Err>}
               </div>
             )}
 
