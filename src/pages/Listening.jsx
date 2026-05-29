@@ -1,4 +1,4 @@
-import { ArrowRight, Clock3, Headphones, Search, Signal, Sparkles } from 'lucide-react'
+import { ArrowRight, Clock as Clock3, Headphones, Search, Signal, Sparkles } from 'lucide-react'
 import { listeningPage } from '../data/siteData'
 
 const statIcons = {

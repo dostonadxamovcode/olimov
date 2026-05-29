@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { isSuperAdmin } from '../utils/roles'
-import { Moon, Sun, LogOut, User, Settings, Shield, Bell, LayoutDashboard } from 'lucide-react'
+import { Moon, Sun, LogOut, User, Settings, ShieldCheck as Shield, Bell, LayoutDashboard } from 'lucide-react'
 import { toastSuccess, toastError } from '../utils/errorHandler'
 import { LoadingSpinner } from '../components/ui/SkeletonLoader'
 

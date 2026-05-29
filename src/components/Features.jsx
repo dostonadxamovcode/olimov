@@ -1,4 +1,4 @@
-import { Timer, Zap, BarChart2, TrendingUp, Globe, ShieldCheck } from 'lucide-react';
+import { Timer, Zap, ChartBar as BarChart2, TrendingUp, Globe, ShieldCheck } from 'lucide-react';
 import { features } from '../data/siteData';
 
 const iconMap = { Timer, Zap, BarChart2, TrendingUp, Globe, ShieldCheck };

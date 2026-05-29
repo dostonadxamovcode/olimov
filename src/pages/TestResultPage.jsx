@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { CheckCircle, XCircle, ArrowLeft, House as Home, ArrowCounterClockwise as RotateCcw, CaretDown as ChevronDown, CaretUp as ChevronUp } from '@phosphor-icons/react'
+import { CheckCircle, XCircle, ArrowLeft, Home, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react'
 import { useState } from 'react'
 
 const LETTERS = ['A', 'B', 'C', 'D']

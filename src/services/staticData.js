@@ -105,29 +105,45 @@ const BULLET_COLORS = [
 // Icon componentlarini string sifatida saqlash uchun mapping
 import {
   // Admin icons
-  LayoutDashboard, PlusCircle, BookOpen, Settings, GraduationCap,
-  Users, FileText, DollarSign, Home,
-  
+  LayoutDashboard,
+  PlusCircle,
+  BookOpen,
+  Settings,
+  GraduationCap,
+  Users,
+  FileText,
+  DollarSign,
+  Home,
   // Profile icons
-  User, Shield, Bell,
-  
+  User,
+  ShieldCheck as Shield,
+  Bell,
   // Contact icons
-  Mail, Phone, MapPin, MessageCircle,
-  
+  Mail,
+  Phone,
+  MapPin,
+  MessageCircle,
   // About icons
-  Star, Clock, CheckCircle,
-  
+  Star,
+  Clock,
+  CheckCircle,
   // Level icons
-  Sprout, BookOpen as BookOpenLevel, TrendingUp, BarChart2, Award, Star as StarLevel,
-  
+  Sprout,
+  TrendingUp,
+  ChartBar as BarChart2,
+  Trophy as Award,
+  Star as StarLevel,
   // Feature icons
-  Timer, Zap, BarChart2 as BarChart2Feature, TrendingUp as TrendingUpFeature, Globe, ShieldCheck,
-  
+  Timer,
+  Zap,
+  Globe,
   // Services icons
-  Headphones, BookOpen as BookOpenService, FilePenLine, Mic, Trophy, BarChart3,
-  
+  Headphones,
+  FilePenLine,
+  Mic,
   // Learning tools icons
-  BookMarked, Layers, FileText as FileTextTool,
+  BookMarked,
+  Layers,
 } from 'lucide-react'
 
 export const iconMap = {

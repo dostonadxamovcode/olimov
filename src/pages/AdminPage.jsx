@@ -1,10 +1,25 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
-  LayoutDashboard, GraduationCap, Users, FileText,
-  DollarSign, Settings, Search, Bell, ChevronRight,
-  TrendingUp, TrendingDown, MoreHorizontal, ChevronLeft,
-  Calendar, Menu, X, Home, PlusCircle, BookOpen
+  LayoutDashboard,
+  GraduationCap,
+  Users,
+  FileText,
+  DollarSign,
+  Settings,
+  Search,
+  Bell,
+  ChevronRight,
+  TrendingUp,
+  TrendingDown,
+  MoreHorizontal,
+  ChevronLeft,
+  Calendar,
+  Menu,
+  X,
+  Home,
+  PlusCircle,
+  BookOpen,
 } from 'lucide-react'
 import { auth } from '../firebase'
 import {

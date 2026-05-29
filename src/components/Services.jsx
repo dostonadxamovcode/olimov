@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { BarChart3, BookOpen, Dot, FilePenLine, Headphones, Mic, Trophy } from 'lucide-react'
+import { ChartBar as BarChart3, BookOpen, Dot, FilePenLine, Headphones, Mic, Trophy } from 'lucide-react'
 import { services } from '../data/siteData'
 
 const icons = [Headphones, BookOpen, FilePenLine, Mic, Trophy, BarChart3]

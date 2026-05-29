@@ -5,7 +5,7 @@ import { db } from '../firebase'
 import { saveResult } from '../services/firestore'
 import { getTestQuestions } from '../services/questionPoolService'
 import { useAuth } from '../context/AuthContext'
-import { Clock, X, CaretRight as ChevronRight, CaretLeft as ChevronLeft, Warning as AlertCircle, Check } from '@phosphor-icons/react'
+import { Clock, X, ChevronRight, ChevronLeft, AlertCircle, Check } from 'lucide-react'
 import { toastError, toastSuccess } from '../utils/errorHandler'
 import { LoadingSpinner } from '../components/ui/SkeletonLoader'
 

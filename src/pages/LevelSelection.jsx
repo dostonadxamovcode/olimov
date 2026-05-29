@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getDocs, collection } from 'firebase/firestore'
 import { db } from '../firebase'
-import { Plant as Sprout, BookOpen, TrendUp as TrendingUp, ChartBar as BarChart2, Trophy as Award, Star, SpinnerGap as Loader2 } from '@phosphor-icons/react'
+import { Sprout, BookOpen, TrendingUp, ChartBar as BarChart2, Trophy as Award, Star, Loader2 } from 'lucide-react'
 
 const QUESTION_COUNT = 30
 
