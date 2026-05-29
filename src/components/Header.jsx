@@ -50,7 +50,7 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const { currentUser, userRole, isSuperadmin, logout, loading } = useAuth();
+  const { currentUser, user, userRole, isSuperadmin, logout, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const profileRef = useRef(null);
@@ -186,8 +186,11 @@ export default function Header() {
                   onClick={() => setIsProfileOpen(prev => !prev)}
                   className="flex items-center gap-2 px-2 py-1.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/9 hover:border-white/18 transition-all duration-200"
                 >
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#3b82f6] to-[#8b5cf6] flex items-center justify-center shadow-md shadow-indigo-500/45 text-[10px] font-bold text-white flex-shrink-0">
-                    {currentUser.email?.[0]?.toUpperCase() || <User className="w-3 h-3" />}
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#3b82f6] to-[#8b5cf6] flex items-center justify-center shadow-md shadow-indigo-500/45 text-[10px] font-bold text-white flex-shrink-0 overflow-hidden">
+                    {user?.avatar
+                      ? <img src={user.avatar} alt="avatar" className="w-full h-full object-cover" />
+                      : (currentUser.email?.[0]?.toUpperCase() || <User className="w-3 h-3" />)
+                    }
                   </div>
                   <span className="text-xs font-medium text-slate-300 truncate max-w-[60px]">
                     {currentUser.displayName || currentUser.email?.split('@')[0] || 'User'}
@@ -325,7 +328,12 @@ export default function Header() {
                   onClick={() => setIsOpen(false)}
                   className="flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-all duration-200 w-full"
                 >
-                  <User className="w-4 h-4" />
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-[#3b82f6] to-[#8b5cf6] flex items-center justify-center text-[9px] font-bold text-white overflow-hidden flex-shrink-0">
+                    {user?.avatar
+                      ? <img src={user.avatar} alt="avatar" className="w-full h-full object-cover" />
+                      : (currentUser?.email?.[0]?.toUpperCase() || <User className="w-3 h-3" />)
+                    }
+                  </div>
                   Profile
                 </Link>
                 <button

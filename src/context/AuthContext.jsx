@@ -29,6 +29,7 @@ function loadPresence() {
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null)
   const [userRole, setUserRole] = useState(null)
+  const [userAvatar, setUserAvatar] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -74,18 +75,20 @@ export function AuthProvider({ children }) {
           doc(db, 'users', user.uid),
           (snap) => {
             if (cancelled) return
+            const data = snap.exists() ? snap.data() : {}
             let role = 'user'
-            if (snap.exists() && snap.data()?.role === 'superadmin') {
-              role = 'superadmin'
-            } else if (user.email.toLowerCase() === 'superadmin@gmail.com') {
+            if (data?.role === 'superadmin' || user.email.toLowerCase() === 'superadmin@gmail.com') {
               role = 'superadmin'
             }
             setUserRole(role)
+            // photoBase64 (uploaded) > photoURL from Firestore > Auth photoURL
+            setUserAvatar(data.photoBase64 || data.photoURL || user.photoURL || null)
             setLoading(false)
           },
           () => {
             const role = user.email.toLowerCase() === 'superadmin@gmail.com' ? 'superadmin' : 'user'
             setUserRole(role)
+            setUserAvatar(user.photoURL || null)
             setLoading(false)
           }
         )
@@ -165,12 +168,19 @@ export function AuthProvider({ children }) {
 
     // 3. Sync React state so Header/Avatar updates immediately
     setCurrentUser(prev => prev ? { ...prev, ...authUpdates } : prev)
+    // userAvatar is kept in sync via onSnapshot — no manual update needed
   }
 
   const isSuperadmin = userRole === 'superadmin'
 
   const user = currentUser
-    ? { uid: currentUser.uid, email: currentUser.email, displayName: currentUser.displayName, role: userRole || 'user' }
+    ? {
+        uid:         currentUser.uid,
+        email:       currentUser.email,
+        displayName: currentUser.displayName,
+        role:        userRole || 'user',
+        avatar:      userAvatar || currentUser.photoURL || null,
+      }
     : null
 
   return (

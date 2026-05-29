@@ -311,7 +311,6 @@ export default function ExamPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4">
       <div className="text-center">
         <p className="text-slate-400 mb-4">This test has no questions yet.</p>
-        <button onClick={() => navigate(-1)} className="text-indigo-400 hover:underline text-sm">← Go back</button>
       </div>
     </div>
   )
@@ -341,12 +340,6 @@ export default function ExamPage() {
           }`}>
             <Clock className="w-3.5 h-3.5" /> {timerDisplay}
           </div>
-          <button
-            onClick={() => setShowExitConfirm(true)}
-            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-700 text-slate-400 hover:text-slate-200 transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
         </div>
       </header>
 
