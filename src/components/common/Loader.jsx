@@ -40,11 +40,12 @@ export const Loader = memo(function Loader({ size = 'md', text, className = '' }
 })
 
 /**
- * Full-screen centered loader — use for page-level suspense / route fallback.
+ * Full-screen loader — fully opaque, covers everything (Header, Footer, content).
+ * Used for initial auth gate and route-transition overlays.
  */
 export const PageLoader = memo(function PageLoader() {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-[#080c14]/70 backdrop-blur-sm z-50">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#080c14]">
       <Loader size="lg" />
     </div>
   )
