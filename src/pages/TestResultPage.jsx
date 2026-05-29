@@ -1,8 +1,44 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { CheckCircle, XCircle, ArrowLeft, Home, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react'
+import { CheckCircle, XCircle, ArrowLeft, House as Home, ArrowCounterClockwise as RotateCcw, CaretDown as ChevronDown, CaretUp as ChevronUp } from '@phosphor-icons/react'
 import { useState } from 'react'
 
 const LETTERS = ['A', 'B', 'C', 'D']
+
+function norm(str) {
+  return (str || '').trim().toLowerCase().replace(/\s+/g, ' ')
+}
+
+function checkAnswer(question, answer) {
+  if (answer === undefined || answer === null) return false
+  if (!question.type) return answer === question.correctAnswer  // old format
+  if (question.type === 'multiple_choice') {
+    if (typeof answer === 'number') {
+      return norm(question.options?.[answer]) === norm(question.correct_answer)
+    }
+    return norm(answer) === norm(question.correct_answer)
+  }
+  if (question.type === 'word_order') {
+    if (!Array.isArray(answer) || !answer.length) return false
+    return norm(answer.map(i => question.scrambled_words[i]).join(' ')) === norm(question.correct_answer)
+  }
+  return norm(answer) === norm(question.correct_answer)
+}
+
+function getDisplayAnswer(question, answer) {
+  if (answer === undefined || answer === null) return '(bo\'sh)'
+  if (!question.type) {
+    return question.options?.[answer] ?? String(answer)
+  }
+  if (question.type === 'multiple_choice') {
+    if (typeof answer === 'number') return question.options?.[answer] ?? String(answer)
+    return String(answer)
+  }
+  if (question.type === 'word_order') {
+    if (!Array.isArray(answer) || !answer.length) return '(bo\'sh)'
+    return answer.map(i => question.scrambled_words[i]).join(' ')
+  }
+  return String(answer) || '(bo\'sh)'
+}
 
 export default function TestResultPage() {
   const location = useLocation()
@@ -54,11 +90,19 @@ export default function TestResultPage() {
   }
 
   const handleRetakeTest = () => {
-    navigate(`/tests/${testId}`, {
-      state: {
-        levelId: level,
-      }
-    })
+    if (testId === 'practice') {
+      navigate('/tests/practice', {
+        state: {
+          levelId: level,
+          testTitle,
+          questions,
+        },
+      })
+    } else {
+      navigate(`/tests/${testId}`, {
+        state: { levelId: level },
+      })
+    }
   }
 
   return (
@@ -108,7 +152,7 @@ export default function TestResultPage() {
 
             <div className="flex gap-3 justify-center">
               <button
-                onClick={() => navigate('/tests')}
+                onClick={() => navigate('/level')}
                 className="flex items-center gap-2 px-6 py-3 rounded-xl bg-white/10 border border-white/20 text-white font-semibold hover:bg-white/20 transition-colors"
               >
                 <Home className="w-4 h-4" /> Testlar
@@ -129,16 +173,16 @@ export default function TestResultPage() {
           
           {questions.map((question, index) => {
             const selectedAnswer = answers[index]
-            const correctAnswer = question.correctAnswer
-            const isCorrect = selectedAnswer === correctAnswer
-            const isExpanded = expandedQuestions[index]
+            const isCorrect      = checkAnswer(question, selectedAnswer)
+            const isExpanded     = expandedQuestions[index]
+            const isNewFmt       = !!question.type
 
             return (
               <div
                 key={index}
                 className={`premium-card border transition-all duration-300 ${
-                  isCorrect 
-                    ? 'border-emerald-500/30 bg-emerald-500/5' 
+                  isCorrect
+                    ? 'border-emerald-500/30 bg-emerald-500/5'
                     : 'border-red-500/30 bg-red-500/5'
                 }`}
               >
@@ -156,22 +200,22 @@ export default function TestResultPage() {
                       <XCircle className="w-5 h-5 text-red-400" />
                     )}
                   </div>
-                  
+
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-sm font-semibold text-slate-400">
                         Savol {index + 1}
                       </span>
                       <span className={`text-xs px-2 py-1 rounded-full font-semibold ${
-                        isCorrect 
-                          ? 'bg-emerald-500/20 text-emerald-300' 
+                        isCorrect
+                          ? 'bg-emerald-500/20 text-emerald-300'
                           : 'bg-red-500/20 text-red-300'
                       }`}>
                         {isCorrect ? "To'g'ri" : "Noto'g'ri"}
                       </span>
                     </div>
                     <p className="text-white font-medium line-clamp-2">
-                      {question.text || question.question}
+                      {question.text || question.title || question.question}
                     </p>
                   </div>
 
@@ -187,63 +231,77 @@ export default function TestResultPage() {
                 {/* Expanded Details */}
                 {isExpanded && (
                   <div className="px-5 pb-5 border-t border-white/10 pt-4">
-                    <div className="space-y-3">
-                      {question.options?.map((option, optIndex) => {
-                        const isSelected = selectedAnswer === optIndex
-                        const isCorrectOption = correctAnswer === optIndex
-                        
-                        let optionClass = "p-4 rounded-xl border-2 "
-                        
-                        if (isCorrectOption) {
-                          optionClass += "border-emerald-500 bg-emerald-500/20"
-                        } else if (isSelected && !isCorrect) {
-                          optionClass += "border-red-500 bg-red-500/20"
-                        } else {
-                          optionClass += "border-slate-600 bg-slate-700/30"
-                        }
+                    {/* Multiple Choice options (old format OR new MC format) */}
+                    {question.options && (
+                      <div className="space-y-3">
+                        {question.options.map((option, optIndex) => {
+                          const correctIdx  = isNewFmt
+                            ? question.options.indexOf(question.correct_answer)
+                            : question.correctAnswer
+                          const isSelected     = selectedAnswer === optIndex
+                          const isCorrectOption = correctIdx === optIndex
 
-                        return (
-                          <div key={optIndex} className={optionClass}>
-                            <div className="flex items-center gap-3">
-                              <span className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${
-                                isCorrectOption 
-                                  ? 'bg-emerald-500 text-white' 
-                                  : isSelected && !isCorrect
-                                  ? 'bg-red-500 text-white'
+                          let optionClass = "p-4 rounded-xl border-2 "
+                          if (isCorrectOption)          optionClass += "border-emerald-500 bg-emerald-500/20"
+                          else if (isSelected && !isCorrect) optionClass += "border-red-500 bg-red-500/20"
+                          else                          optionClass += "border-slate-600 bg-slate-700/30"
+
+                          return (
+                            <div key={optIndex} className={optionClass}>
+                              <div className="flex items-center gap-3">
+                                <span className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${
+                                  isCorrectOption          ? 'bg-emerald-500 text-white'
+                                  : isSelected && !isCorrect ? 'bg-red-500 text-white'
                                   : 'bg-slate-600 text-slate-300'
-                              }`}>
-                                {LETTERS[optIndex]}
-                              </span>
-                              <span className={`font-medium ${
-                                isCorrectOption 
-                                  ? 'text-emerald-300' 
-                                  : isSelected && !isCorrect
-                                  ? 'text-red-300'
+                                }`}>
+                                  {LETTERS[optIndex]}
+                                </span>
+                                <span className={`font-medium ${
+                                  isCorrectOption          ? 'text-emerald-300'
+                                  : isSelected && !isCorrect ? 'text-red-300'
                                   : 'text-slate-300'
-                              }`}>
-                                {option}
-                              </span>
-                              {isCorrectOption && (
-                                <span className="ml-auto text-xs font-semibold text-emerald-400">
-                                  To'g'ri javob
+                                }`}>
+                                  {option}
                                 </span>
-                              )}
-                              {isSelected && !isCorrect && (
-                                <span className="ml-auto text-xs font-semibold text-red-400">
-                                  Siz tanlagan
-                                </span>
-                              )}
+                                {isCorrectOption && (
+                                  <span className="ml-auto text-xs font-semibold text-emerald-400">To'g'ri javob</span>
+                                )}
+                                {isSelected && !isCorrect && (
+                                  <span className="ml-auto text-xs font-semibold text-red-400">Siz tanlagan</span>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        )
-                      })}
-                    </div>
+                          )
+                        })}
+                      </div>
+                    )}
 
-                    {!isCorrect && (
+                    {/* Text / Translation / Word Order — show answer as text */}
+                    {isNewFmt && !question.options && (
+                      <div className="space-y-2">
+                        <div className={`p-3 rounded-xl border text-sm ${
+                          isCorrect ? 'border-emerald-500/30 bg-emerald-500/10' : 'border-red-500/30 bg-red-500/10'
+                        }`}>
+                          <span className="text-slate-400 text-xs">Sizning javobingiz: </span>
+                          <span className={`font-semibold ${isCorrect ? 'text-emerald-300' : 'text-red-300'}`}>
+                            {getDisplayAnswer(question, selectedAnswer)}
+                          </span>
+                        </div>
+                        {!isCorrect && (
+                          <div className="p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-sm">
+                            <span className="text-slate-400 text-xs">To'g'ri javob: </span>
+                            <span className="font-semibold text-emerald-300">{question.correct_answer}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Old format explanation */}
+                    {!isNewFmt && !isCorrect && (
                       <div className="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
                         <p className="text-sm text-blue-300">
-                          <span className="font-semibold">Tushuntirish:</span> To'g'ri javob{" "}
-                          <span className="font-bold">{LETTERS[correctAnswer]}</span> varianti.
+                          <span className="font-semibold">Tushuntirish:</span> To'g'ri javob{' '}
+                          <span className="font-bold">{LETTERS[question.correctAnswer]}</span> varianti.
                         </p>
                       </div>
                     )}

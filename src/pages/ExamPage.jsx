@@ -5,11 +5,11 @@ import { db } from '../firebase'
 import { saveResult } from '../services/firestore'
 import { getTestQuestions } from '../services/questionPoolService'
 import { useAuth } from '../context/AuthContext'
-import { Clock, X, ChevronRight, AlertCircle } from 'lucide-react'
+import { Clock, X, CaretRight as ChevronRight, CaretLeft as ChevronLeft, Warning as AlertCircle, Check } from '@phosphor-icons/react'
 import { toastError, toastSuccess } from '../utils/errorHandler'
 import { LoadingSpinner } from '../components/ui/SkeletonLoader'
 
-// ── Timer ────────────────────────────────────────────────────────────────────
+// ── Timer ─────────────────────────────────────────────────────
 function useTimer(initial) {
   const [secs, setSecs] = useState(initial)
   useEffect(() => {
@@ -21,22 +21,125 @@ function useTimer(initial) {
   return { display: `${mm}:${ss}`, secs }
 }
 
+// ── Helpers ───────────────────────────────────────────────────
 const LETTERS = ['A', 'B', 'C', 'D']
 const LEVEL_COLLECTIONS = ['a1', 'a2', 'b1', 'b2', 'c1', 'c2']
 
-export default function ExamPage() {
-  const { testId } = useParams()
-  const navigate = useNavigate()
-  const location = useLocation()
-  const { user } = useAuth()
+const TYPE_INSTRUCTION = {
+  multiple_choice: { icon: '☑️', text: 'To\'g\'ri variantni tanlang',                    cls: 'bg-orange-500/10 border-orange-500/25 text-orange-300' },
+  text_input:      { icon: '✏️', text: 'Javobni matn sifatida yozing',                   cls: 'bg-emerald-500/10 border-emerald-500/25 text-emerald-300' },
+  translation:     { icon: '🔤', text: 'Berilgan iborani o\'zbek/inglizcha tarjima qiling', cls: 'bg-blue-500/10 border-blue-500/25 text-blue-300' },
+  word_order:      { icon: '🔀', text: 'So\'zlarni to\'g\'ri tartibda joylashtiring',       cls: 'bg-violet-500/10 border-violet-500/25 text-violet-300' },
+}
 
-  const [test, setTest] = useState(null)
-  const [levelId, setLevelId] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [current, setCurrent] = useState(0)
-  const [selected, setSelected] = useState({})
-  const [submitting, setSubmitting] = useState(false)
+function norm(str) {
+  return (str || '').trim().toLowerCase().replace(/\s+/g, ' ')
+}
+
+export function calcIsCorrect(question, answer) {
+  if (answer === undefined || answer === null) return false
+  // Old format (index-based MC)
+  if (!question.type) return answer === question.correctAnswer
+  if (question.type === 'multiple_choice') {
+    if (typeof answer === 'number') {
+      return norm(question.options?.[answer]) === norm(question.correct_answer)
+    }
+    return norm(answer) === norm(question.correct_answer)
+  }
+  if (question.type === 'word_order') {
+    if (!Array.isArray(answer) || answer.length === 0) return false
+    const sentence = answer.map(i => question.scrambled_words[i]).join(' ')
+    return norm(sentence) === norm(question.correct_answer)
+  }
+  // text_input, translation
+  return norm(answer) === norm(question.correct_answer)
+}
+
+// ── Word Order sub-component ──────────────────────────────────
+function WordOrderInput({ question, answer, onChange }) {
+  const arranged  = answer || []
+  const remaining = question.scrambled_words
+    .map((_, i) => i)
+    .filter(i => !arranged.includes(i))
+
+  const add    = idx => onChange([...arranged, idx])
+  const remove = pos => { const n = [...arranged]; n.splice(pos, 1); onChange(n) }
+  const clear  = ()  => onChange([])
+
+  const preview = arranged.length > 0
+    ? arranged.map(i => question.scrambled_words[i]).join(' ')
+    : null
+
+  return (
+    <div className="space-y-4">
+      {/* Answer slot */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Javobingiz</p>
+          {arranged.length > 0 && (
+            <button onClick={clear} className="text-xs text-slate-500 hover:text-red-400 transition-colors flex items-center gap-1">
+              <X className="w-3 h-3" /> Tozalash
+            </button>
+          )}
+        </div>
+        <div className={`min-h-[52px] px-4 py-3 rounded-2xl border-2 border-dashed flex flex-wrap gap-2 items-center transition-colors ${
+          arranged.length > 0 ? 'border-indigo-500/40 bg-indigo-500/5' : 'border-slate-600 bg-slate-700/30'
+        }`}>
+          {arranged.length === 0
+            ? <span className="text-slate-500 text-sm italic">So'zlarni quyidan tanlang...</span>
+            : arranged.map((wordIdx, pos) => (
+              <button
+                key={`${pos}-${wordIdx}`}
+                onClick={() => remove(pos)}
+                className="px-3 py-1.5 rounded-lg bg-indigo-500/25 border border-indigo-500/40 text-indigo-200 text-sm font-medium hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-300 transition-all group"
+              >
+                {question.scrambled_words[wordIdx]}
+                <span className="ml-1.5 opacity-40 group-hover:opacity-100">×</span>
+              </button>
+            ))
+          }
+        </div>
+        {preview && (
+          <p className="mt-1.5 text-xs text-slate-500 italic px-1">&ldquo;{preview}&rdquo;</p>
+        )}
+      </div>
+
+      {/* Word bank */}
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">So'z banki</p>
+        <div className="flex flex-wrap gap-2">
+          {remaining.length === 0 && arranged.length > 0
+            ? <span className="text-slate-500 text-sm italic">Barcha so'zlar ishlatildi</span>
+            : remaining.map(idx => (
+              <button
+                key={idx}
+                onClick={() => add(idx)}
+                className="px-3 py-1.5 rounded-lg bg-slate-700 border border-slate-600 text-slate-300 text-sm font-medium hover:bg-indigo-500/20 hover:border-indigo-500/40 hover:text-indigo-300 transition-all"
+              >
+                {question.scrambled_words[idx]}
+              </button>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Main component ────────────────────────────────────────────
+export default function ExamPage() {
+  const { testId }  = useParams()
+  const navigate    = useNavigate()
+  const location    = useLocation()
+  const { user }    = useAuth()
+
+  const [test,            setTest]            = useState(null)
+  const [levelId,         setLevelId]         = useState(null)
+  const [loading,         setLoading]         = useState(true)
+  const [error,           setError]           = useState('')
+  const [current,         setCurrent]         = useState(0)
+  const [selected,        setSelected]        = useState({})
+  const [submitting,      setSubmitting]      = useState(false)
   const [showExitConfirm, setShowExitConfirm] = useState(false)
 
   const { display: timerDisplay, secs } = useTimer(60 * 60)
@@ -47,7 +150,7 @@ export default function ExamPage() {
       if (location.state?.questions?.length > 0) {
         setLevelId(location.state.levelId || 'a1')
         setTest({
-          title: location.state.testTitle || 'Mashq',
+          title:     location.state.testTitle || 'Mashq',
           questions: location.state.questions,
         })
         setLoading(false)
@@ -60,26 +163,14 @@ export default function ExamPage() {
         return
       }
 
-      // Get levelId from navigation state or try to detect it
       let detectedLevelId = location.state?.levelId
 
       if (!detectedLevelId) {
-        // Try to detect level by searching through all level collections
         for (const level of LEVEL_COLLECTIONS) {
-          const collectionName = `${level}Tests`
-
           try {
-            const docRef = doc(db, collectionName, testId)
-            const docSnap = await getDoc(docRef)
-
-            if (docSnap.exists()) {
-              detectedLevelId = level
-              break
-            }
-          } catch (err) {
-            console.warn(`Failed to check ${collectionName}:`, err)
-            continue
-          }
+            const snap = await getDoc(doc(db, `${level}Tests`, testId))
+            if (snap.exists()) { detectedLevelId = level; break }
+          } catch { continue }
         }
       }
 
@@ -92,38 +183,24 @@ export default function ExamPage() {
 
       setLevelId(detectedLevelId)
 
-      const collectionName = `${detectedLevelId}Tests`
-
       try {
-        const docRef = doc(db, collectionName, testId)
-        const docSnap = await getDoc(docRef)
-
-        if (!docSnap.exists()) {
-          setError("Test topilmadi. Darajalar sahifasiga qaytib urinib ko'ring.")
-          toastError("Test topilmadi.")
+        const snap = await getDoc(doc(db, `${detectedLevelId}Tests`, testId))
+        if (!snap.exists()) {
+          setError("Test topilmadi.")
           setLoading(false)
           return
         }
 
-        const testData = { id: docSnap.id, ...docSnap.data() }
+        const testData = { id: snap.id, ...snap.data() }
 
-        if (!testData.questions || !Array.isArray(testData.questions) || testData.questions.length === 0) {
+        if (!testData.questions?.length) {
           setError("Bu testda haqiqiy savollar mavjud emas.")
-          toastError("Test strukturasi noto'g'ri.")
           setLoading(false)
           return
         }
 
-        // Use question pool if available, otherwise use test's own questions
         const questionResult = await getTestQuestions(testData, detectedLevelId)
-        const finalTestData = {
-          ...testData,
-          questions: questionResult.questions,
-          questionSource: questionResult.source,
-          poolSize: questionResult.poolSize
-        }
-
-        setTest(finalTestData)
+        setTest({ ...testData, questions: questionResult.questions })
       } catch (err) {
         setError("Testni yuklashda xatolik yuz berdi.")
         toastError(err)
@@ -135,93 +212,69 @@ export default function ExamPage() {
     fetchTest()
   }, [testId, location.state])
 
-  // Handle answer selection with auto-advance
-  const handleSelectAnswer = (questionIndex, answerIndex) => {
-    setSelected(prev => ({
-      ...prev,
-      [questionIndex]: answerIndex
-    }))
-
-    // Auto-advance to next question
-    if (current < test.questions.length - 1) {
-      setTimeout(() => {
-        setCurrent(prev => prev + 1)
-      }, 150)
+  // ── Answer handlers ───────────────────────────────────────
+  const handleAnswer = (questionIndex, value) => {
+    setSelected(prev => ({ ...prev, [questionIndex]: value }))
+    // Auto-advance only for old-format or MC
+    const q = test?.questions?.[questionIndex]
+    const isMC = !q?.type || q.type === 'multiple_choice'
+    if (isMC && questionIndex < (test?.questions?.length ?? 0) - 1) {
+      setTimeout(() => setCurrent(prev => prev + 1), 150)
     }
   }
 
-  // Handle next question
   const handleNext = () => {
-    if (current < test.questions.length - 1) {
+    if (current < (test?.questions?.length ?? 0) - 1) {
       setCurrent(prev => prev + 1)
     } else {
-      // All questions answered, submit final result
       handleFinalSubmit()
     }
   }
 
-  // Handle previous question
   const handlePrevious = () => {
-    if (current > 0) {
-      setCurrent(prev => prev - 1)
-    }
+    if (current > 0) setCurrent(prev => prev - 1)
   }
 
-  // Final submission
+  // ── Submit ────────────────────────────────────────────────
   const handleFinalSubmit = async () => {
     if (submitting) return
     setSubmitting(true)
 
     const questions = test?.questions ?? []
-
-    // Calculate all results at the end
     let score = 0
-    const results = {}
-
-    questions.forEach((question, index) => {
-      const selectedAnswer = selected[index]
-      const isCorrect = selectedAnswer === question.correctAnswer
-
-      if (isCorrect) {
-        score++
-      }
-
-      results[index] = {
-        selected: selectedAnswer,
-        correct: question.correctAnswer,
-        isCorrect: isCorrect
-      }
+    questions.forEach((q, i) => {
+      if (calcIsCorrect(q, selected[i])) score++
     })
 
     try {
       await saveResult({
-        userId: user?.uid ?? 'anonymous',
+        userId:    user?.uid ?? 'anonymous',
         testId,
         testTitle: test.title,
-        level: levelId,
+        level:     levelId,
         score,
-        total: questions.length,
-        answers: selected,
+        total:     questions.length,
+        answers:   selected,
       })
       toastSuccess("Test muvaffaqiyatli topshirildi.")
-    } catch (err) {
+    } catch {
       toastError("Natijani saqlashda xatolik, lekin natijangiz ko'rsatilmoqda.")
-      // Continue to results page even if save fails
     }
 
     navigate('/test-result', {
       state: {
         score,
-        total: questions.length,
+        total:     questions.length,
         questions,
-        answers: selected,
+        answers:   selected,
         testTitle: test.title,
-        level: levelId,
+        level:     levelId,
         testId,
       },
     })
   }
 
+  // ── Loading / Error ───────────────────────────────────────
   if (loading) return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4">
       <LoadingSpinner />
@@ -234,19 +287,15 @@ export default function ExamPage() {
         <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
           <AlertCircle className="w-8 h-8 text-red-400" />
         </div>
-        <h2 className="text-xl font-bold text-white mb-2">Test Not Found</h2>
+        <h2 className="text-xl font-bold text-white mb-2">Test topilmadi</h2>
         <p className="text-slate-400 mb-6">{error}</p>
         <div className="flex gap-3 justify-center">
-          <button 
-            onClick={() => navigate(`/levels/${levelId || 'a1'}`)}
-            className="px-6 py-2.5 rounded-xl bg-indigo-500 text-white font-semibold hover:bg-indigo-600 transition-colors"
-          >
+          <button onClick={() => navigate(`/levels/${levelId || 'a1'}`)}
+            className="px-6 py-2.5 rounded-xl bg-indigo-500 text-white font-semibold hover:bg-indigo-600 transition-colors">
             Back to Level
           </button>
-          <button 
-            onClick={() => navigate('/level')}
-            className="px-6 py-2.5 rounded-xl border border-slate-600 text-slate-300 font-semibold hover:bg-slate-700 transition-colors"
-          >
+          <button onClick={() => navigate('/level')}
+            className="px-6 py-2.5 rounded-xl border border-slate-600 text-slate-300 font-semibold hover:bg-slate-700 transition-colors">
             All Levels
           </button>
         </div>
@@ -255,8 +304,8 @@ export default function ExamPage() {
   )
 
   const questions = test?.questions ?? []
-  const total = questions.length
-  const q = questions[current]
+  const total     = questions.length
+  const q         = questions[current]
 
   if (total === 0) return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4">
@@ -267,100 +316,204 @@ export default function ExamPage() {
     </div>
   )
 
-  const progress = ((current + 1) / total) * 100
-  const isLow = secs < 300
+  const progress  = ((current + 1) / total) * 100
+  const isLow     = secs < 300
+  const isNewFmt  = !!q?.type
+  const curAnswer = selected[current]
+  const isLast    = current === total - 1
 
+  // ── Render ────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col">
 
       {/* Top bar */}
       <header className="sticky top-0 z-30 bg-slate-900/80 backdrop-blur-md border-b border-slate-700 shadow-sm">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center gap-4">
-          <span className="text-xs font-bold text-slate-400 shrink-0 w-14">
+          <span className="text-xs font-bold text-slate-400 shrink-0 w-14 tabular-nums">
             {current + 1}<span className="font-normal text-slate-500">/{total}</span>
           </span>
           <div className="flex-1 h-2 bg-slate-700 rounded-full overflow-hidden">
-            <div className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400"
+            <div className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400 transition-all duration-300"
               style={{ width: `${progress}%` }} />
           </div>
-          <div className={`flex items-center gap-1.5 shrink-0 px-3 py-1 rounded-full text-xs font-bold transition-colors ${isLow ? 'bg-red-500/20 text-red-400' : 'bg-slate-700 text-slate-300'}`}>
+          <div className={`flex items-center gap-1.5 shrink-0 px-3 py-1 rounded-full text-xs font-bold transition-colors ${
+            isLow ? 'bg-red-500/20 text-red-400' : 'bg-slate-700 text-slate-300'
+          }`}>
             <Clock className="w-3.5 h-3.5" /> {timerDisplay}
           </div>
-          {!loading && (
-            <button
-              onClick={() => setShowExitConfirm(true)}
-              className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-700 text-slate-400 hover:text-slate-200 transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
+          <button
+            onClick={() => setShowExitConfirm(true)}
+            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-700 text-slate-400 hover:text-slate-200 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       </header>
 
       {/* Question */}
       <main className="flex-1 flex items-center justify-center px-4 py-10">
         <div className="w-full max-w-2xl">
-          <div key={current}
-            className="animate-fadeIn">
+          <div key={current} className="animate-fadeIn">
+            <div className="bg-slate-800 rounded-3xl shadow-xl shadow-slate-900/50 p-6 sm:p-10 border border-slate-700">
 
-              <div className="bg-slate-800 rounded-3xl shadow-xl shadow-slate-900/50 p-6 sm:p-10 border border-slate-700">
-                {/* Question number + text */}
-                <p className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-2">
+              {/* Category + type badges */}
+              {isNewFmt && (
+                <div className="flex gap-2 flex-wrap mb-4">
+                  {q.category && (
+                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-widest bg-white/[0.06] border border-white/10 text-slate-400">
+                      {q.category}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* Question number + instruction */}
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
                   {current + 1}-savol
                 </p>
-                <h2 className="text-xl sm:text-2xl font-bold text-white mb-8 leading-snug">
-                  {q.text || q.question}
-                </h2>
+                {isNewFmt && (
+                  <span className={`text-[11px] font-medium px-2.5 py-1 rounded-lg border ${TYPE_INSTRUCTION[q.type]?.cls}`}>
+                    {TYPE_INSTRUCTION[q.type]?.icon} {TYPE_INSTRUCTION[q.type]?.text}
+                  </span>
+                )}
+              </div>
 
-                {/* Options */}
+              {/* Question text — skip for translation (renderer shows its own) */}
+              {q.type !== 'translation' && (
+                <h2 className="text-xl sm:text-2xl font-bold text-white mb-8 leading-snug">
+                  {q.text || q.title || q.question}
+                </h2>
+              )}
+
+              {/* ── OLD FORMAT: Multiple Choice (no type field) ── */}
+              {!isNewFmt && (
                 <div className="space-y-3">
                   {q.options?.map((opt, idx) => {
-                    const isSelected = selected[current] === idx
-
-                    const buttonClass = `w-full flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-colors duration-150 ${
-                      isSelected
-                        ? 'border-indigo-500 bg-indigo-500/20 shadow-md shadow-indigo-500/20'
-                        : 'border-slate-600 bg-slate-700/50 hover:border-indigo-400 hover:bg-indigo-500/10'
-                    }`
-
+                    const isSelected = curAnswer === idx
                     return (
                       <button
                         key={idx}
-                        onClick={() => handleSelectAnswer(current, idx)}
-                        className={buttonClass}
+                        onClick={() => handleAnswer(current, idx)}
+                        className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-colors duration-150 ${
+                          isSelected
+                            ? 'border-indigo-500 bg-indigo-500/20 shadow-md shadow-indigo-500/20'
+                            : 'border-slate-600 bg-slate-700/50 hover:border-indigo-400 hover:bg-indigo-500/10'
+                        }`}
                       >
                         <span className={`flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold transition-colors ${
                           isSelected ? 'bg-indigo-500 text-white' : 'bg-slate-600 border-2 border-slate-500 text-slate-300'
                         }`}>
-                          {LETTERS[idx]}
+                          {isSelected ? <Check className="w-4 h-4" /> : LETTERS[idx]}
                         </span>
-                        <span className={`font-medium text-sm sm:text-base ${
-                          isSelected ? 'text-indigo-300' : 'text-slate-200'
-                        }`}>{opt}</span>
+                        <span className={`font-medium text-sm sm:text-base ${isSelected ? 'text-indigo-300' : 'text-slate-200'}`}>
+                          {opt}
+                        </span>
                       </button>
                     )
                   })}
                 </div>
-              </div>
+              )}
 
-              {/* Navigation */}
-              <div className="flex justify-end mt-6 px-1">
-                <button
-                  onClick={handleNext}
-                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-semibold bg-gradient-to-r from-indigo-500 to-cyan-500 text-white shadow-lg shadow-indigo-500/30 hover:opacity-90 transition-opacity"
-                >
-                  {current < total - 1 ? (
-                    <>Next <ChevronRight className="w-4 h-4" /></>
-                  ) : (
-                    'Finish Test'
-                  )}
-                </button>
-              </div>
+              {/* ── NEW FORMAT: Multiple Choice ── */}
+              {q.type === 'multiple_choice' && (
+                <div className="space-y-3">
+                  {q.options?.map((opt, idx) => {
+                    const isSelected = curAnswer === idx
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => handleAnswer(current, idx)}
+                        className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-colors duration-150 ${
+                          isSelected
+                            ? 'border-indigo-500 bg-indigo-500/20 shadow-md shadow-indigo-500/20'
+                            : 'border-slate-600 bg-slate-700/50 hover:border-indigo-400 hover:bg-indigo-500/10'
+                        }`}
+                      >
+                        <span className={`flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold transition-colors ${
+                          isSelected ? 'bg-indigo-500 text-white' : 'bg-slate-600 border-2 border-slate-500 text-slate-300'
+                        }`}>
+                          {isSelected ? <Check className="w-4 h-4" /> : LETTERS[idx]}
+                        </span>
+                        <span className={`font-medium text-sm sm:text-base ${isSelected ? 'text-indigo-300' : 'text-slate-200'}`}>
+                          {opt}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+
+              {/* ── NEW FORMAT: Text Input ── */}
+              {q.type === 'text_input' && (
+                <input
+                  type="text"
+                  value={curAnswer || ''}
+                  onChange={e => handleAnswer(current, e.target.value)}
+                  placeholder="Javobingizni shu yerga yozing..."
+                  autoComplete="off"
+                  spellCheck="false"
+                  className="w-full px-5 py-4 rounded-2xl bg-slate-700/50 border-2 border-slate-600 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all text-base"
+                />
+              )}
+
+              {/* ── NEW FORMAT: Translation ── */}
+              {q.type === 'translation' && (
+                <div className="space-y-5">
+                  <div className="px-5 py-4 rounded-2xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-blue-400 mb-2">
+                      Quyidagi iborani tarjima qiling
+                    </p>
+                    <p className="text-white font-semibold text-lg leading-relaxed">{q.title}</p>
+                  </div>
+                  <input
+                    type="text"
+                    value={curAnswer || ''}
+                    onChange={e => handleAnswer(current, e.target.value)}
+                    placeholder="Tarjimangizni shu yerga yozing..."
+                    autoComplete="off"
+                    spellCheck="false"
+                    className="w-full px-5 py-4 rounded-2xl bg-slate-700/50 border-2 border-slate-600 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all text-base"
+                  />
+                </div>
+              )}
+
+              {/* ── NEW FORMAT: Word Order ── */}
+              {q.type === 'word_order' && (
+                <WordOrderInput
+                  question={q}
+                  answer={curAnswer}
+                  onChange={val => handleAnswer(current, val)}
+                />
+              )}
             </div>
+
+            {/* Navigation */}
+            <div className="flex items-center justify-between mt-6 px-1">
+              <button
+                onClick={handlePrevious}
+                disabled={current === 0}
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-semibold border border-slate-600 text-slate-300 hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft className="w-4 h-4" /> Oldingi
+              </button>
+
+              <button
+                onClick={handleNext}
+                disabled={submitting}
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-semibold bg-gradient-to-r from-indigo-500 to-cyan-500 text-white shadow-lg shadow-indigo-500/30 hover:opacity-90 transition-opacity disabled:opacity-70"
+              >
+                {isLast
+                  ? (submitting ? 'Topshirilmoqda...' : 'Tugatish')
+                  : <> Keyingi <ChevronRight className="w-4 h-4" /></>
+                }
+              </button>
+            </div>
+          </div>
         </div>
       </main>
 
-      {/* Exit confirmation modal */}
+      {/* Exit confirmation */}
       {showExitConfirm && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="max-w-sm w-full bg-slate-800 rounded-3xl p-8 border border-slate-700 shadow-2xl text-center">
@@ -368,20 +521,14 @@ export default function ExamPage() {
               <X className="w-7 h-7 text-red-400" />
             </div>
             <h2 className="text-xl font-bold text-white mb-2">Testdan chiqasizmi?</h2>
-            <p className="text-slate-400 text-sm mb-6">
-              Jarayoningiz saqlanmaydi. Darajalar sahifasiga qaytasiz.
-            </p>
+            <p className="text-slate-400 text-sm mb-6">Jarayoningiz saqlanmaydi. Darajalar sahifasiga qaytasiz.</p>
             <div className="flex gap-3">
-              <button
-                onClick={() => setShowExitConfirm(false)}
-                className="flex-1 py-3 rounded-xl border border-slate-600 text-slate-300 font-semibold hover:bg-slate-700 transition-colors"
-              >
+              <button onClick={() => setShowExitConfirm(false)}
+                className="flex-1 py-3 rounded-xl border border-slate-600 text-slate-300 font-semibold hover:bg-slate-700 transition-colors">
                 Davom etish
               </button>
-              <button
-                onClick={() => navigate('/level')}
-                className="flex-1 py-3 rounded-xl bg-red-500/20 border border-red-500/30 text-red-400 font-semibold hover:bg-red-500/30 transition-colors"
-              >
+              <button onClick={() => navigate('/level')}
+                className="flex-1 py-3 rounded-xl bg-red-500/20 border border-red-500/30 text-red-400 font-semibold hover:bg-red-500/30 transition-colors">
                 Chiqish
               </button>
             </div>

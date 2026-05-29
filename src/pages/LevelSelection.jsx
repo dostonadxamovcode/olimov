@@ -2,7 +2,20 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getDocs, collection } from 'firebase/firestore'
 import { db } from '../firebase'
-import { Sprout, BookOpen, TrendingUp, BarChart2, Award, Star, X, Loader2 } from 'lucide-react'
+import { Plant as Sprout, BookOpen, TrendUp as TrendingUp, ChartBar as BarChart2, Trophy as Award, Star, SpinnerGap as Loader2 } from '@phosphor-icons/react'
+
+const QUESTION_COUNT = 30
+
+const toCollection = (code) => code === 'ielts' ? 'ielts' : `${code}Tests`
+
+function shuffle(arr) {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
 
 const LEVELS = [
   { code: 'a1', label: 'A1', name: 'Beginner',          desc: 'Basic words and simple phrases.',                        icon: Sprout,     gradient: 'from-emerald-500 to-teal-400',   glow: 'shadow-emerald-500/25', border: 'hover:border-emerald-500/50', badge: 'bg-emerald-500/20 text-emerald-300' },
@@ -13,56 +26,32 @@ const LEVELS = [
   { code: 'c2', label: 'C2', name: 'Proficient',         desc: 'Near-native precision and fluency.',                    icon: Star,       gradient: 'from-yellow-400 to-amber-300',   glow: 'shadow-yellow-400/25',  border: 'hover:border-yellow-400/50',  badge: 'bg-yellow-400/20 text-yellow-300'   },
 ]
 
-const QUESTION_LIMIT = 40
-
-const toCollection = (code) =>
-  code === 'ielts' ? 'ielts' : `${code}Tests`
-
-function shuffle(arr) {
-  const a = [...arr]
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]]
-  }
-  return a
-}
 
 export default function LevelSelection() {
-  const navigate = useNavigate()
-  const [selected, setSelected] = useState(null)
-  const [fetching, setFetching] = useState(false)
+  const navigate   = useNavigate()
+  const [selected,   setSelected]   = useState(null)
+  const [fetching,   setFetching]   = useState(false)
   const [fetchError, setFetchError] = useState('')
 
-  const handleCardClick = (level) => {
-    setFetchError('')
-    setSelected(level)
-  }
+  const handleCardClick = (level) => { setFetchError(''); setSelected(level) }
 
   const handleConfirm = async () => {
     if (!selected) return
     setFetching(true)
     setFetchError('')
-
     try {
       const snap = await getDocs(collection(db, toCollection(selected.code)))
-      const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      // Fetch ALL question types (not only multiple_choice)
+      const docs = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter(d => d.type)
 
-      // Filter multiple_choice questions with valid options
-      const eligible = docs.filter(
-        d => d.type === 'multiple_choice' && Array.isArray(d.options) && d.options.length > 0
-      )
-
-      if (eligible.length === 0) {
+      if (docs.length === 0) {
         setFetchError("Bu darajada hali testlar mavjud emas.")
         return
       }
 
-      // Shuffle and take up to 40
-      const questions = shuffle(eligible).slice(0, QUESTION_LIMIT).map(d => ({
-        text: d.title,
-        options: d.options,
-        correctAnswer: Math.max(0, d.options.indexOf(d.correct_answer)),
-      }))
+      const questions = shuffle(docs).slice(0, QUESTION_COUNT)
 
       navigate('/tests/practice', {
         state: {
@@ -79,11 +68,7 @@ export default function LevelSelection() {
     }
   }
 
-  const handleCancel = () => {
-    if (fetching) return
-    setSelected(null)
-    setFetchError('')
-  }
+  const handleCancel = () => { if (fetching) return; setSelected(null); setFetchError('') }
 
   return (
     <div className="level-selection-page relative min-h-screen site-bg overflow-hidden flex flex-col items-center px-4 py-16 mt-[80px]">
@@ -178,12 +163,12 @@ export default function LevelSelection() {
               {/* Stats */}
               <div className="flex gap-3 mb-6">
                 <div className="flex-1 rounded-2xl bg-black/20 backdrop-blur-sm px-4 py-3 text-center">
-                  <p className="text-2xl font-bold text-white">40</p>
+                  <p className="text-2xl font-bold text-white">30</p>
                   <p className="text-white/60 text-xs mt-0.5">Savollar</p>
                 </div>
                 <div className="flex-1 rounded-2xl bg-black/20 backdrop-blur-sm px-4 py-3 text-center">
-                  <p className="text-2xl font-bold text-white">Random</p>
-                  <p className="text-white/60 text-xs mt-0.5">Tartib</p>
+                  <p className="text-2xl font-bold text-white">4 tur</p>
+                  <p className="text-white/60 text-xs mt-0.5">Savol turlari</p>
                 </div>
               </div>
 
