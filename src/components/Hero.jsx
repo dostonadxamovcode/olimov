@@ -33,14 +33,21 @@ export default function Hero() {
     <section id="top" className="relative flex min-h-screen items-center justify-center overflow-hidden pt-16 animate-hero-fade">
 
       {/* BACKGROUND */}
-      <div className="absolute inset-0 site-bg" />
-      <div className="hero-darkness absolute inset-0" />
-      <div className="aurora" />
-      <div className="absolute inset-0 grid-bg opacity-30" />
+      <div className="absolute inset-0" style={{ background: '#080c14' }} />
 
-      {/* Glow Effects — reduced on mobile via CSS */}
-      <div className="absolute left-1/4 top-20 h-64 w-64 md:h-96 md:w-96 rounded-full bg-[#0ea5e9]/12 blur-3xl animate-pulse-glow" />
-      <div className="absolute bottom-20 right-1/4 h-64 w-64 md:h-96 md:w-96 rounded-full bg-[#8b5cf6]/10 blur-3xl animate-pulse-glow" style={{ animationDelay: '1s' }} />
+      {/* Animated blobs */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute w-[600px] h-[600px] rounded-full blur-[130px] opacity-20"
+          style={{ background: 'radial-gradient(circle, #3b82f6, transparent)', top: '-10%', left: '20%' }} />
+        <div className="absolute w-[500px] h-[500px] rounded-full blur-[110px] opacity-15"
+          style={{ background: 'radial-gradient(circle, #8b5cf6, transparent)', bottom: '0%', right: '10%' }} />
+        <div className="absolute w-[400px] h-[400px] rounded-full blur-[90px] opacity-10"
+          style={{ background: 'radial-gradient(circle, #06b6d4, transparent)', bottom: '20%', left: '5%' }} />
+      </div>
+
+      {/* Grid pattern overlay */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
+        style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
       {/* CONTENT */}
       <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">

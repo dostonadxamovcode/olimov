@@ -5,9 +5,7 @@ import Hero from '../components/Hero';
 const Services       = lazy(() => import('../components/Services'));
 const MockTests      = lazy(() => import('../components/MockTests'));
 const Features       = lazy(() => import('../components/Features'));
-const LearningTools  = lazy(() => import('../components/LearningTools'));
 const About          = lazy(() => import('../components/About'));
-const AuthPreview    = lazy(() => import('../components/AuthPreview'));
 const Contact        = lazy(() => import('../components/Contact'));
 
 export default function Home() {
@@ -18,9 +16,7 @@ export default function Home() {
         <Services />
         <MockTests />
         <Features />
-        <LearningTools />
         <About />
-        <AuthPreview />
         <Contact />
       </Suspense>
     </>
