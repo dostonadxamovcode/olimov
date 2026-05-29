@@ -138,6 +138,35 @@ export function AuthProvider({ children }) {
     setUserRole(null)
   }
 
+  // Update Firebase Auth profile + Firestore users doc, then sync React state
+  const updateUserProfile = async ({ displayName, photoURL, username, phone, bio }) => {
+    const { auth, db, doc, setDoc, serverTimestamp, updateProfile } = await loadAuthClient()
+    const u = auth.currentUser
+    if (!u) throw new Error('Not authenticated')
+
+    // 1. Firebase Auth update (displayName & photoURL only)
+    const authUpdates = {}
+    // Only update displayName if it's a non-empty string
+    if (displayName !== undefined && displayName !== null && displayName !== '')
+      authUpdates.displayName = displayName
+    if (photoURL !== undefined) authUpdates.photoURL = photoURL ?? null
+    if (Object.keys(authUpdates).length > 0) {
+      await updateProfile(u, authUpdates)
+    }
+
+    // 2. Firestore update (all profile fields)
+    const firestoreData = { updatedAt: serverTimestamp() }
+    if (displayName !== undefined) firestoreData.displayName = displayName
+    if (photoURL !== undefined) firestoreData.photoURL = photoURL ?? null
+    if (username !== undefined) firestoreData.username = username
+    if (phone !== undefined) firestoreData.phone = phone
+    if (bio !== undefined) firestoreData.bio = bio
+    await setDoc(doc(db, 'users', u.uid), firestoreData, { merge: true })
+
+    // 3. Sync React state so Header/Avatar updates immediately
+    setCurrentUser(prev => prev ? { ...prev, ...authUpdates } : prev)
+  }
+
   const isSuperadmin = userRole === 'superadmin'
 
   const user = currentUser
@@ -145,7 +174,7 @@ export function AuthProvider({ children }) {
     : null
 
   return (
-    <AuthContext.Provider value={{ currentUser, user, userRole, isSuperadmin, loading, login, register, logout, googleLogin }}>
+    <AuthContext.Provider value={{ currentUser, user, userRole, isSuperadmin, loading, login, register, logout, googleLogin, updateUserProfile }}>
       {children}
     </AuthContext.Provider>
   )
