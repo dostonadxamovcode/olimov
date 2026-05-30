@@ -8,47 +8,42 @@ import {
 } from '../services/examSession'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const HEARTBEAT_MS   = 5_000   // send heartbeat every 5 s
-const GAP_THRESHOLD  = 8_000   // gap > 8 s after returning = violation
-const MOUNT_THRESHOLD = 15_000  // Firestore check on mount (larger = tolerates clock skew)
+const HEARTBEAT_MS    = 5_000   // send heartbeat every 5 s
+const GAP_THRESHOLD   = 8_000   // gap > 8 s on return = violation
+const MOUNT_THRESHOLD = 12_000  // Firestore stale check on mount
 
 const FLAG = (tid, uid) => `xs_${tid}_${uid}`
 
 /**
  * Server-based exam security — heartbeat + inactivity detection.
  *
- * HOW IT WORKS:
- *   1. When exam is active: heartbeat updates Firestore `lastActive` every 5 s
- *   2. When user leaves (app switch, home button, tab change):
- *        visibilitychange/pagehide fires → heartbeat STOPS → hiddenAt recorded
- *   3. When user RETURNS:
- *        visibilitychange(visible) / pageshow fires →
- *        if (Date.now() - hiddenAt > 8 s) → TERMINATE
- *        else → restart heartbeat (user was away briefly, OK)
- *   4. On every mount (refresh, new tab):
- *        Firestore session checked → if terminated OR lastActive stale → TERMINATE
+ * SECURITY IS ALWAYS ACTIVE regardless of test type (practice or real).
+ * isPractice was intentionally removed from this hook.
  *
- * NOTE: visibilitychange / pagehide are only used to CONTROL the heartbeat
- * and to CHECK on return. They do NOT trigger instant termination anymore.
+ * Flow:
+ *  1. Heartbeat updates Firestore `lastActive` every 5 s while exam is open
+ *  2. visibilitychange/pagehide → heartbeat stops, hiddenAt recorded
+ *  3. visibilitychange(visible)/pageshow → gap check
+ *     gap > 8 s → TERMINATE
+ *     gap ≤ 8 s → resume heartbeat
+ *  4. On mount (refresh/new tab): Firestore session checked
+ *     status=terminated OR lastActive stale → TERMINATE
  */
 export function useExamSecurity({
   isActive,
-  isPractice = false,
   userId,
   testId,
   levelId,
   testTitle,
   autoSubmit,
 }) {
-  // Refs — updated synchronously every render
+  // ── Refs — updated synchronously on every render ───────────────────────────
   const isActiveRef   = useRef(isActive)
-  const isPracticeRef = useRef(isPractice)
   const userIdRef     = useRef(userId)
   const testIdRef     = useRef(testId)
   const autoSubmitRef = useRef(autoSubmit)
 
   isActiveRef.current   = isActive
-  isPracticeRef.current = isPractice
   userIdRef.current     = userId
   testIdRef.current     = testId
   autoSubmitRef.current = autoSubmit
@@ -56,12 +51,12 @@ export function useExamSecurity({
   const sessionIdRef   = useRef(null)
   const terminatedRef  = useRef(false)
   const sessionCreated = useRef(false)
-  const heartbeatRef   = useRef(null)   // setInterval id
-  const hiddenAtRef    = useRef(null)   // timestamp when page was hidden
+  const heartbeatRef   = useRef(null)
+  const hiddenAtRef    = useRef(null)
 
   // ── startHeartbeat ──────────────────────────────────────────────────────────
   const startHeartbeat = useCallback(() => {
-    if (heartbeatRef.current) return // already running
+    if (heartbeatRef.current) return
 
     heartbeatRef.current = setInterval(() => {
       const sid = sessionIdRef.current
@@ -71,7 +66,7 @@ export function useExamSecurity({
         .catch(e => console.log('[ExamSecurity] heartbeat error:', e))
     }, HEARTBEAT_MS)
 
-    console.log('[ExamSecurity] heartbeat started (every', HEARTBEAT_MS, 'ms)')
+    console.log('[ExamSecurity] heartbeat started')
   }, [])
 
   // ── stopHeartbeat ───────────────────────────────────────────────────────────
@@ -84,9 +79,8 @@ export function useExamSecurity({
 
   // ── terminate ───────────────────────────────────────────────────────────────
   const terminate = useCallback((reason = 'app_switch_or_inactivity') => {
-    if (!isActiveRef.current)  { console.log('[ExamSecurity] terminate skipped — not active'); return }
-    if (isPracticeRef.current) { console.log('[ExamSecurity] terminate skipped — practice');   return }
-    if (terminatedRef.current) { console.log('[ExamSecurity] terminate skipped — already done'); return }
+    if (!isActiveRef.current)  { console.log('[ExamSecurity] skip — not active'); return }
+    if (terminatedRef.current) { console.log('[ExamSecurity] skip — already terminated'); return }
 
     terminatedRef.current = true
     stopHeartbeat()
@@ -96,7 +90,7 @@ export function useExamSecurity({
 
     console.log('EXAM TERMINATED — reason:', reason)
 
-    // 1. sessionStorage flag (synchronous, survives reload)
+    // 1. sessionStorage flag (synchronous — survives page reload and bfcache)
     try { sessionStorage.setItem(FLAG(tid, uid), '1') } catch {}
 
     // 2. Auto-submit current answers (fire-and-forget)
@@ -107,13 +101,14 @@ export function useExamSecurity({
       terminateExamSession(sessionIdRef.current, reason)
     }
 
-    // 4. Redirect
+    // 4. Redirect — window.location works even when React is not rendering
+    console.log('[ExamSecurity] redirecting to /exam-terminated')
     window.location.replace('/exam-terminated')
   }, [stopHeartbeat])
 
-  // ── 1. Re-entry check (on mount and when isActive first becomes true) ───────
+  // ── 1. Re-entry check on mount ─────────────────────────────────────────────
   useEffect(() => {
-    if (!isActive || isPractice || !userId || !testId) return
+    if (!isActive || !userId || !testId) return
 
     const flag = FLAG(testId, userId)
 
@@ -124,33 +119,33 @@ export function useExamSecurity({
       return
     }
 
-    // Slow path: Firestore
+    // Slow path: Firestore (handles new browser session / different device)
     getLatestSession(userId, testId).then(session => {
       if (!session) return
 
       if (session.status === 'terminated') {
         try { sessionStorage.setItem(flag, '1') } catch {}
-        console.log('[ExamSecurity] re-entry blocked (Firestore status=terminated)')
+        console.log('[ExamSecurity] re-entry blocked (Firestore terminated)')
         window.location.replace('/exam-terminated')
         return
       }
 
-      // Check if last heartbeat is too stale (user was away before refresh)
+      // Check for stale heartbeat on mount (user was away, then refreshed)
       if (session.lastActive) {
         const lastMs = session.lastActive.toMillis?.() ?? (session.lastActive.seconds * 1000)
         const gap    = Date.now() - lastMs
         console.log('[ExamSecurity] mount lastActive gap:', gap, 'ms')
         if (gap > MOUNT_THRESHOLD) {
-          console.log('[ExamSecurity] INACTIVITY on mount — gap:', gap, 'ms')
+          console.log('[ExamSecurity] stale session on mount — gap:', gap, 'ms')
           terminate('app_switch_or_inactivity')
         }
       }
     }).catch(() => {})
-  }, [isActive, isPractice, userId, testId, terminate])
+  }, [isActive, userId, testId, terminate])
 
   // ── 2. Session creation (once) ─────────────────────────────────────────────
   useEffect(() => {
-    if (!isActive || isPractice || !userId || !testId || sessionCreated.current) return
+    if (!isActive || !userId || !testId || sessionCreated.current) return
     sessionCreated.current = true
 
     createExamSession({ userId, testId, levelId, testTitle })
@@ -159,23 +154,22 @@ export function useExamSecurity({
         console.log('[ExamSecurity] session created:', id)
       })
       .catch(e => console.log('[ExamSecurity] createExamSession error:', e))
+    // levelId/testTitle excluded from deps — prevent duplicate creation
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isActive, isPractice, userId, testId])
+  }, [isActive, userId, testId])
 
   // ── 3. Heartbeat + visibility management ──────────────────────────────────
   useEffect(() => {
-    if (!isActive || isPractice) return
+    if (!isActive) return
 
     startHeartbeat()
 
-    // Called when page becomes hidden (user left)
     const onHide = (source) => {
-      console.log('[ExamSecurity] page hidden —', source, '— stopping heartbeat')
+      console.log('[ExamSecurity] page hidden —', source)
       stopHeartbeat()
       hiddenAtRef.current = Date.now()
     }
 
-    // Called when page becomes visible again (user returned)
     const onReturn = (source) => {
       if (!hiddenAtRef.current) return
 
@@ -183,21 +177,17 @@ export function useExamSecurity({
       console.log('[ExamSecurity] returned via', source, '— gap:', gap, 'ms')
 
       if (gap > GAP_THRESHOLD) {
-        console.log('[ExamSecurity] INACTIVITY VIOLATION — gap:', gap, 'ms — threshold:', GAP_THRESHOLD, 'ms')
+        console.log('[ExamSecurity] VIOLATION — gap:', gap, 'ms > threshold:', GAP_THRESHOLD, 'ms')
         terminate('app_switch_or_inactivity')
       } else {
-        console.log('[ExamSecurity] gap OK (' + gap + 'ms) — resuming heartbeat')
+        console.log('[ExamSecurity] gap OK — resuming heartbeat')
         hiddenAtRef.current = null
         startHeartbeat()
       }
     }
 
-    // visibilitychange: used ONLY to start/stop heartbeat and check gap on return
-    // NOT used for instant termination
     const onVisibilityChange = () => {
-      console.log('[ExamSecurity] visibilitychange —',
-        document.visibilityState, '| hidden:', document.hidden)
-
+      console.log('[ExamSecurity] visibilitychange —', document.visibilityState)
       if (document.hidden) {
         onHide('visibilitychange')
       } else {
@@ -205,16 +195,20 @@ export function useExamSecurity({
       }
     }
 
-    // pagehide: iOS Safari, back navigation, bfcache entry
     const onPageHide = (e) => {
       console.log('[ExamSecurity] pagehide — persisted:', e.persisted)
       onHide('pagehide')
     }
 
-    // pageshow: bfcache restoration — check gap
     const onPageShow = (e) => {
       console.log('[ExamSecurity] pageshow — persisted:', e.persisted)
-      if (e.persisted) onReturn('pageshow(bfcache)')
+      if (e.persisted) {
+        onReturn('pageshow')
+        // Extra guard for bfcache: if exam still active after restore, terminate
+        if (!terminatedRef.current && isActiveRef.current) {
+          terminate('bfcache_restore')
+        }
+      }
     }
 
     document.addEventListener('visibilitychange', onVisibilityChange)
@@ -226,13 +220,13 @@ export function useExamSecurity({
       window.removeEventListener('pagehide', onPageHide)
       window.removeEventListener('pageshow', onPageShow)
       stopHeartbeat()
-      console.log('[ExamSecurity] cleanup — heartbeat stopped, listeners removed')
+      console.log('[ExamSecurity] cleanup')
     }
-  }, [isActive, isPractice, startHeartbeat, stopHeartbeat, terminate])
+  }, [isActive, startHeartbeat, stopHeartbeat, terminate])
 
-  // ── 4. markCompleted — call before normal submit navigation ────────────────
+  // ── 4. markCompleted — disarm before normal submit ─────────────────────────
   const markCompleted = useCallback(async () => {
-    console.log('[ExamSecurity] markCompleted')
+    console.log('[ExamSecurity] markCompleted — disarming')
     terminatedRef.current = true
     stopHeartbeat()
 

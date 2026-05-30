@@ -140,17 +140,28 @@ export default function ExamPage() {
 
   const { display: timerDisplay, secs } = useTimer(60 * 60)
 
-  // ── Practice mode: questions passed via navigation state ──────────────────
-  // isPractice=true  → LevelSelection flow (/tests/practice?state.questions)
-  // isPractice=false → BeginnerPage/direct test link (real Firestore testId)
-  const isPractice = !!(location.state?.questions?.length > 0) || testId === 'practice'
+  // ── UI: detect if questions came from LevelSelection (practice flow) ────────
+  // This only labels the test as "practice" in the UI.
+  // It NEVER gates security — security always runs.
+  const isPracticeUI = !!(location.state?.questions?.length > 0) || testId === 'practice'
   const userId = user?.uid ?? 'anonymous'
 
-  // Diagnostic: log security state so we can see in console which mode is active
+  // ── Security testId: practice tests need a unique per-session ID ───────────
+  // Real tests: use Firestore document ID from URL param
+  // Practice tests: generate a unique ID so sessions don't collide between
+  //   different practice attempts from the same user
+  const practiceIdRef = useRef(
+    isPracticeUI
+      ? `prac_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`
+      : null
+  )
+  const securityTestId = isPracticeUI ? practiceIdRef.current : (testId ?? '')
+
   console.log('[ExamPage] testId:', testId,
-    '| isPractice:', isPractice,
+    '| isPracticeUI:', isPracticeUI,
+    '| securityTestId:', securityTestId,
     '| userId:', userId,
-    '| isActive (after load):', !loading && !!test && !isPractice)
+    '| isActive (after load):', !loading && !!test)
 
   // Keep latest exam state in refs so autoSubmit is always fresh
   // (event handlers capture refs, not stale closure values)
@@ -179,20 +190,20 @@ export default function ExamPage() {
     })
   }, [userId, testId]) // stable — reads state via refs, not closure
 
+  // isActive now depends only on loading + test, NOT on practice mode
+  // Security is always active once the exam is loaded
   const { markCompleted } = useExamSecurity({
-    isActive:  !loading && !!test && !isPractice,
-    isPractice,
+    isActive:  !loading && !!test,
     userId,
-    testId:    testId ?? '',
+    testId:    securityTestId,
     levelId,
     testTitle: test?.title,
     autoSubmit,
   })
 
   // ── Back button / Android back gesture protection ─────────────────────────
-  // Ref so popstate handler always reads the latest isActive value
   const examIsActiveRef = useRef(false)
-  examIsActiveRef.current = !loading && !!test && !isPractice
+  examIsActiveRef.current = !loading && !!test
 
   useEffect(() => {
     // Push a guard state so the back button can be intercepted
