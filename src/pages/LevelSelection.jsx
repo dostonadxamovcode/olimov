@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { getDocs, collection } from 'firebase/firestore'
 import { db } from '../firebase'
 import { useTranslation } from 'react-i18next'
-import { useAuth } from '../context/AuthContext'
-import { createExamSession } from '../services/examSession'
 import { Sprout, BookOpen, TrendingUp, ChartBar as BarChart2, Trophy as Award, Star, Loader2 } from 'lucide-react'
 
 const QUESTION_COUNT = 30
@@ -31,7 +29,6 @@ const LEVELS = [
 
 export default function LevelSelection() {
   const { t } = useTranslation()
-  const { user } = useAuth()
   const navigate   = useNavigate()
   const [selected,   setSelected]   = useState(null)
   const [fetching,   setFetching]   = useState(false)
@@ -44,7 +41,6 @@ export default function LevelSelection() {
     setFetching(true)
     setFetchError('')
     try {
-      // 1. Fetch questions from Firestore
       const snap = await getDocs(collection(db, toCollection(selected.code)))
       const docs = snap.docs
         .map(d => ({ id: d.id, ...d.data() }))
@@ -56,27 +52,16 @@ export default function LevelSelection() {
       }
 
       const questions = shuffle(docs).slice(0, QUESTION_COUNT)
-      const testTitle = `${t('levels.' + selected.code + '.name')} — ${questions.length} ${t('levels.questions')}`
 
-      // 2. Create Firestore session BEFORE navigating.
-      //    sessionId in URL survives refresh and app switch.
-      const sessionId = await createExamSession({
-        userId:     user?.uid ?? 'anonymous',
-        testId:     `prac_${selected.code}_${Date.now().toString(36)}`,
-        levelId:    selected.code,
-        testTitle,
-        isPractice: true,
+      navigate('/tests/practice', {
+        state: {
+          levelId: selected.code,
+          questions,
+          testTitle: `${t('levels.' + selected.code + '.name')} — ${questions.length} ${t('levels.questions')}`,
+        },
       })
-
-      // 3. Store questions in sessionStorage keyed by sessionId
-      //    (survives refresh within same tab)
-      sessionStorage.setItem(`exam_questions_${sessionId}`, JSON.stringify(questions))
-
-      // 4. Navigate to secure URL — sessionId is in the URL, not location.state
-      navigate(`/exam/${sessionId}`)
       setSelected(null)
-    } catch (err) {
-      console.error('[LevelSelection] start failed:', err)
+    } catch {
       setFetchError(t('levels.loadError'))
     } finally {
       setFetching(false)

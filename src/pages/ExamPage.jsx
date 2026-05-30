@@ -4,10 +4,8 @@ import { doc, getDoc } from 'firebase/firestore'
 import { db } from '../firebase'
 import { saveResult } from '../services/firestore'
 import { getTestQuestions } from '../services/questionPoolService'
-import { getExamSession } from '../services/examSession'
 import { useAuth } from '../context/AuthContext'
 import { useTranslation } from 'react-i18next'
-import { useExamSecurity } from '../hooks/useExamSecurity'
 import { Clock, X, ChevronRight, ChevronLeft, AlertCircle, Check } from 'lucide-react'
 import { toastError, toastSuccess } from '../utils/errorHandler'
 import { LoadingSpinner } from '../components/ui/SkeletonLoader'
@@ -124,16 +122,10 @@ function WordOrderInput({ question, answer, onChange, t }) {
 
 export default function ExamPage() {
   const { t, i18n } = useTranslation()
-  // sessionId  → new route: /exam/:sessionId  (session-based, survives refresh)
-  // testId     → legacy routes: /tests/:testId or /exam/:level/:testId
-  const { sessionId, testId, level: levelParam } = useParams()
-  const navigate = useNavigate()
-  const location = useLocation()
-  const { user } = useAuth()
-
-  // Session-based mode = navigated via /exam/:sessionId (new secure flow)
-  // Legacy mode        = navigated via /tests/:testId or /exam/:level/:testId
-  const isSessionMode = !!sessionId && !testId
+  const { testId }  = useParams()
+  const navigate    = useNavigate()
+  const location    = useLocation()
+  const { user }    = useAuth()
 
   const [test,            setTest]            = useState(null)
   const [levelId,         setLevelId]         = useState(null)
@@ -143,136 +135,11 @@ export default function ExamPage() {
   const [selected,        setSelected]        = useState({})
   const [submitting,      setSubmitting]      = useState(false)
   const [showExitConfirm, setShowExitConfirm] = useState(false)
-  const [showBackConfirm, setShowBackConfirm] = useState(false)
 
   const { display: timerDisplay, secs } = useTimer(60 * 60)
 
-  const userId = user?.uid ?? 'anonymous'
-
-  // Keep latest exam state in refs — event handlers read from here, no stale closures
-  const testRef     = useRef(test)
-  const selectedRef = useRef(selected)
-  const levelIdRef  = useRef(levelId)
-  testRef.current     = test
-  selectedRef.current = selected
-  levelIdRef.current  = levelId
-
-  // The testId used for saving results:
-  // - session mode: loaded from Firestore session document
-  // - legacy mode: from URL param
-  const resultTestIdRef = useRef(testId ?? '')
-
-  console.log('[ExamPage] sessionId:', sessionId, '| testId:', testId,
-    '| isSessionMode:', isSessionMode, '| userId:', userId)
-
-  // autoSubmit — reads latest state from refs (always fresh)
-  const autoSubmit = useCallback(async () => {
-    const questions = testRef.current?.questions ?? []
-    if (!questions.length) return
-    let score = 0
-    questions.forEach((q, i) => { if (calcIsCorrect(q, selectedRef.current[i])) score++ })
-    await saveResult({
-      userId,
-      testId:    resultTestIdRef.current,
-      testTitle: testRef.current?.title ?? '',
-      level:     levelIdRef.current,
-      score,
-      total:     questions.length,
-      answers:   selectedRef.current,
-      terminated: true,
-    })
-  }, [userId])
-
-  // ── useExamSecurity — new URL-based interface ─────────────────────────────
-  // sessionId from URL survives refresh, app switch, bfcache restore.
-  // For legacy mode: sessionId is undefined → security hook skips (old behavior).
-  const { markCompleted } = useExamSecurity(sessionId ?? '', autoSubmit)
-
-  // ── Back button / Android back gesture protection ─────────────────────────
-  const examIsActiveRef = useRef(false)
-  examIsActiveRef.current = !loading && !!test
-
   useEffect(() => {
-    // Push a guard state so the back button can be intercepted
-    history.pushState(null, '', window.location.href)
-
-    const onPopState = () => {
-      // Re-push immediately so back navigation is fully blocked
-      history.pushState(null, '', window.location.href)
-
-      if (examIsActiveRef.current) {
-        // Show confirmation — user must choose explicitly
-        setShowBackConfirm(true)
-      }
-      // If exam not active (loading/error), silently block back
-    }
-
-    window.addEventListener('popstate', onPopState)
-    return () => window.removeEventListener('popstate', onPopState)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // attached once — reads latest state via examIsActiveRef
-
-  useEffect(() => {
-    const loadExam = async () => {
-
-      // ── SESSION MODE: /exam/:sessionId ─────────────────────────────────────
-      // sessionId from URL is source of truth — survives refresh.
-      if (isSessionMode && sessionId) {
-        const session = await getExamSession(sessionId)
-
-        if (!session || session.status !== 'active') {
-          // Session terminated or not found — security hook already redirects,
-          // but set error here as a safety net.
-          setError(t('exam.notFoundMsg'))
-          setLoading(false)
-          return
-        }
-
-        const { testId: sessionTestId, levelId: sessionLevelId, isPractice } = session
-        resultTestIdRef.current = sessionTestId ?? ''
-
-        if (isPractice) {
-          // Practice questions were stored in sessionStorage before navigation
-          const raw = sessionStorage.getItem(`exam_questions_${sessionId}`)
-          if (!raw) {
-            setError(t('exam.notFoundMsg'))
-            setLoading(false)
-            return
-          }
-          const questions = JSON.parse(raw)
-          setLevelId(sessionLevelId ?? 'a1')
-          setTest({ title: session.testTitle ?? 'Practice', questions })
-          setLoading(false)
-          return
-        }
-
-        // Real test — fetch from Firestore using session's testId + levelId
-        setLevelId(sessionLevelId)
-        try {
-          const snap = await getDoc(doc(db, `${sessionLevelId}Tests`, sessionTestId))
-          if (!snap.exists()) {
-            setError(t('exam.notFoundMsg'))
-            setLoading(false)
-            return
-          }
-          const testData = { id: snap.id, ...snap.data() }
-          if (!testData.questions?.length) {
-            setError(t('exam.noRealQuestions'))
-            setLoading(false)
-            return
-          }
-          const result = await getTestQuestions(testData, sessionLevelId)
-          setTest({ ...testData, questions: result.questions })
-        } catch (err) {
-          setError(t('exam.loadError'))
-          toastError(err)
-        } finally {
-          setLoading(false)
-        }
-        return
-      }
-
-      // ── LEGACY MODE: /tests/:testId or /exam/:level/:testId ────────────────
+    const fetchTest = async () => {
       if (location.state?.questions?.length > 0) {
         setLevelId(location.state.levelId || 'a1')
         setTest({
@@ -289,7 +156,7 @@ export default function ExamPage() {
         return
       }
 
-      let detectedLevelId = levelParam ?? location.state?.levelId
+      let detectedLevelId = location.state?.levelId
 
       if (!detectedLevelId) {
         for (const level of LEVEL_COLLECTIONS) {
@@ -308,7 +175,6 @@ export default function ExamPage() {
       }
 
       setLevelId(detectedLevelId)
-      resultTestIdRef.current = testId
 
       try {
         const snap = await getDoc(doc(db, `${detectedLevelId}Tests`, testId))
@@ -317,12 +183,15 @@ export default function ExamPage() {
           setLoading(false)
           return
         }
+
         const testData = { id: snap.id, ...snap.data() }
+
         if (!testData.questions?.length) {
           setError(t('exam.noRealQuestions'))
           setLoading(false)
           return
         }
+
         const questionResult = await getTestQuestions(testData, detectedLevelId)
         setTest({ ...testData, questions: questionResult.questions })
       } catch (err) {
@@ -333,8 +202,8 @@ export default function ExamPage() {
       }
     }
 
-    loadExam()
-  }, [sessionId, testId, isSessionMode, levelParam, location.state])
+    fetchTest()
+  }, [testId, location.state])
 
   const handleAnswer = (questionIndex, value) => {
     setSelected(prev => ({ ...prev, [questionIndex]: value }))
@@ -361,9 +230,6 @@ export default function ExamPage() {
     if (submitting) return
     setSubmitting(true)
 
-    // Mark session completed BEFORE navigating (disarms security listeners)
-    await markCompleted()
-
     const questions = test?.questions ?? []
     let score = 0
     questions.forEach((q, i) => {
@@ -373,7 +239,7 @@ export default function ExamPage() {
     try {
       await saveResult({
         userId:    user?.uid ?? 'anonymous',
-        testId:    resultTestIdRef.current,
+        testId,
         testTitle: test.title,
         level:     levelId,
         score,
@@ -386,11 +252,7 @@ export default function ExamPage() {
     }
 
     navigate('/test-result', {
-      state: {
-        score, total: questions.length, questions, answers: selected,
-        testTitle: test.title, level: levelId,
-        testId: resultTestIdRef.current,
-      },
+      state: { score, total: questions.length, questions, answers: selected, testTitle: test.title, level: levelId, testId },
     })
   }
 
@@ -441,7 +303,6 @@ export default function ExamPage() {
   const curAnswer = selected[current]
   const isLast    = current === total - 1
 
-  // Multilingual question text — prefer q.text_<lang> if exists
   const qText = q[`text_${lang}`] || q.text || q.title || q.question
 
   return (
@@ -620,41 +481,6 @@ export default function ExamPage() {
               <button onClick={() => navigate('/level')}
                 className="flex-1 py-3 rounded-xl bg-red-500/20 border border-red-500/30 text-red-400 font-semibold hover:bg-red-500/30 transition-colors">
                 {t('exam.exitModal.exit')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Back button confirmation modal ───────────────────────────────── */}
-      {showBackConfirm && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
-          <div className="max-w-sm w-full bg-slate-800 rounded-3xl p-8 border border-slate-700 shadow-2xl text-center">
-            <div className="w-14 h-14 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto mb-4">
-              <AlertCircle className="w-7 h-7 text-amber-400" />
-            </div>
-            <h2 className="text-xl font-bold text-white mb-3">
-              {t('exam.backConfirm.title')}
-            </h2>
-            <p className="text-slate-400 text-sm mb-6 leading-relaxed">
-              {t('exam.backConfirm.message')}
-            </p>
-            <div className="flex flex-col gap-2.5">
-              <button
-                onClick={() => setShowBackConfirm(false)}
-                className="w-full py-3.5 rounded-2xl font-semibold text-white bg-gradient-to-r from-indigo-500 to-cyan-500 shadow-lg shadow-indigo-500/30 hover:opacity-90 transition-opacity"
-              >
-                {t('exam.backConfirm.continue')}
-              </button>
-              <button
-                onClick={() => {
-                  setShowBackConfirm(false)
-                  handleFinalSubmit()
-                }}
-                disabled={submitting}
-                className="w-full py-3.5 rounded-2xl font-semibold border border-slate-600 text-slate-300 hover:bg-slate-700 transition-colors disabled:opacity-50"
-              >
-                {submitting ? t('exam.submitting') : t('exam.backConfirm.exit')}
               </button>
             </div>
           </div>

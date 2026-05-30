@@ -29,7 +29,6 @@ const ResultsPage  = lazy(() => import('./pages/ResultsPage'))
 const TestResultPage=lazy(() => import('./pages/TestResultPage'))
 const AdminPage    = lazy(() => import('./pages/AdminPage'))
 const Profile        = lazy(() => import('./pages/Profile'))
-const ExamTerminated = lazy(() => import('./pages/ExamTerminated'))
 
 function LoginGate({ children }) {
   const { currentUser, userRole } = useAuth()
@@ -93,11 +92,9 @@ const router = createBrowserRouter([
       { path: '*',      element: <LazyPage><NotFound /></LazyPage> },
     ],
   },
-  { path: '/exam/:sessionId',       element: <LazyPage><ExamPage /></LazyPage> },
   { path: '/tests/:testId',        element: <LazyPage><ExamPage /></LazyPage> },
   { path: '/exam/:level/:testId',  element: <LazyPage><ExamPage /></LazyPage> },
   { path: '/test-result',          element: <LazyPage><TestResultPage /></LazyPage> },
-  { path: '/exam-terminated',      element: <LazyPage><ExamTerminated /></LazyPage> },
 ])
 
 // Blocks the entire app until Firebase auth check completes (avoids Header/Footer
