@@ -141,8 +141,16 @@ export default function ExamPage() {
   const { display: timerDisplay, secs } = useTimer(60 * 60)
 
   // ── Practice mode: questions passed via navigation state ──────────────────
+  // isPractice=true  → LevelSelection flow (/tests/practice?state.questions)
+  // isPractice=false → BeginnerPage/direct test link (real Firestore testId)
   const isPractice = !!(location.state?.questions?.length > 0) || testId === 'practice'
   const userId = user?.uid ?? 'anonymous'
+
+  // Diagnostic: log security state so we can see in console which mode is active
+  console.log('[ExamPage] testId:', testId,
+    '| isPractice:', isPractice,
+    '| userId:', userId,
+    '| isActive (after load):', !loading && !!test && !isPractice)
 
   // Keep latest exam state in refs so autoSubmit is always fresh
   // (event handlers capture refs, not stale closure values)
