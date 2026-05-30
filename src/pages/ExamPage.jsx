@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '../firebase'
@@ -143,23 +143,32 @@ export default function ExamPage() {
   const isPractice = !!(location.state?.questions?.length > 0) || testId === 'practice'
   const userId = user?.uid ?? 'anonymous'
 
-  // Auto-submit callback used by security hook on violation
+  // Keep latest exam state in refs so autoSubmit is always fresh
+  // (event handlers capture refs, not stale closure values)
+  const testRef     = useRef(test)
+  const selectedRef = useRef(selected)
+  const levelIdRef  = useRef(levelId)
+  testRef.current     = test
+  selectedRef.current = selected
+  levelIdRef.current  = levelId
+
+  // autoSubmit reads from refs — always has the very latest answers
   const autoSubmit = useCallback(async () => {
-    const questions = test?.questions ?? []
+    const questions = testRef.current?.questions ?? []
     if (!questions.length) return
     let score = 0
-    questions.forEach((q, i) => { if (calcIsCorrect(q, selected[i])) score++ })
+    questions.forEach((q, i) => { if (calcIsCorrect(q, selectedRef.current[i])) score++ })
     await saveResult({
       userId,
       testId,
-      testTitle: test?.title ?? '',
-      level:     levelId,
+      testTitle: testRef.current?.title ?? '',
+      level:     levelIdRef.current,
       score,
       total:     questions.length,
-      answers:   selected,
+      answers:   selectedRef.current,
       terminated: true,
     })
-  }, [test, selected, userId, testId, levelId])
+  }, [userId, testId]) // stable — reads state via refs, not closure
 
   const { markCompleted } = useExamSecurity({
     isActive:  !loading && !!test && !isPractice,
