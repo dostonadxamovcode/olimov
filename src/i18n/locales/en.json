@@ -124,6 +124,12 @@
       "title": "Exit Test?",
       "message": "Your progress will not be saved. You will return to the levels page.",
       "continue": "Continue", "exit": "Exit"
+    },
+    "backConfirm": {
+      "title": "Exit Test?",
+      "message": "Are you sure you want to exit? The exam will be submitted and your results will be saved.",
+      "continue": "Continue Exam",
+      "exit": "Exit Test"
     }
   },
   "testResult": {

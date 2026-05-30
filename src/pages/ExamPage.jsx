@@ -136,6 +136,7 @@ export default function ExamPage() {
   const [selected,        setSelected]        = useState({})
   const [submitting,      setSubmitting]      = useState(false)
   const [showExitConfirm, setShowExitConfirm] = useState(false)
+  const [showBackConfirm, setShowBackConfirm] = useState(false)
 
   const { display: timerDisplay, secs } = useTimer(60 * 60)
 
@@ -179,6 +180,31 @@ export default function ExamPage() {
     testTitle: test?.title,
     autoSubmit,
   })
+
+  // ── Back button / Android back gesture protection ─────────────────────────
+  // Ref so popstate handler always reads the latest isActive value
+  const examIsActiveRef = useRef(false)
+  examIsActiveRef.current = !loading && !!test && !isPractice
+
+  useEffect(() => {
+    // Push a guard state so the back button can be intercepted
+    history.pushState(null, '', window.location.href)
+
+    const onPopState = () => {
+      // Re-push immediately so back navigation is fully blocked
+      history.pushState(null, '', window.location.href)
+
+      if (examIsActiveRef.current) {
+        // Show confirmation — user must choose explicitly
+        setShowBackConfirm(true)
+      }
+      // If exam not active (loading/error), silently block back
+    }
+
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // attached once — reads latest state via examIsActiveRef
 
   useEffect(() => {
     const fetchTest = async () => {
@@ -527,6 +553,41 @@ export default function ExamPage() {
               <button onClick={() => navigate('/level')}
                 className="flex-1 py-3 rounded-xl bg-red-500/20 border border-red-500/30 text-red-400 font-semibold hover:bg-red-500/30 transition-colors">
                 {t('exam.exitModal.exit')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Back button confirmation modal ───────────────────────────────── */}
+      {showBackConfirm && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+          <div className="max-w-sm w-full bg-slate-800 rounded-3xl p-8 border border-slate-700 shadow-2xl text-center">
+            <div className="w-14 h-14 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="w-7 h-7 text-amber-400" />
+            </div>
+            <h2 className="text-xl font-bold text-white mb-3">
+              {t('exam.backConfirm.title')}
+            </h2>
+            <p className="text-slate-400 text-sm mb-6 leading-relaxed">
+              {t('exam.backConfirm.message')}
+            </p>
+            <div className="flex flex-col gap-2.5">
+              <button
+                onClick={() => setShowBackConfirm(false)}
+                className="w-full py-3.5 rounded-2xl font-semibold text-white bg-gradient-to-r from-indigo-500 to-cyan-500 shadow-lg shadow-indigo-500/30 hover:opacity-90 transition-opacity"
+              >
+                {t('exam.backConfirm.continue')}
+              </button>
+              <button
+                onClick={() => {
+                  setShowBackConfirm(false)
+                  handleFinalSubmit()
+                }}
+                disabled={submitting}
+                className="w-full py-3.5 rounded-2xl font-semibold border border-slate-600 text-slate-300 hover:bg-slate-700 transition-colors disabled:opacity-50"
+              >
+                {submitting ? t('exam.submitting') : t('exam.backConfirm.exit')}
               </button>
             </div>
           </div>

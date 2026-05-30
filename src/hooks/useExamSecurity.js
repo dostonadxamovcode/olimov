@@ -8,15 +8,22 @@ import {
 
 const sessionKey = (testId, userId) => `exam_terminated__${testId}__${userId}`
 
+const DEV = import.meta.env.DEV
+
+function dbg(...args) {
+  if (DEV) console.log('[ExamSecurity]', ...args)
+}
+
 /**
- * Strict mobile exam security hook.
+ * Multi-layer mobile exam security hook.
  *
- * Design principles:
- * - Event listeners attach ONCE on mount (empty deps), read state via refs
- * - All mutable values kept in refs → no stale closures in handlers
- * - window.location.replace used instead of React navigate (works when JS is freezing)
- * - sessionStorage as synchronous first line of defence (survives page reload)
- * - Firestore writes are fire-and-forget (non-blocking on terminate path)
+ * Layers:
+ *  1. visibilitychange  — primary (Android + iOS, fires on home/app switch)
+ *  2. pagehide          — iOS Safari bfcache, swipe-away
+ *  3. window blur       — additional coverage (only when page is also hidden)
+ *
+ * All values read through refs → listeners attached ONCE on mount → no stale closures.
+ * window.location.replace() used (not React navigate) → works even when JS is freezing.
  */
 export function useExamSecurity({
   isActive,
@@ -27,120 +34,189 @@ export function useExamSecurity({
   testTitle,
   autoSubmit,
 }) {
-  // ── Refs — updated synchronously every render, safe to read from event handlers ──
+  dbg('hook render — isActive:', isActive, 'isPractice:', isPractice, 'testId:', testId)
+
+  // ── Refs updated synchronously every render (no useEffect lag) ─────────────
   const isActiveRef    = useRef(isActive)
   const isPracticeRef  = useRef(isPractice)
   const userIdRef      = useRef(userId)
   const testIdRef      = useRef(testId)
   const autoSubmitRef  = useRef(autoSubmit)
 
-  // Update ALL refs on every render (synchronous — no async gap)
   isActiveRef.current   = isActive
   isPracticeRef.current = isPractice
   userIdRef.current     = userId
   testIdRef.current     = testId
   autoSubmitRef.current = autoSubmit
 
-  const sessionIdRef    = useRef(null)
-  const terminatedRef   = useRef(false)
-  const sessionCreated  = useRef(false)
+  const sessionIdRef   = useRef(null)
+  const terminatedRef  = useRef(false)
+  const sessionCreated = useRef(false)
 
-  // ── Terminate ref — always current, called by listeners ──────────────────
-  // Defined as a ref so listeners never need to re-register
+  // ── Terminate — ref so event handlers always call latest version ──────────
   const terminateRef = useRef(null)
-  terminateRef.current = (reason = 'mobile_app_switch') => {
-    // Guard: skip if not in active exam, practice mode, or already terminated
-    if (!isActiveRef.current || isPracticeRef.current || terminatedRef.current) return
+  terminateRef.current = (source = 'unknown') => {
+    if (!isActiveRef.current) {
+      dbg('terminate called but exam not active, skipping —', source)
+      return
+    }
+    if (isPracticeRef.current) {
+      dbg('terminate called but practice mode, skipping —', source)
+      return
+    }
+    if (terminatedRef.current) {
+      dbg('terminate already ran, skipping —', source)
+      return
+    }
+
     terminatedRef.current = true
+    dbg('TERMINATE STARTED —', source)
 
     const uid = userIdRef.current
     const tid = testIdRef.current
 
-    // 1. sessionStorage — SYNCHRONOUS, survives JS freeze and page reload
+    // Step 1: sessionStorage — synchronous, works even when JS engine freezes
     if (uid && tid) {
-      try { sessionStorage.setItem(sessionKey(tid, uid), 'terminated') } catch {}
+      try {
+        sessionStorage.setItem(sessionKey(tid, uid), 'terminated')
+        dbg('sessionStorage set')
+      } catch (e) {
+        dbg('sessionStorage failed', e)
+      }
     }
 
-    // 2. Auto-submit — fire-and-forget, do NOT await (JS may freeze)
-    try { autoSubmitRef.current?.() } catch {}
+    // Step 2: Auto-submit answers — fire-and-forget (do NOT await)
+    try {
+      autoSubmitRef.current?.()
+      dbg('autoSubmit fired')
+    } catch (e) {
+      dbg('autoSubmit error', e)
+    }
 
-    // 3. Firestore session update — fire-and-forget
+    // Step 3: Firestore session update — fire-and-forget
     if (sessionIdRef.current) {
-      try { terminateExamSession(sessionIdRef.current, reason) } catch {}
+      try {
+        terminateExamSession(sessionIdRef.current, source)
+        dbg('firestore terminate fired — sessionId:', sessionIdRef.current)
+      } catch (e) {
+        dbg('firestore terminate error', e)
+      }
+    } else {
+      dbg('no sessionId yet, skipping firestore update')
     }
 
-    // 4. Redirect — window.location is synchronous and works even when
-    //    React is not rendering (page freeze / component unmount)
+    // Step 4: Redirect — window.location works even when React is not rendering
+    dbg('redirect to /exam-terminated')
     window.location.replace('/exam-terminated')
   }
 
-  // ── 1. Re-entry protection ────────────────────────────────────────────────
+  // ── 1. Re-entry protection ─────────────────────────────────────────────────
   useEffect(() => {
     if (!isActive || isPractice || !userId || !testId) return
 
+    dbg('checking re-entry — userId:', userId, 'testId:', testId)
+
     const key = sessionKey(testId, userId)
 
-    // Fast path: sessionStorage (synchronous, instant)
+    // Fast path — synchronous sessionStorage check
     if (sessionStorage.getItem(key) === 'terminated') {
+      dbg('sessionStorage says terminated — blocking re-entry')
       window.location.replace('/exam-terminated')
       return
     }
 
-    // Slow path: Firestore check (handles new browser session / different device)
-    getLatestSession(userId, testId).then(session => {
-      if (session?.status === 'terminated') {
-        try { sessionStorage.setItem(key, 'terminated') } catch {}
-        window.location.replace('/exam-terminated')
-      }
-    }).catch(() => {})
+    // Slow path — Firestore check (catches new browser session / different device)
+    getLatestSession(userId, testId)
+      .then(session => {
+        dbg('Firestore session:', session?.status)
+        if (session?.status === 'terminated') {
+          try { sessionStorage.setItem(key, 'terminated') } catch {}
+          window.location.replace('/exam-terminated')
+        }
+      })
+      .catch(e => dbg('getLatestSession error', e))
   }, [isActive, isPractice, userId, testId])
 
-  // ── 2. Session creation — guarded, runs once ──────────────────────────────
+  // ── 2. Session creation — runs once ───────────────────────────────────────
   useEffect(() => {
     if (!isActive || isPractice || !userId || !testId || sessionCreated.current) return
     sessionCreated.current = true
 
+    dbg('creating Firestore session')
     createExamSession({ userId, testId, levelId, testTitle })
-      .then(id => { sessionIdRef.current = id })
-      .catch(() => {})
-    // NOTE: levelId/testTitle intentionally excluded from deps to prevent
-    // duplicate session creation on subsequent renders
+      .then(id => {
+        sessionIdRef.current = id
+        dbg('session created — id:', id)
+      })
+      .catch(e => dbg('createExamSession error', e))
+    // levelId/testTitle excluded from deps to prevent double creation
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isActive, isPractice, userId, testId])
 
-  // ── 3. Event listeners — attached ONCE on mount ───────────────────────────
-  // Empty deps array = attach once, never re-register.
-  // Handlers read latest state via terminateRef (always current).
+  // ── 3. Multi-layer event listeners — attached ONCE on mount ───────────────
+  // Empty deps [] — handlers read latest state via refs, never re-register.
   useEffect(() => {
+    dbg('attaching event listeners')
+
+    // Layer 1: visibilitychange — PRIMARY (Android home button, app switch, tab switch)
     const onVisibilityChange = () => {
+      dbg('visibilitychange fired — hidden:', document.hidden,
+          'visibilityState:', document.visibilityState)
       if (document.hidden) {
-        terminateRef.current('mobile_app_switch')
+        dbg('VISIBILITY VIOLATION')
+        terminateRef.current('visibilitychange')
       }
     }
 
-    // pagehide: iOS Safari swipe-away, back navigation, tab close
+    // Layer 2: pagehide — iOS Safari swipe-away, back navigation, bfcache
     const onPageHide = () => {
-      terminateRef.current('mobile_app_switch')
+      dbg('PAGEHIDE VIOLATION')
+      terminateRef.current('pagehide')
     }
 
-    // capture: true → fires in capture phase before any child handlers
+    // Layer 3: window blur — extra coverage
+    // Only terminate when page is also hidden to avoid false positives
+    // from keyboard open, alerts, in-page focus changes.
+    const onWindowBlur = () => {
+      dbg('blur fired — visibilityState:', document.visibilityState)
+      // A keyboard open on mobile does NOT hide the page, so this guard is safe
+      if (document.visibilityState === 'hidden') {
+        dbg('BLUR VIOLATION (page also hidden)')
+        terminateRef.current('blur')
+      } else {
+        dbg('blur fired but page still visible — likely keyboard/alert, ignoring')
+      }
+    }
+
+    // capture:true = fires in capture phase (before child handlers)
     document.addEventListener('visibilitychange', onVisibilityChange, true)
-    window.addEventListener('pagehide', onPageHide, true)
+    window.addEventListener('pagehide',           onPageHide,          true)
+    window.addEventListener('blur',               onWindowBlur,        true)
+
+    dbg('listeners attached')
 
     return () => {
       document.removeEventListener('visibilitychange', onVisibilityChange, true)
-      window.removeEventListener('pagehide', onPageHide, true)
+      window.removeEventListener('pagehide',           onPageHide,          true)
+      window.removeEventListener('blur',               onWindowBlur,        true)
+      dbg('listeners removed (cleanup)')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // intentionally empty — handlers read state through refs
+  }, []) // intentionally empty — state is read through refs
 
-  // ── 4. markCompleted — call BEFORE navigating on normal submit ────────────
+  // ── 4. markCompleted — call before navigating on normal submit ─────────────
   const markCompleted = useCallback(async () => {
-    // Disarm listeners — prevents false positive when React Router navigates away
+    dbg('markCompleted called — disarming listeners')
+    // Disarm all listeners before navigating away (prevents false positive)
     terminatedRef.current = true
 
     if (sessionIdRef.current) {
-      try { completeExamSession(sessionIdRef.current) } catch {}
+      try {
+        completeExamSession(sessionIdRef.current)
+        dbg('session marked completed')
+      } catch (e) {
+        dbg('completeExamSession error', e)
+      }
     }
     if (userId && testId) {
       try { sessionStorage.removeItem(sessionKey(testId, userId)) } catch {}

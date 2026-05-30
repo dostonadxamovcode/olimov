@@ -124,6 +124,12 @@
       "title": "Testdan chiqasizmi?",
       "message": "Jarayoningiz saqlanmaydi. Darajalar sahifasiga qaytasiz.",
       "continue": "Davom etish", "exit": "Chiqish"
+    },
+    "backConfirm": {
+      "title": "Testdan chiqmoqchimisiz?",
+      "message": "Siz testdan chiqmoqchimisiz? Test yakunlanadi va natijangiz saqlanadi.",
+      "continue": "Testni davom ettirish",
+      "exit": "Testdan chiqish"
     }
   },
   "testResult": {
