@@ -1,11 +1,11 @@
 export const navLinks = [
-  { label: 'Home', href: '/#top' },
-  { label: 'Services', href: '/#services' },
-  { label: 'Mock Tests', href: '/#mock-tests' },
-  { label: 'Results', href: '/result' },
-  { label: 'Contact', href: '/#contact' },
-  { label: 'About', href: '/about' },
-  { label: 'Levels', href: '/level' },
+  { label: 'nav.home', href: '/#top' },
+  { label: 'nav.services', href: '/#services' },
+  { label: 'nav.mockTests', href: '/#mock-tests' },
+  { label: 'nav.results', href: '/result' },
+  { label: 'nav.contact', href: '/#contact' },
+  { label: 'nav.about', href: '/about' },
+  { label: 'nav.levels', href: '/level' },
 ]
 
 export const stats = [

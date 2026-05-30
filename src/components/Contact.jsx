@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { Mail, Phone, MapPin, Send, CheckCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-const contactInfo = [
-  { icon: Mail, label: 'Email', value: 'olimovmax2003@gmail.com' },
-  { icon: Phone, label: 'Phone', value: '+998 90 040 67 28' },
-  { icon: MapPin, label: 'Location', value: 'Fegana, Uzbekistan' },
+const contactInfoKeys = [
+  { icon: Mail, labelKey: 'contact.emailLabel', value: 'olimovmax2003@gmail.com' },
+  { icon: Phone, labelKey: 'contact.phoneLabel', value: '+998 90 040 67 28' },
+  { icon: MapPin, labelKey: 'contact.locationLabel', value: 'Fergana, Uzbekistan' },
 ];
 
 export default function Contact() {
+  const { t } = useTranslation();
   const [form, setForm] = useState({ name: '', email: '', message: '' });
   const [sent, setSent] = useState(false);
 
@@ -26,23 +28,23 @@ export default function Contact() {
         <div className="text-center mb-10 animate-fade-in-up">
           <div className="gold-badge mb-3">
             <span className="h-1.5 w-1.5 rounded-full bg-[#f59e0b]" />
-            <span>Get In Touch</span>
+            <span>{t('contact.badge')}</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3">
-            We'd love to{' '}
+            {t('contact.title')}{' '}
             <span className="gradient-text">
-              hear from you
+              {t('contact.highlight')}
             </span>
           </h2>
           <p className="text-gray-400 text-sm max-w-2xl mx-auto">
-            Have questions about our courses or platform? Reach out and we'll respond within 24 hours.
+            {t('contact.subtitle')}
           </p>
         </div>
 
         <div className="grid lg:grid-cols-5 gap-6">
           {/* Left info */}
           <div className="lg:col-span-2 space-y-5">
-            {contactInfo.map((item, i) => {
+            {contactInfoKeys.map((item, i) => {
               const Icon = item.icon;
               return (
                 <div key={i} className="premium-card premium-card-hover flex items-center gap-4 p-5 animate-fade-in-up" style={{ animationDelay: `${i * 100}ms` }}>
@@ -50,14 +52,12 @@ export default function Contact() {
                     <Icon className="h-5 w-5 text-[#0ea5e9]" />
                   </div>
                   <div>
-                    <div className="text-gray-400 text-xs">{item.label}</div>
+                    <div className="text-gray-400 text-xs">{t(item.labelKey)}</div>
                     <div className="text-white font-medium text-sm">{item.value}</div>
                   </div>
                 </div>
               );
             })}
-
-
           </div>
 
           {/* Right form */}
@@ -67,52 +67,52 @@ export default function Contact() {
                 <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#0ea5e9] to-[#8b5cf6]">
                   <CheckCircle className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-white font-bold text-xl mb-2">Message Sent!</h3>
-                <p className="text-gray-400">We'll get back to you within 24 hours.</p>
+                <h3 className="text-white font-bold text-xl mb-2">{t('contact.sentTitle')}</h3>
+                <p className="text-gray-400">{t('contact.sentDesc')}</p>
                 <button
                   onClick={() => { setSent(false); setForm({ name: '', email: '', message: '' }); }}
                   className="mt-6 text-sm font-medium text-[#0ea5e9] transition-colors hover:text-white"
                 >
-                  Send another message
+                  {t('contact.sendAnother')}
                 </button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="premium-card space-y-4 rounded-3xl p-6 animate-scale-in">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-gray-400 text-xs font-medium mb-2 uppercase tracking-wide">Full Name</label>
+                    <label className="block text-gray-400 text-xs font-medium mb-2 uppercase tracking-wide">{t('contact.fullName')}</label>
                     <input
                       type="text"
                       name="name"
                       value={form.name}
                       onChange={handleChange}
                       required
-                      placeholder="Olimov Asadbek"
+                      placeholder={t('contact.namePlaceholder')}
                       className="field"
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-400 text-xs font-medium mb-2 uppercase tracking-wide">Email</label>
+                    <label className="block text-gray-400 text-xs font-medium mb-2 uppercase tracking-wide">{t('contact.emailLabel')}</label>
                     <input
                       type="email"
                       name="email"
                       value={form.email}
                       onChange={handleChange}
                       required
-                      placeholder="olimovmax2003@gmail.com"
+                      placeholder={t('contact.emailPlaceholder')}
                       className="field"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-gray-400 text-xs font-medium mb-2 uppercase tracking-wide">Message</label>
+                  <label className="block text-gray-400 text-xs font-medium mb-2 uppercase tracking-wide">{t('contact.message')}</label>
                   <textarea
                     name="message"
                     value={form.message}
                     onChange={handleChange}
                     required
                     rows={5}
-                    placeholder="How can we help you?"
+                    placeholder={t('contact.messagePlaceholder')}
                     className="field resize-none"
                   />
                 </div>
@@ -121,7 +121,7 @@ export default function Contact() {
                   className="btn-primary w-full py-3"
                 >
                   <Send className="w-4 h-4" />
-                  Send Message
+                  {t('contact.send')}
                 </button>
               </form>
             )}

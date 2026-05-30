@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { AlertTriangle, LogOut, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function ConfirmModal({
   open,
@@ -18,6 +19,7 @@ export default function ConfirmModal({
     return () => document.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
+  const { t } = useTranslation();
   if (!open) return null;
 
   const isDanger = variant === 'danger';
@@ -82,7 +84,7 @@ export default function ConfirmModal({
               disabled={loading}
               className="flex-1 py-2.5 rounded-xl text-sm font-medium text-slate-400 border border-white/10 bg-white/4 hover:bg-white/8 hover:text-slate-200 transition-all duration-200 disabled:opacity-50"
             >
-              Bekor qilish
+              {t('confirmModal.cancel')}
             </button>
             <button
               onClick={onConfirm}
@@ -100,7 +102,7 @@ export default function ConfirmModal({
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
                   <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Kutilmoqda...
+                  {t('confirmModal.waiting')}
                 </span>
               ) : confirmLabel}
             </button>

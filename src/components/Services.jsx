@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { ChartBar as BarChart3, BookOpen, Dot, FilePenLine, Headphones, Mic, Trophy } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { services } from '../data/siteData'
 
 const icons = [Headphones, BookOpen, FilePenLine, Mic, Trophy, BarChart3]
@@ -24,6 +25,8 @@ const bulletColors = [
 ]
 
 export default function Services() {
+  const { t } = useTranslation();
+
   return (
     <section id="services" className="relative overflow-hidden bg-[#050816] py-10 sm:py-16">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-indigo-950/10 to-transparent" />
@@ -34,16 +37,16 @@ export default function Services() {
         <div className="mb-6 text-center sm:mb-10">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1.5 sm:mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-            <span className="text-indigo-300 text-xs font-medium">Our Services</span>
+            <span className="text-indigo-300 text-xs font-medium">{t('services.badge')}</span>
           </div>
           <h2 className="mb-2 text-2xl font-bold text-white sm:mb-3 sm:text-4xl">
-            Comprehensive CEFR
+            {t('services.title')}
             <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent block">
-              preparation services
+              {t('services.highlight')}
             </span>
           </h2>
           <p className="mx-auto max-w-2xl text-xs text-gray-400 sm:text-sm">
-            Master every skill with our tailored courses and expert guidance
+            {t('services.subtitle')}
           </p>
         </div>
 
@@ -52,7 +55,8 @@ export default function Services() {
             const Icon = icons[i % icons.length]
             const gradient = gradientColors[i % gradientColors.length]
             const bulletColor = bulletColors[i % bulletColors.length]
-            
+            const sFeatures = t(`services.${s.id}.features`, { returnObjects: true })
+
             return (
               <div
                 key={s.id}
@@ -61,24 +65,28 @@ export default function Services() {
                 <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} text-white transition-transform group-hover:scale-110 sm:mb-6 sm:h-14 sm:w-14`}>
                   <Icon className="h-5 w-5 sm:h-7 sm:w-7" />
                 </div>
-                
-                <h3 className="mb-1.5 text-xs font-bold leading-tight text-white sm:mb-2 sm:text-base">{s.title}</h3>
-                <p className="mb-2 text-[10px] leading-4 text-gray-400 sm:mb-4 sm:text-xs sm:leading-relaxed">{s.description}</p>
-                
+
+                <h3 className="mb-1.5 text-xs font-bold leading-tight text-white sm:mb-2 sm:text-base">
+                  {t(`services.${s.id}.title`)}
+                </h3>
+                <p className="mb-2 text-[10px] leading-4 text-gray-400 sm:mb-4 sm:text-xs sm:leading-relaxed">
+                  {t(`services.${s.id}.description`)}
+                </p>
+
                 <ul className="mb-6 hidden space-y-3 sm:block">
-                  {s.features.map((feature, idx) => (
+                  {Array.isArray(sFeatures) && sFeatures.map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-3">
                       <span className={`w-1.5 h-1.5 rounded-full ${bulletColor} mt-2 flex-shrink-0`} />
                       <span className="text-gray-300 text-sm flex align-center"><Dot/> {feature}</span>
                     </li>
                   ))}
                 </ul>
-                
+
                 <Link
                   to={`/services/${s.slug}`}
                   className={`mt-auto block w-full rounded-xl bg-gradient-to-r ${gradient} px-3 py-2 text-center text-xs font-semibold text-white transition-all duration-300 hover:opacity-90 sm:px-4 sm:py-2.5 sm:text-sm`}
                 >
-                  Get Started
+                  {t('services.getStarted')}
                 </Link>
               </div>
             )

@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { ChevronRight, Trophy } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { mockTestQuestions } from '../data/siteData'
 import { getMockTestQuestions } from '../services/questions'
 import { LoadingSpinner } from './ui/SkeletonLoader'
 
 export default function MockTests() {
+  const { t } = useTranslation()
   const [questions, setQuestions] = useState(mockTestQuestions)
   const [current, setCurrent] = useState(0)
   const [selected, setSelected] = useState({})
@@ -73,20 +75,20 @@ export default function MockTests() {
         <div className="text-center mb-8 animate-fade-in-up">
           <div className="gold-badge mb-3">
             <span className="h-1.5 w-1.5 rounded-full bg-[#f59e0b]" />
-            <span>Practice Test</span>
+            <span>{t('mockTestComp.badge')}</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2">
-            Try Our <span className="gradient-text">Mock Test</span>
+            {t('mockTestComp.title')} <span className="gradient-text">{t('mockTestComp.highlight')}</span>
           </h2>
         </div>
 
         {loading ? (
           <div className="premium-card p-6 text-center animate-scale-in">
-            <LoadingSpinner size="md" text="Savollar yuklanmoqda..." />
+            <LoadingSpinner size="md" text={t('mockTestComp.loading')} />
           </div>
         ) : loadError ? (
           <div className="mb-4 rounded-xl border border-amber-400/25 bg-amber-400/10 p-4 text-sm text-amber-100">
-            Firebase questions could not be loaded. Showing local sample questions.
+            {t('mockTestComp.loadError')}
           </div>
         ) : null}
 
@@ -95,18 +97,18 @@ export default function MockTests() {
             <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-[#0ea5e9] to-[#8b5cf6]">
               <Trophy className="h-10 w-10 text-white" />
             </div>
-            <h3 className="text-3xl font-bold text-white mb-2">{score}/{total} Correct</h3>
-            <p className="text-gray-400 mb-4">Estimated Band Score</p>
+            <h3 className="text-3xl font-bold text-white mb-2">{score}/{total} {t('mockTestComp.correct')}</h3>
+            <p className="text-gray-400 mb-4">{t('mockTestComp.bandScore')}</p>
             <div className="gradient-text mb-8 text-4xl font-bold">{band}</div>
             <button onClick={handleReset} className="btn-primary">
-              Try Again
+              {t('mockTestComp.tryAgain')}
             </button>
           </div>
         ) : question ? (
           <div className="premium-card p-6 animate-scale-in">
             <div className="mb-6">
               <div className="flex justify-between items-center mb-4">
-                <span className="text-sm font-semibold text-[#0ea5e9]">Question {current + 1} of {total}</span>
+                <span className="text-sm font-semibold text-[#0ea5e9]">{t('mockTestComp.badge')} {current + 1} / {total}</span>
                 <div className="w-full ml-4 h-2 bg-gray-700 rounded-full overflow-hidden">
                   <div className="h-full bg-gradient-to-r from-[#0ea5e9] via-[#8b5cf6] to-[#f43f5e] transition-all duration-300" style={{ width: `${((current + 1) / total) * 100}%` }} />
                 </div>
@@ -149,7 +151,7 @@ export default function MockTests() {
                   onClick={() => setCurrent((c) => c - 1)}
                   className="px-4 py-2 text-gray-300 hover:text-white transition-colors"
                 >
-                  ← Previous
+                  {t('mockTestComp.prev')}
                 </button>
               ) : <div />}
 
@@ -159,7 +161,7 @@ export default function MockTests() {
                   disabled={selected[current] === undefined}
                   className="btn-primary disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Next <ChevronRight className="w-4 h-4" />
+                  {t('mockTestComp.next')} <ChevronRight className="w-4 h-4" />
                 </button>
               ) : (
                 <button
@@ -167,14 +169,14 @@ export default function MockTests() {
                   disabled={selected[current] === undefined}
                   className="btn-primary disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Submit Quiz
+                  {t('mockTestComp.submit')}
                 </button>
               )}
             </div>
           </div>
         ) : (
           <div className="premium-card p-6 text-center text-gray-300 animate-scale-in">
-            No questions found.
+            {t('mockTestComp.noQuestions')}
           </div>
         )}
       </div>

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { isSuperAdmin } from '../utils/roles'
+import { useTranslation } from 'react-i18next'
 import {
   Moon, Sun, LogOut, User, Settings,
   ShieldCheck as Shield, Bell, LayoutDashboard,
@@ -34,18 +35,15 @@ function compressImage(file) {
   })
 }
 
-const tabs = [
-  { id: 'account',       label: 'Account Settings', icon: User },
-  { id: 'security',      label: 'Login & Security',  icon: Shield },
-  { id: 'notifications', label: 'Notifications',     icon: Bell },
-  { id: 'interface',     label: 'Interface',          icon: Settings },
-]
+const TAB_IDS = ['account', 'security', 'notifications', 'interface']
+const TAB_ICONS = { account: User, security: Shield, notifications: Bell, interface: Settings }
 
 const MAX_IMAGE_MB = 5
 const USERNAME_RE  = /^[a-zA-Z0-9_]{3,20}$/
 const PHONE_RE     = /^[+\d\s\-(]{7,20}$/
 
 export default function Profile() {
+  const { t } = useTranslation()
   const { currentUser, user, logout, updateUserProfile } = useAuth()
   const navigate = useNavigate()
 
@@ -131,11 +129,11 @@ export default function Profile() {
   // ── Validation ─────────────────────────────────────────────
   const validate = () => {
     const e = {}
-    if (!form.fullName.trim())                    e.fullName = 'Ism bo\'sh bo\'lishi mumkin emas'
+    if (!form.fullName.trim())                    e.fullName = t('profile.validation.nameEmpty')
     if (form.username && !USERNAME_RE.test(form.username))
-      e.username = 'Username: 3-20 ta harf, raqam yoki _'
+      e.username = t('profile.validation.usernameBad')
     if (form.phone && !PHONE_RE.test(form.phone.replace(/\s/g, '')))
-      e.phone = 'Telefon raqami noto\'g\'ri formatda'
+      e.phone = t('profile.validation.phoneBad')
     return e
   }
 
@@ -167,9 +165,9 @@ export default function Profile() {
       }, { merge: true })
 
       setAvatar(base64)
-      toastSuccess('Profil rasmi yangilandi')
+      toastSuccess(t('profile.toasts.photoUpdated'))
     } catch {
-      toastError('Rasmni saqlashda xatolik yuz berdi')
+      toastError(t('profile.toasts.photoError'))
     } finally {
       setUploading(false)
       if (fileRef.current) fileRef.current.value = ''
@@ -195,9 +193,9 @@ export default function Profile() {
       }
 
       setAvatar(null)
-      toastSuccess("Profil rasmi o'chirildi")
+      toastSuccess(t('profile.toasts.photoDeleted'))
     } catch {
-      toastError("Rasmni o'chirishda xatolik yuz berdi")
+      toastError(t('profile.toasts.photoDeleteError'))
     } finally {
       setRemoving(false)
     }
@@ -225,10 +223,10 @@ export default function Profile() {
       })
       // Sync local form to show the saved value
       setForm(f => ({ ...f, fullName: displayName }))
-      toastSuccess('Profil muvaffaqiyatli yangilandi')
+      toastSuccess(t('profile.toasts.profileSaved'))
       setErrors({})
     } catch {
-      toastError('Profilni yangilashda xatolik yuz berdi')
+      toastError(t('profile.toasts.profileError'))
     } finally {
       setSaving(false)
     }
@@ -238,17 +236,17 @@ export default function Profile() {
   const handleLogout = async () => {
     try {
       await logout()
-      toastSuccess('Tizimdan muvaffaqiyatli chiqdingiz.')
+      toastSuccess(t('profile.toasts.logoutSuccess'))
       navigate('/')
     } catch {
-      toastError('Chiqishda xatolik yuz berdi')
+      toastError(t('profile.toasts.logoutError'))
     }
   }
 
   if (!currentUser) {
     return (
       <div className="min-h-screen bg-[#0a0a1a] flex items-center justify-center">
-        <LoadingSpinner size="md" text="Yuklanmoqda..." />
+        <LoadingSpinner size="md" text={t('profile.loading')} />
       </div>
     )
   }
@@ -296,7 +294,7 @@ export default function Profile() {
                   {user?.role || 'user'}
                 </span>
                 <span className="px-2.5 py-0.5 rounded-full bg-green-500/15 text-green-400 text-xs font-medium border border-green-500/25">
-                  Active
+                  {t('profile.active')}
                 </span>
               </div>
             </div>
@@ -308,7 +306,7 @@ export default function Profile() {
                   className="h-10 px-4 rounded-xl border border-blue-500/20 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition flex items-center gap-2 text-sm font-medium"
                 >
                   <LayoutDashboard className="w-4 h-4" />
-                  <span className="hidden sm:inline">Admin Panel</span>
+                  <span className="hidden sm:inline">{t('profile.adminPanel')}</span>
                 </button>
               )}
               <button
@@ -322,7 +320,7 @@ export default function Profile() {
                 className="h-10 px-4 rounded-xl border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20 transition flex items-center gap-2 text-sm font-medium"
               >
                 <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline">Logout</span>
+                <span className="hidden sm:inline">{t('profile.logout')}</span>
               </button>
             </div>
           </div>
@@ -330,20 +328,23 @@ export default function Profile() {
 
         {/* Tabs */}
         <div className="flex items-center gap-1 border-b border-white/10 mb-8 overflow-x-auto scrollbar-none">
-          {tabs.map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => setActiveTab(id)}
-              className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium whitespace-nowrap rounded-t-lg transition-all ${
-                activeTab === id
-                  ? 'border border-b-0 border-blue-500/50 text-white bg-blue-500/10 -mb-px'
-                  : 'text-gray-500 hover:text-gray-300'
-              }`}
-            >
-              <Icon className="w-4 h-4" />
-              {label}
-            </button>
-          ))}
+          {TAB_IDS.map((id) => {
+            const Icon = TAB_ICONS[id]
+            return (
+              <button
+                key={id}
+                onClick={() => setActiveTab(id)}
+                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium whitespace-nowrap rounded-t-lg transition-all ${
+                  activeTab === id
+                    ? 'border border-b-0 border-blue-500/50 text-white bg-blue-500/10 -mb-px'
+                    : 'text-gray-500 hover:text-gray-300'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {t('profile.tabs.' + id)}
+              </button>
+            )
+          })}
         </div>
 
         {/* ── Account Settings ──────────────────────────── */}
@@ -352,7 +353,7 @@ export default function Profile() {
 
             {/* Profile Picture */}
             <GlassCard>
-              <p className="text-gray-400 text-xs mb-3">Profile Picture</p>
+              <p className="text-gray-400 text-xs mb-3">{t('profile.profilePicture')}</p>
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white/10 bg-white/5 flex items-center justify-center shrink-0 relative">
                   {avatar
@@ -379,7 +380,7 @@ export default function Profile() {
                     className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition"
                   >
                     {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
-                    {uploading ? 'Yuklanmoqda...' : 'Rasm yuklash'}
+                    {uploading ? t('profile.uploading') : t('profile.uploadPhoto')}
                   </button>
                   {avatar && (
                     <button
@@ -388,7 +389,7 @@ export default function Profile() {
                       className="flex items-center gap-2 px-4 py-2 rounded-lg border border-red-500/25 bg-red-500/10 hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-red-400 text-sm font-medium transition"
                     >
                       {removing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-                      {removing ? 'O\'chirilmoqda...' : 'O\'chirish'}
+                      {removing ? t('profile.deleting') : t('profile.deletePhoto')}
                     </button>
                   )}
                 </div>
@@ -398,36 +399,36 @@ export default function Profile() {
             {/* Full Name + Email */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field
-                label="To'liq ism *"
+                label={t('profile.fullName')}
                 value={form.fullName}
                 onChange={set('fullName')}
-                placeholder="Ismingizni kiriting"
+                placeholder={t('profile.fullNamePlaceholder')}
                 error={errors.fullName}
               />
               <Field
-                label="Email manzil"
+                label={t('profile.email')}
                 value={form.email}
                 placeholder="Email"
                 type="email"
                 disabled
-                hint="Email o'zgartirib bo'lmaydi"
+                hint={t('profile.emailNote')}
               />
             </div>
 
             {/* Username + Phone */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field
-                label="Username"
+                label={t('profile.username')}
                 value={form.username}
                 onChange={set('username')}
-                placeholder="username (3-20 ta belgi)"
+                placeholder={t('profile.usernamePlaceholder')}
                 error={errors.username}
               />
               <Field
-                label="Telefon raqami"
+                label={t('profile.phone')}
                 value={form.phone}
                 onChange={set('phone')}
-                placeholder="+998 90 000 00 00"
+                placeholder={t('profile.phonePlaceholder')}
                 type="tel"
                 error={errors.phone}
               />
@@ -435,13 +436,13 @@ export default function Profile() {
 
             {/* Bio */}
             <div>
-              <label className="block text-gray-400 text-xs mb-1.5">Bio</label>
+              <label className="block text-gray-400 text-xs mb-1.5">{t('profile.bio')}</label>
               <textarea
                 value={form.bio}
                 onChange={set('bio')}
                 rows={4}
                 maxLength={300}
-                placeholder="O'zingiz haqida yozing..."
+                placeholder={t('profile.bioPlaceholder')}
                 className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 outline-none focus:border-blue-500/50 transition-all text-sm resize-none"
               />
               <p className="text-gray-600 text-xs mt-1 text-right">{form.bio.length}/300</p>
@@ -455,10 +456,10 @@ export default function Profile() {
                 className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium text-sm transition"
               >
                 {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-                {saving ? 'Saqlanmoqda...' : 'Profilni saqlash'}
+                {saving ? t('profile.saving') : t('profile.save')}
               </button>
               {!profileLoaded && (
-                <span className="text-gray-500 text-xs">Ma'lumotlar yuklanmoqda...</span>
+                <span className="text-gray-500 text-xs">{t('profile.dataLoading')}</span>
               )}
             </div>
           </div>
@@ -470,8 +471,8 @@ export default function Profile() {
             <GlassCard>
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-white font-medium mb-1">Dark Mode</h3>
-                  <p className="text-gray-400 text-sm">Mavzuni almashtirish</p>
+                  <h3 className="text-white font-medium mb-1">{t('profile.darkMode')}</h3>
+                  <p className="text-gray-400 text-sm">{t('profile.toggleTheme')}</p>
                 </div>
                 <button
                   onClick={toggleTheme}
@@ -484,8 +485,8 @@ export default function Profile() {
             <GlassCard>
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-white font-medium mb-1">Joriy mavzu</h3>
-                  <p className="text-gray-400 text-sm capitalize">{theme === 'dark' ? 'Qorong\'i' : 'Yorug\''} rejim faol</p>
+                  <h3 className="text-white font-medium mb-1">{t('profile.currentTheme')}</h3>
+                  <p className="text-gray-400 text-sm capitalize">{theme === 'dark' ? t('profile.dark') : t('profile.light')} {t('profile.activeMode')}</p>
                 </div>
                 <span className="px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-medium border border-blue-500/20 capitalize">
                   {theme}
@@ -505,7 +506,7 @@ export default function Profile() {
               }
             </div>
             <p className="text-gray-500 text-sm">
-              {tabs.find(t => t.id === activeTab)?.label} — tez orada
+              {t('profile.tabs.' + activeTab)} — {t('profile.comingSoon')}
             </p>
           </div>
         )}
@@ -518,9 +519,9 @@ export default function Profile() {
         onClose={() => setShowLogoutModal(false)}
         onConfirm={handleLogout}
         variant="default"
-        title="Tizimdan chiqish"
-        message="Hisobingizdan chiqmoqchimisiz?"
-        confirmLabel="Chiqish"
+        title={t('profile.logoutModal.title')}
+        message={t('profile.logoutModal.message')}
+        confirmLabel={t('profile.logoutModal.confirm')}
       />
     </div>
   )

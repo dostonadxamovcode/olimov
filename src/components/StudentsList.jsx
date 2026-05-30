@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { Search, Mail, Calendar, User, Clock } from '../lib/icons'
+import { useTranslation } from 'react-i18next'
 import { toastError } from '../utils/errorHandler'
 import { LoadingSpinner } from './ui/SkeletonLoader'
 import { getStudents } from '../services/students'
 
 export default function StudentsList() {
+  const { t } = useTranslation()
   const [students, setStudents] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
@@ -19,7 +21,7 @@ export default function StudentsList() {
       const studentsData = await getStudents()
       setStudents(studentsData)
     } catch (error) {
-      toastError("Talabalar ro'yxatini yuklashda xatolik yuz berdi.")
+      toastError(error.message)
     } finally {
       setLoading(false)
     }
@@ -38,37 +40,32 @@ export default function StudentsList() {
     if (!timestamp) return 'N/A'
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp)
     return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+      month: 'short', day: 'numeric', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
     })
   }
 
   const getLastLogin = (student) => {
     if (student.lastLogin) return formatDate(student.lastLogin)
     if (student.createdAt) return formatDate(student.createdAt)
-    return 'Unknown'
+    return 'N/A'
   }
 
   return (
     <div className="pb-20">
-      {/* Header */}
       <div className="flex items-start justify-between mb-6 gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">Students</h1>
-          <p className="text-sm text-slate-500 mt-1">View all registered students</p>
+          <h1 className="text-2xl font-bold text-slate-100">{t('studentsList.title')}</h1>
+          <p className="text-sm text-slate-500 mt-1">{t('studentsList.subtitle')}</p>
         </div>
       </div>
 
-      {/* Search */}
       <div className="mb-6 max-w-sm">
         <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/8">
           <Search className="w-[14px] h-[14px] text-slate-500 shrink-0" />
           <input
             type="text"
-            placeholder="Search students by name or email..."
+            placeholder={t('studentsList.search')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="bg-transparent outline-none text-slate-200 text-sm flex-1 placeholder-slate-600 min-w-0"
@@ -76,27 +73,24 @@ export default function StudentsList() {
         </div>
       </div>
 
-      {/* Loading */}
       {loading && (
         <div className="flex justify-center items-center min-h-[400px]">
-          <LoadingSpinner size="lg" text="Yuklanmoqda..." />
+          <LoadingSpinner size="lg" text={t('studentsList.loading')} />
         </div>
       )}
 
-      {/* Empty */}
       {!loading && filteredStudents.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 rounded-2xl border border-dashed border-white/10 bg-white/[0.02]">
           <User className="w-10 h-10 text-slate-600 mb-4" />
           <h3 className="text-base font-semibold text-slate-300 mb-1.5">
-            {searchQuery ? 'No students found' : 'No students registered'}
+            {searchQuery ? t('studentsList.noFound') : t('studentsList.noFound')}
           </h3>
           <p className="text-sm text-slate-500">
-            {searchQuery ? 'Try adjusting your search criteria' : 'Students will appear here when they register'}
+            {searchQuery ? t('studentsList.noMatch') : t('studentsList.noRegistered')}
           </p>
         </div>
       )}
 
-      {/* Grid */}
       {!loading && filteredStudents.length > 0 && (
         <div className="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(360px,1fr))]">
           {filteredStudents.map((student, index) => (
@@ -104,7 +98,6 @@ export default function StudentsList() {
               key={student.id || index}
               className="rounded-2xl bg-white/[0.04] border border-white/8 p-5 hover:border-white/12 transition-colors animate-fadeInUp"
             >
-              {/* Header */}
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center font-bold text-lg text-white border-2 border-blue-500/25 overflow-hidden shrink-0">
                   {student.photoURL ? (
@@ -117,31 +110,29 @@ export default function StudentsList() {
                   <h3 className="text-sm font-semibold text-slate-100 truncate">
                     {student.name || student.displayName || 'Unknown User'}
                   </h3>
-                  <p className="text-xs text-slate-500 truncate">{student.email || 'No email'}</p>
+                  <p className="text-xs text-slate-500 truncate">{student.email || t('studentsList.noEmail')}</p>
                 </div>
               </div>
 
-              {/* Info */}
               <div className="space-y-1.5 mb-4">
                 <div className="flex items-center gap-2 text-xs text-slate-500">
                   <Mail className="w-3 h-3 shrink-0" />
-                  <span className="truncate">{student.email || 'No email provided'}</span>
+                  <span className="truncate">{student.email || t('studentsList.noEmail')}</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-slate-500">
                   <Calendar className="w-3 h-3 shrink-0" />
-                  <span>Joined: {formatDate(student.createdAt)}</span>
+                  <span>{formatDate(student.createdAt)}</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-slate-500">
                   <Clock className="w-3 h-3 shrink-0" />
-                  <span>Last login: {getLastLogin(student)}</span>
+                  <span>{getLastLogin(student)}</span>
                 </div>
               </div>
 
-              {/* Badges */}
               <div className="flex flex-wrap gap-1.5">
                 {student.emailVerified && (
                   <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-green-500/15 text-green-400 border border-green-500/20">
-                    Verified
+                    {t('studentsList.verified')}
                   </span>
                 )}
                 {student.level && (
@@ -160,19 +151,18 @@ export default function StudentsList() {
         </div>
       )}
 
-      {/* Stats bar */}
       {!loading && students.length > 0 && (
         <div className="fixed bottom-0 left-0 md:left-[220px] right-0 h-14 flex items-center gap-3 px-6 bg-[#0d1b2a]/95 backdrop-blur-md border-t border-white/8 z-[100]">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/8 text-xs">
-            <span className="text-slate-500 font-medium">Total</span>
+            <span className="text-slate-500 font-medium">{t('adminTests.total')}</span>
             <span className="text-slate-100 font-semibold">{students.length}</span>
           </div>
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/8 text-xs">
-            <span className="text-slate-500 font-medium">Showing</span>
+            <span className="text-slate-500 font-medium">{t('adminTests.showing')}</span>
             <span className="text-slate-100 font-semibold">{filteredStudents.length}</span>
           </div>
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-500/10 border border-green-500/20 text-xs">
-            <span className="text-slate-500 font-medium">Verified</span>
+            <span className="text-slate-500 font-medium">{t('studentsList.verified')}</span>
             <span className="text-green-400 font-semibold">{students.filter(s => s.emailVerified).length}</span>
           </div>
         </div>

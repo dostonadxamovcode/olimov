@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, memo, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { ChevronDown, Check } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Drop-in replacement for native <select>.
@@ -19,10 +20,12 @@ const CustomSelect = memo(function CustomSelect({
   value,
   onValueChange,
   options = [],
-  placeholder = 'Select...',
+  placeholder,
   className = '',
   hasError = false,
 }) {
+  const { t } = useTranslation()
+  const resolvedPlaceholder = placeholder ?? t('common.select')
   const [isOpen, setIsOpen] = useState(false)
   const [panelStyle, setPanelStyle] = useState({})
 
@@ -132,7 +135,7 @@ const CustomSelect = memo(function CustomSelect({
         ].join(' ')}
       >
         <span className={`block truncate whitespace-nowrap ${selected ? 'text-white font-medium' : 'text-slate-500'}`}>
-          {selected ? selected.label : placeholder}
+          {selected ? selected.label : resolvedPlaceholder}
         </span>
         <ChevronDown
           className={`w-4 h-4 shrink-0 transition-transform duration-200 ${

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 import {
   Plus,
@@ -51,6 +52,7 @@ const levelKeyOf = (col) =>
   col.endsWith('Tests') ? col.replace('Tests', '').toLowerCase() : col.toLowerCase()
 
 export default function AdminTestsContent() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [tests, setTests] = useState([])
   const [loading, setLoading] = useState(true)
@@ -88,7 +90,7 @@ export default function AdminTestsContent() {
 
       setTests(allTests)
     } catch (error) {
-      toastError("Testlarni yuklashda xatolik yuz berdi.")
+      toastError(t('adminTests.loading'))
     } finally {
       setLoading(false)
     }
@@ -105,11 +107,11 @@ export default function AdminTestsContent() {
 
       await deleteDoc(doc(firestoreDb, test.collectionName, test.id))
 
-      toastSuccess("Test muvaffaqiyatli o'chirildi.")
+      toastSuccess(t('adminTests.deleteModal.title'))
       setPendingDelete(null)
       await fetchAllTests()
     } catch (error) {
-      toastError("O'chirishda xatolik yuz berdi.")
+      toastError(t('adminTests.deleteModal.title'))
     } finally {
       setDeletingId(null)
     }
@@ -143,8 +145,8 @@ export default function AdminTestsContent() {
       {/* Page Title */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24 }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: '#f1f5f9' }}>Tests Management</h1>
-          <p style={{ margin: '4px 0 0', fontSize: 13, color: '#64748b' }}>Manage all level tests</p>
+          <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: '#f1f5f9' }}>{t('adminTests.title')}</h1>
+          <p style={{ margin: '4px 0 0', fontSize: 13, color: '#64748b' }}>{t('adminTests.subtitle')}</p>
         </div>
         <button
           onClick={() => navigate('/admin/add-test')}
@@ -158,7 +160,7 @@ export default function AdminTestsContent() {
           }}
         >
           <Plus size={16} />
-          Add New Test
+          {t('adminTests.addNew')}
         </button>
       </div>
       
@@ -178,7 +180,7 @@ export default function AdminTestsContent() {
           <Search size={15} color="#475569" />
           <input
             type="text"
-            placeholder="Search tests..."
+            placeholder={t('adminTests.search')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
@@ -203,7 +205,7 @@ export default function AdminTestsContent() {
           display: 'flex', justifyContent: 'center', alignItems: 'center',
           minHeight: 400, 
         }}>
-          <LoadingSpinner size="lg" text="Testlar yuklanmoqda..." />
+          <LoadingSpinner size="lg" text={t('adminTests.loading')} />
         </div>
       )}
 
@@ -217,12 +219,12 @@ export default function AdminTestsContent() {
         }}>
           <FileText size={48} color="#475569" style={{ marginBottom: 16 }} />
           <h3 style={{ margin: '0 0 8px', fontSize: 18, color: '#f1f5f9' }}>
-            No tests available
+            {t('adminTests.noTests')}
           </h3>
           <p style={{ margin: 0, fontSize: 14, color: '#64748b', marginBottom: 24 }}>
-            {searchQuery || levelFilter !== 'all' 
-              ? 'No tests match your search criteria' 
-              : 'Get started by creating your first test'}
+            {searchQuery || levelFilter !== 'all'
+              ? t('adminTests.noMatch')
+              : t('adminTests.noTestsDesc')}
           </p>
           {!searchQuery && levelFilter === 'all' && (
             <button
@@ -236,7 +238,7 @@ export default function AdminTestsContent() {
               }}
             >
               <Plus size={16} />
-              Create Your First Test
+              {t('adminTests.createFirst')}
             </button>
           )}
         </div>
@@ -300,7 +302,7 @@ export default function AdminTestsContent() {
                       color:                         test.isPublished ? '#22c55e'              : '#fbbf24',
                       border:                        test.isPublished ? '1px solid rgba(34,197,94,0.3)' : '1px solid rgba(251,191,36,0.3)',
                     }}>
-                      {test.isPublished ? 'Published' : 'Draft'}
+                      {test.isPublished ? t('adminTests.published') : t('adminTests.draft')}
                     </span>
                   )}
                 </div>
@@ -408,7 +410,7 @@ export default function AdminTestsContent() {
               borderRadius: 8,
               border: '1px solid rgba(255,255,255,0.1)',
             }}>
-              <span style={{ color: '#64748b', fontWeight: 500 }}>Total</span>
+              <span style={{ color: '#64748b', fontWeight: 500 }}>{t('adminTests.total')}</span>
               <span style={{ color: '#f1f5f9', fontWeight: 600 }}>{tests.length}</span>
             </div>
             <div style={{ 
@@ -420,7 +422,7 @@ export default function AdminTestsContent() {
               borderRadius: 8,
               border: '1px solid rgba(255,255,255,0.1)',
             }}>
-              <span style={{ color: '#64748b', fontWeight: 500 }}>Showing</span>
+              <span style={{ color: '#64748b', fontWeight: 500 }}>{t('adminTests.showing')}</span>
               <span style={{ color: '#f1f5f9', fontWeight: 600 }}>{filteredTests.length}</span>
             </div>
           </div>
@@ -433,9 +435,9 @@ export default function AdminTestsContent() {
         onConfirm={handleDeleteConfirm}
         loading={!!deletingId}
         variant="danger"
-        title="Testni o'chirish"
-        message={`"${pendingDelete?.title || 'Bu test'}" ni rostan ham o'chirmoqchimisiz? Bu amalni qaytarib bo'lmaydi.`}
-        confirmLabel="O'chirish"
+        title={t('adminTests.deleteModal.title')}
+        message={t('adminTests.deleteModal.message')}
+        confirmLabel={t('confirmModal.cancel') === 'Cancel' ? 'Delete' : t('adminTests.deleteModal.title')}
       />
     </div>
   )

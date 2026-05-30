@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, memo } from 'react'
 import { Trophy, Search, ArrowLeft, User, Headphones, BookOpen, PenTool, MessageCircle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore'
 import { db } from '../firebase'
 import { LoadingSpinner } from '../components/ui/SkeletonLoader'
@@ -106,6 +107,7 @@ const StudentCard = memo(function StudentCard({ student, getScoreColor, getLevel
 })
 
 export default function ResultsPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [students, setStudents] = useState([])
   const [loading, setLoading] = useState(true)
@@ -150,7 +152,7 @@ export default function ResultsPage() {
       },
       (err) => {
         console.error('Error fetching students:', err)
-        setError('Failed to load results. Please try again.')
+        setError(t('results.loadError'))
         setLoading(false)
       }
     )
@@ -208,7 +210,7 @@ export default function ResultsPage() {
             onClick={() => navigate('/')}
             className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-4"
           >
-            <ArrowLeft className="w-4 h-4" /> Back to Home
+            <ArrowLeft className="w-4 h-4" /> {t('results.backHome')}
           </button>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
@@ -221,7 +223,7 @@ export default function ResultsPage() {
               <div className={`px-4 py-2 rounded-xl ${getScoreBg(averageScore)} border`}>
                 <div className="flex items-center gap-2">
                   <Trophy className="w-5 h-5 text-amber-400" />
-                  <span className="text-white font-semibold">Avg: {averageScore}%</span>
+                  <span className="text-white font-semibold">{t('results.avg')}: {averageScore}%</span>
                 </div>
               </div>
             </div>
@@ -238,14 +240,14 @@ export default function ResultsPage() {
               <User className="w-5 h-5 text-blue-400" />
               <span className="text-2xl font-bold text-white">{students.length}</span>
             </div>
-            <p className="text-gray-400 text-sm">Total Students</p>
+            <p className="text-gray-400 text-sm">{t('results.totalStudents')}</p>
           </div>
           <div className="premium-card p-5">
             <div className="flex items-center justify-between mb-2">
               <Trophy className="w-5 h-5 text-amber-400" />
               <span className={`text-2xl font-bold ${getScoreColor(averageScore)}`}>{averageScore}%</span>
             </div>
-            <p className="text-gray-400 text-sm">Average Score</p>
+            <p className="text-gray-400 text-sm">{t('results.averageScore')}</p>
           </div>
           <div className="premium-card p-5">
             <div className="flex items-center justify-between mb-2">
@@ -254,7 +256,7 @@ export default function ResultsPage() {
                 {students.filter(s => (s.listening + s.reading + s.speaking + s.writing) / 4 >= 70).length}
               </span>
             </div>
-            <p className="text-gray-400 text-sm">Passed (70%+)</p>
+            <p className="text-gray-400 text-sm">{t('results.passed')}</p>
           </div>
           <div className="premium-card p-5">
             <div className="flex items-center justify-between mb-2">
@@ -263,7 +265,7 @@ export default function ResultsPage() {
                 {students.length > 0 ? Math.round(students.reduce((sum, s) => sum + s.overallScore !== 'N/A' ? 1 : 0, 0) / students.length * 100) : 0}%
               </span>
             </div>
-            <p className="text-gray-400 text-sm">With CEFR Level</p>
+            <p className="text-gray-400 text-sm">{t('results.withLevel')}</p>
           </div>
         </div>
 
@@ -276,7 +278,7 @@ export default function ResultsPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
             <input
               type="text"
-              placeholder="Search students..."
+              placeholder={t('results.search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all"
@@ -287,7 +289,7 @@ export default function ResultsPage() {
         {/* Loading State */}
         {loading && (
           <div className="flex justify-center items-center py-20 animate-fadeIn">
-            <LoadingSpinner size="lg" text="Yuklanmoqda..." />
+            <LoadingSpinner size="lg" text={t('results.loading')} />
           </div>
         )}
 
@@ -304,9 +306,9 @@ export default function ResultsPage() {
         {!loading && !error && filteredStudents.length === 0 && (
           <div className="text-center py-20 animate-fadeIn">
             <User className="w-16 h-16 mx-auto mb-4 text-gray-600" />
-            <h3 className="text-xl font-semibold text-white mb-2">No Students Found</h3>
+            <h3 className="text-xl font-semibold text-white mb-2">{t('results.noFound')}</h3>
             <p className="text-gray-400">
-              {searchQuery ? 'No students match your search' : 'No student data available in Firestore'}
+              {searchQuery ? t('results.noMatch') : t('results.noData')}
             </p>
           </div>
         )}
@@ -322,8 +324,8 @@ export default function ResultsPage() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-white/10">
-                      <th className="text-left px-6 py-4 text-sm font-semibold text-gray-400">Student</th>
-                      <th className="text-left px-6 py-4 text-sm font-semibold text-gray-400">Level</th>
+                      <th className="text-left px-6 py-4 text-sm font-semibold text-gray-400">{t('results.tableHeaders.student')}</th>
+                      <th className="text-left px-6 py-4 text-sm font-semibold text-gray-400">{t('results.tableHeaders.level')}</th>
                       <th className="text-center px-6 py-4 text-sm font-semibold text-gray-400">
                         <Headphones className="w-4 h-4 mx-auto" />
                       </th>
@@ -336,7 +338,7 @@ export default function ResultsPage() {
                       <th className="text-center px-6 py-4 text-sm font-semibold text-gray-400">
                         <MessageCircle className="w-4 h-4 mx-auto" />
                       </th>
-                      <th className="text-center px-6 py-4 text-sm font-semibold text-gray-400">Average</th>
+                      <th className="text-center px-6 py-4 text-sm font-semibold text-gray-400">{t('results.tableHeaders.average')}</th>
                     </tr>
                   </thead>
                   <tbody>

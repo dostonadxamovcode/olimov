@@ -5,11 +5,11 @@ import { db } from '../firebase'
 import { saveResult } from '../services/firestore'
 import { getTestQuestions } from '../services/questionPoolService'
 import { useAuth } from '../context/AuthContext'
+import { useTranslation } from 'react-i18next'
 import { Clock, X, ChevronRight, ChevronLeft, AlertCircle, Check } from 'lucide-react'
 import { toastError, toastSuccess } from '../utils/errorHandler'
 import { LoadingSpinner } from '../components/ui/SkeletonLoader'
 
-// ── Timer ─────────────────────────────────────────────────────
 function useTimer(initial) {
   const [secs, setSecs] = useState(initial)
   useEffect(() => {
@@ -21,15 +21,14 @@ function useTimer(initial) {
   return { display: `${mm}:${ss}`, secs }
 }
 
-// ── Helpers ───────────────────────────────────────────────────
 const LETTERS = ['A', 'B', 'C', 'D']
 const LEVEL_COLLECTIONS = ['a1', 'a2', 'b1', 'b2', 'c1', 'c2']
 
-const TYPE_INSTRUCTION = {
-  multiple_choice: { icon: '☑️', text: 'To\'g\'ri variantni tanlang',                    cls: 'bg-orange-500/10 border-orange-500/25 text-orange-300' },
-  text_input:      { icon: '✏️', text: 'Javobni matn sifatida yozing',                   cls: 'bg-emerald-500/10 border-emerald-500/25 text-emerald-300' },
-  translation:     { icon: '🔤', text: 'Berilgan iborani o\'zbek/inglizcha tarjima qiling', cls: 'bg-blue-500/10 border-blue-500/25 text-blue-300' },
-  word_order:      { icon: '🔀', text: 'So\'zlarni to\'g\'ri tartibda joylashtiring',       cls: 'bg-violet-500/10 border-violet-500/25 text-violet-300' },
+const TYPE_CLASSES = {
+  multiple_choice: 'bg-orange-500/10 border-orange-500/25 text-orange-300',
+  text_input:      'bg-emerald-500/10 border-emerald-500/25 text-emerald-300',
+  translation:     'bg-blue-500/10 border-blue-500/25 text-blue-300',
+  word_order:      'bg-violet-500/10 border-violet-500/25 text-violet-300',
 }
 
 function norm(str) {
@@ -38,7 +37,6 @@ function norm(str) {
 
 export function calcIsCorrect(question, answer) {
   if (answer === undefined || answer === null) return false
-  // Old format (index-based MC)
   if (!question.type) return answer === question.correctAnswer
   if (question.type === 'multiple_choice') {
     if (typeof answer === 'number') {
@@ -51,12 +49,10 @@ export function calcIsCorrect(question, answer) {
     const sentence = answer.map(i => question.scrambled_words[i]).join(' ')
     return norm(sentence) === norm(question.correct_answer)
   }
-  // text_input, translation
   return norm(answer) === norm(question.correct_answer)
 }
 
-// ── Word Order sub-component ──────────────────────────────────
-function WordOrderInput({ question, answer, onChange }) {
+function WordOrderInput({ question, answer, onChange, t }) {
   const arranged  = answer || []
   const remaining = question.scrambled_words
     .map((_, i) => i)
@@ -72,13 +68,12 @@ function WordOrderInput({ question, answer, onChange }) {
 
   return (
     <div className="space-y-4">
-      {/* Answer slot */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Javobingiz</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{t('exam.yourAnswer')}</p>
           {arranged.length > 0 && (
             <button onClick={clear} className="text-xs text-slate-500 hover:text-red-400 transition-colors flex items-center gap-1">
-              <X className="w-3 h-3" /> Tozalash
+              <X className="w-3 h-3" /> {t('exam.clear')}
             </button>
           )}
         </div>
@@ -86,7 +81,7 @@ function WordOrderInput({ question, answer, onChange }) {
           arranged.length > 0 ? 'border-indigo-500/40 bg-indigo-500/5' : 'border-slate-600 bg-slate-700/30'
         }`}>
           {arranged.length === 0
-            ? <span className="text-slate-500 text-sm italic">So'zlarni quyidan tanlang...</span>
+            ? <span className="text-slate-500 text-sm italic">{t('exam.selectWords')}</span>
             : arranged.map((wordIdx, pos) => (
               <button
                 key={`${pos}-${wordIdx}`}
@@ -104,12 +99,11 @@ function WordOrderInput({ question, answer, onChange }) {
         )}
       </div>
 
-      {/* Word bank */}
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">So'z banki</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">{t('exam.wordBank')}</p>
         <div className="flex flex-wrap gap-2">
           {remaining.length === 0 && arranged.length > 0
-            ? <span className="text-slate-500 text-sm italic">Barcha so'zlar ishlatildi</span>
+            ? <span className="text-slate-500 text-sm italic">{t('exam.allWordsUsed')}</span>
             : remaining.map(idx => (
               <button
                 key={idx}
@@ -126,8 +120,8 @@ function WordOrderInput({ question, answer, onChange }) {
   )
 }
 
-// ── Main component ────────────────────────────────────────────
 export default function ExamPage() {
+  const { t, i18n } = useTranslation()
   const { testId }  = useParams()
   const navigate    = useNavigate()
   const location    = useLocation()
@@ -146,11 +140,10 @@ export default function ExamPage() {
 
   useEffect(() => {
     const fetchTest = async () => {
-      // Practice mode: questions passed directly via navigation state
       if (location.state?.questions?.length > 0) {
         setLevelId(location.state.levelId || 'a1')
         setTest({
-          title:     location.state.testTitle || 'Mashq',
+          title:     location.state.testTitle || t('exam.question'),
           questions: location.state.questions,
         })
         setLoading(false)
@@ -158,7 +151,7 @@ export default function ExamPage() {
       }
 
       if (!testId || testId === 'practice') {
-        setError('Test ID is required')
+        setError(t('exam.notFoundMsg'))
         setLoading(false)
         return
       }
@@ -175,8 +168,8 @@ export default function ExamPage() {
       }
 
       if (!detectedLevelId) {
-        setError("Test topilmadi. Darajalar sahifasiga qaytib urinib ko'ring.")
-        toastError("Test topilmadi.")
+        setError(t('exam.notFoundMsg'))
+        toastError(t('exam.notFound'))
         setLoading(false)
         return
       }
@@ -186,7 +179,7 @@ export default function ExamPage() {
       try {
         const snap = await getDoc(doc(db, `${detectedLevelId}Tests`, testId))
         if (!snap.exists()) {
-          setError("Test topilmadi.")
+          setError(t('exam.notFoundMsg'))
           setLoading(false)
           return
         }
@@ -194,7 +187,7 @@ export default function ExamPage() {
         const testData = { id: snap.id, ...snap.data() }
 
         if (!testData.questions?.length) {
-          setError("Bu testda haqiqiy savollar mavjud emas.")
+          setError(t('exam.noRealQuestions'))
           setLoading(false)
           return
         }
@@ -202,7 +195,7 @@ export default function ExamPage() {
         const questionResult = await getTestQuestions(testData, detectedLevelId)
         setTest({ ...testData, questions: questionResult.questions })
       } catch (err) {
-        setError("Testni yuklashda xatolik yuz berdi.")
+        setError(t('exam.loadError'))
         toastError(err)
       } finally {
         setLoading(false)
@@ -212,10 +205,8 @@ export default function ExamPage() {
     fetchTest()
   }, [testId, location.state])
 
-  // ── Answer handlers ───────────────────────────────────────
   const handleAnswer = (questionIndex, value) => {
     setSelected(prev => ({ ...prev, [questionIndex]: value }))
-    // Auto-advance only for old-format or MC
     const q = test?.questions?.[questionIndex]
     const isMC = !q?.type || q.type === 'multiple_choice'
     if (isMC && questionIndex < (test?.questions?.length ?? 0) - 1) {
@@ -235,7 +226,6 @@ export default function ExamPage() {
     if (current > 0) setCurrent(prev => prev - 1)
   }
 
-  // ── Submit ────────────────────────────────────────────────
   const handleFinalSubmit = async () => {
     if (submitting) return
     setSubmitting(true)
@@ -256,25 +246,16 @@ export default function ExamPage() {
         total:     questions.length,
         answers:   selected,
       })
-      toastSuccess("Test muvaffaqiyatli topshirildi.")
+      toastSuccess(t('exam.submitSuccess'))
     } catch {
-      toastError("Natijani saqlashda xatolik, lekin natijangiz ko'rsatilmoqda.")
+      toastError(t('exam.submitError'))
     }
 
     navigate('/test-result', {
-      state: {
-        score,
-        total:     questions.length,
-        questions,
-        answers:   selected,
-        testTitle: test.title,
-        level:     levelId,
-        testId,
-      },
+      state: { score, total: questions.length, questions, answers: selected, testTitle: test.title, level: levelId, testId },
     })
   }
 
-  // ── Loading / Error ───────────────────────────────────────
   if (loading) return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4">
       <LoadingSpinner />
@@ -287,16 +268,16 @@ export default function ExamPage() {
         <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
           <AlertCircle className="w-8 h-8 text-red-400" />
         </div>
-        <h2 className="text-xl font-bold text-white mb-2">Test topilmadi</h2>
+        <h2 className="text-xl font-bold text-white mb-2">{t('exam.notFound')}</h2>
         <p className="text-slate-400 mb-6">{error}</p>
         <div className="flex gap-3 justify-center">
           <button onClick={() => navigate('/level')}
             className="px-6 py-2.5 rounded-xl bg-indigo-500 text-white font-semibold hover:bg-indigo-600 transition-colors">
-            Back to Levels
+            {t('exam.backToLevels')}
           </button>
           <button onClick={() => navigate('/level')}
             className="px-6 py-2.5 rounded-xl border border-slate-600 text-slate-300 font-semibold hover:bg-slate-700 transition-colors">
-            All Levels
+            {t('exam.allLevels')}
           </button>
         </div>
       </div>
@@ -310,24 +291,32 @@ export default function ExamPage() {
   if (total === 0) return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4">
       <div className="text-center">
-        <p className="text-slate-400 mb-4">This test has no questions yet.</p>
+        <p className="text-slate-400 mb-4">{t('exam.noQuestions')}</p>
       </div>
     </div>
   )
 
+  const lang      = i18n.language?.slice(0, 2) || 'en'
   const progress  = ((current + 1) / total) * 100
   const isLow     = secs < 300
   const isNewFmt  = !!q?.type
   const curAnswer = selected[current]
   const isLast    = current === total - 1
 
-  // ── Render ────────────────────────────────────────────────
+  // Multilingual question text — prefer q.text_<lang> if exists
+  const qText = q[`text_${lang}`] || q.text || q.title || q.question
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col">
-
-      {/* Top bar */}
       <header className="sticky top-0 z-30 bg-slate-900/80 backdrop-blur-md border-b border-slate-700 shadow-sm">
-        <div className="max-w-3xl mx-auto px-4 h-14 flex items-center gap-4">
+        <div className="max-w-3xl mx-auto px-4 h-14 flex items-center gap-3">
+          <button
+            onClick={() => setShowExitConfirm(true)}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all duration-150 flex-shrink-0"
+            title={t('exam.exitModal.title')}
+          >
+            <X className="w-4 h-4" />
+          </button>
           <span className="text-xs font-bold text-slate-400 shrink-0 w-14 tabular-nums">
             {current + 1}<span className="font-normal text-slate-500">/{total}</span>
           </span>
@@ -343,13 +332,10 @@ export default function ExamPage() {
         </div>
       </header>
 
-      {/* Question */}
       <main className="flex-1 flex items-center justify-center px-4 py-10">
         <div className="w-full max-w-2xl">
           <div key={current} className="animate-fadeIn">
             <div className="bg-slate-800 rounded-3xl shadow-xl shadow-slate-900/50 p-6 sm:p-10 border border-slate-700">
-
-              {/* Category + type badges */}
               {isNewFmt && (
                 <div className="flex gap-2 flex-wrap mb-4">
                   {q.category && (
@@ -360,38 +346,31 @@ export default function ExamPage() {
                 </div>
               )}
 
-              {/* Question number + instruction */}
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
-                  {current + 1}-savol
+                  {t('exam.question')} {current + 1}
                 </p>
                 {isNewFmt && (
-                  <span className={`text-[11px] font-medium px-2.5 py-1 rounded-lg border ${TYPE_INSTRUCTION[q.type]?.cls}`}>
-                    {TYPE_INSTRUCTION[q.type]?.icon} {TYPE_INSTRUCTION[q.type]?.text}
+                  <span className={`text-[11px] font-medium px-2.5 py-1 rounded-lg border ${TYPE_CLASSES[q.type]}`}>
+                    {t('exam.typeInstruction.' + q.type)}
                   </span>
                 )}
               </div>
 
-              {/* Question text — skip for translation (renderer shows its own) */}
               {q.type !== 'translation' && (
                 <h2 className="text-xl sm:text-2xl font-bold text-white mb-8 leading-snug">
-                  {q.text || q.title || q.question}
+                  {qText}
                 </h2>
               )}
 
-              {/* ── OLD FORMAT: Multiple Choice (no type field) ── */}
               {!isNewFmt && (
                 <div className="space-y-3">
                   {q.options?.map((opt, idx) => {
                     const isSelected = curAnswer === idx
                     return (
-                      <button
-                        key={idx}
-                        onClick={() => handleAnswer(current, idx)}
+                      <button key={idx} onClick={() => handleAnswer(current, idx)}
                         className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-colors duration-150 ${
-                          isSelected
-                            ? 'border-indigo-500 bg-indigo-500/20 shadow-md shadow-indigo-500/20'
-                            : 'border-slate-600 bg-slate-700/50 hover:border-indigo-400 hover:bg-indigo-500/10'
+                          isSelected ? 'border-indigo-500 bg-indigo-500/20 shadow-md shadow-indigo-500/20' : 'border-slate-600 bg-slate-700/50 hover:border-indigo-400 hover:bg-indigo-500/10'
                         }`}
                       >
                         <span className={`flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold transition-colors ${
@@ -399,28 +378,21 @@ export default function ExamPage() {
                         }`}>
                           {isSelected ? <Check className="w-4 h-4" /> : LETTERS[idx]}
                         </span>
-                        <span className={`font-medium text-sm sm:text-base ${isSelected ? 'text-indigo-300' : 'text-slate-200'}`}>
-                          {opt}
-                        </span>
+                        <span className={`font-medium text-sm sm:text-base ${isSelected ? 'text-indigo-300' : 'text-slate-200'}`}>{opt}</span>
                       </button>
                     )
                   })}
                 </div>
               )}
 
-              {/* ── NEW FORMAT: Multiple Choice ── */}
               {q.type === 'multiple_choice' && (
                 <div className="space-y-3">
                   {q.options?.map((opt, idx) => {
                     const isSelected = curAnswer === idx
                     return (
-                      <button
-                        key={idx}
-                        onClick={() => handleAnswer(current, idx)}
+                      <button key={idx} onClick={() => handleAnswer(current, idx)}
                         className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-colors duration-150 ${
-                          isSelected
-                            ? 'border-indigo-500 bg-indigo-500/20 shadow-md shadow-indigo-500/20'
-                            : 'border-slate-600 bg-slate-700/50 hover:border-indigo-400 hover:bg-indigo-500/10'
+                          isSelected ? 'border-indigo-500 bg-indigo-500/20 shadow-md shadow-indigo-500/20' : 'border-slate-600 bg-slate-700/50 hover:border-indigo-400 hover:bg-indigo-500/10'
                         }`}
                       >
                         <span className={`flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold transition-colors ${
@@ -428,67 +400,55 @@ export default function ExamPage() {
                         }`}>
                           {isSelected ? <Check className="w-4 h-4" /> : LETTERS[idx]}
                         </span>
-                        <span className={`font-medium text-sm sm:text-base ${isSelected ? 'text-indigo-300' : 'text-slate-200'}`}>
-                          {opt}
-                        </span>
+                        <span className={`font-medium text-sm sm:text-base ${isSelected ? 'text-indigo-300' : 'text-slate-200'}`}>{opt}</span>
                       </button>
                     )
                   })}
                 </div>
               )}
 
-              {/* ── NEW FORMAT: Text Input ── */}
               {q.type === 'text_input' && (
                 <input
                   type="text"
                   value={curAnswer || ''}
                   onChange={e => handleAnswer(current, e.target.value)}
-                  placeholder="Javobingizni shu yerga yozing..."
-                  autoComplete="off"
-                  spellCheck="false"
+                  placeholder={t('exam.writePlaceholder')}
+                  autoComplete="off" spellCheck="false"
                   className="w-full px-5 py-4 rounded-2xl bg-slate-700/50 border-2 border-slate-600 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all text-base"
                 />
               )}
 
-              {/* ── NEW FORMAT: Translation ── */}
               {q.type === 'translation' && (
                 <div className="space-y-5">
                   <div className="px-5 py-4 rounded-2xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
                     <p className="text-[11px] font-bold uppercase tracking-widest text-blue-400 mb-2">
-                      Quyidagi iborani tarjima qiling
+                      {t('exam.translatePhrase')}
                     </p>
-                    <p className="text-white font-semibold text-lg leading-relaxed">{q.title}</p>
+                    <p className="text-white font-semibold text-lg leading-relaxed">{q[`title_${lang}`] || q.title}</p>
                   </div>
                   <input
                     type="text"
                     value={curAnswer || ''}
                     onChange={e => handleAnswer(current, e.target.value)}
-                    placeholder="Tarjimangizni shu yerga yozing..."
-                    autoComplete="off"
-                    spellCheck="false"
+                    placeholder={t('exam.translatePlaceholder')}
+                    autoComplete="off" spellCheck="false"
                     className="w-full px-5 py-4 rounded-2xl bg-slate-700/50 border-2 border-slate-600 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all text-base"
                   />
                 </div>
               )}
 
-              {/* ── NEW FORMAT: Word Order ── */}
               {q.type === 'word_order' && (
-                <WordOrderInput
-                  question={q}
-                  answer={curAnswer}
-                  onChange={val => handleAnswer(current, val)}
-                />
+                <WordOrderInput question={q} answer={curAnswer} onChange={val => handleAnswer(current, val)} t={t} />
               )}
             </div>
 
-            {/* Navigation */}
             <div className="flex items-center justify-between mt-6 px-1">
               <button
                 onClick={handlePrevious}
                 disabled={current === 0}
                 className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-semibold border border-slate-600 text-slate-300 hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                <ChevronLeft className="w-4 h-4" /> Oldingi
+                <ChevronLeft className="w-4 h-4" /> {t('exam.prev')}
               </button>
 
               <button
@@ -497,8 +457,8 @@ export default function ExamPage() {
                 className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-semibold bg-gradient-to-r from-indigo-500 to-cyan-500 text-white shadow-lg shadow-indigo-500/30 hover:opacity-90 transition-opacity disabled:opacity-70"
               >
                 {isLast
-                  ? (submitting ? 'Topshirilmoqda...' : 'Tugatish')
-                  : <> Keyingi <ChevronRight className="w-4 h-4" /></>
+                  ? (submitting ? t('exam.submitting') : t('exam.finish'))
+                  : <> {t('exam.next')} <ChevronRight className="w-4 h-4" /></>
                 }
               </button>
             </div>
@@ -506,23 +466,22 @@ export default function ExamPage() {
         </div>
       </main>
 
-      {/* Exit confirmation */}
       {showExitConfirm && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="max-w-sm w-full bg-slate-800 rounded-3xl p-8 border border-slate-700 shadow-2xl text-center">
             <div className="w-14 h-14 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
               <X className="w-7 h-7 text-red-400" />
             </div>
-            <h2 className="text-xl font-bold text-white mb-2">Testdan chiqasizmi?</h2>
-            <p className="text-slate-400 text-sm mb-6">Jarayoningiz saqlanmaydi. Darajalar sahifasiga qaytasiz.</p>
+            <h2 className="text-xl font-bold text-white mb-2">{t('exam.exitModal.title')}</h2>
+            <p className="text-slate-400 text-sm mb-6">{t('exam.exitModal.message')}</p>
             <div className="flex gap-3">
               <button onClick={() => setShowExitConfirm(false)}
                 className="flex-1 py-3 rounded-xl border border-slate-600 text-slate-300 font-semibold hover:bg-slate-700 transition-colors">
-                Davom etish
+                {t('exam.exitModal.continue')}
               </button>
               <button onClick={() => navigate('/level')}
                 className="flex-1 py-3 rounded-xl bg-red-500/20 border border-red-500/30 text-red-400 font-semibold hover:bg-red-500/30 transition-colors">
-                Chiqish
+                {t('exam.exitModal.exit')}
               </button>
             </div>
           </div>

@@ -1,21 +1,22 @@
 import { memo, useEffect, useState } from 'react';
 import { Play, ArrowRight, Trophy } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { stats } from '../data/siteData';
 
-// Defined outside component — never recreated on re-render
-const WORDS = ['mastery.', 'success.', 'precision.', 'fluency.'];
-
 const HeroStatCard = memo(function HeroStatCard({ stat, index }) {
+  const { t } = useTranslation();
   return (
     <div className="premium-card premium-card-hover min-w-0 p-2 text-center animate-fade-in-up sm:p-5 sm:text-left" style={{ animationDelay: `${index * 100}ms` }}>
       <div className={`truncate text-xl font-bold sm:text-3xl ${index === 0 ? 'text-[#0ea5e9]' : index === 1 ? 'text-[#8b5cf6]' : 'text-[#f43f5e]'}`}>{stat.value}</div>
-      <div className="truncate text-[10px] leading-4 text-gray-400 sm:text-sm">{stat.label}</div>
+      <div className="truncate text-[10px] leading-4 text-gray-400 sm:text-sm">{t('stats.' + stat.id)}</div>
     </div>
   )
 })
 
 export default function Hero() {
+  const { t } = useTranslation();
+  const words = t('hero.words', { returnObjects: true });
   const [wordIndex, setWordIndex] = useState(0);
 
   useEffect(() => {
@@ -24,10 +25,10 @@ export default function Hero() {
 
     const interval = setInterval(() => {
       if (document.hidden) return;
-      setWordIndex((prev) => (prev + 1) % WORDS.length);
+      setWordIndex((prev) => (prev + 1) % words.length);
     }, 3500);
     return () => clearInterval(interval);
-  }, []); // stable — WORDS is module-level constant
+  }, [words.length]);
 
   return (
     <section id="top" className="relative flex min-h-screen items-center justify-center overflow-hidden pt-24 sm:pt-28 animate-hero-fade">
@@ -56,12 +57,12 @@ export default function Hero() {
 
           {/* TITLE */}
           <h1 className="text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
-            Master CEFR{' '}
+            {t('hero.title')}{' '}
             <span className="inline-block">
-              with{' '}
+              {t('hero.with')}{' '}
               <span className="relative inline-block">
                 <span className="gradient-text">
-                  {WORDS[wordIndex]}
+                  {Array.isArray(words) ? words[wordIndex] : ''}
                 </span>
 
                 {/* Premium underline */}
@@ -83,39 +84,37 @@ export default function Hero() {
 
           {/* TEXT */}
           <p className="max-w-2xl text-base leading-7 text-gray-400">
-            Comprehensive CEFR preparation with mock tests, expert feedback,
-            vocabulary tools, and real-time progress tracking.
+            {t('hero.subtitle')}
           </p>
 
           {/* BUTTONS */}
           <div className="flex flex-col gap-3 sm:flex-row">
             <button className="btn-primary group px-6 py-3">
-              Start Free Today
+              {t('hero.startFree')}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
 
             <Link to="/result" className="btn-secondary px-6 py-3 flex items-center justify-center gap-2">
               <Trophy className="w-4 h-4" />
-              My Results
+              {t('hero.myResults')}
             </Link>
 
             <button className="btn-secondary px-6 py-3">
               <Play className="w-4 h-4" />
-              Watch Demo
+              {t('hero.watchDemo')}
             </button>
           </div>
 
           {/* STATS */}
           <div className="grid grid-cols-3 gap-2 pt-1 sm:gap-3 sm:pt-2">
             {stats.map((stat, i) => (
-              <HeroStatCard key={stat.label} stat={stat} index={i} />
+              <HeroStatCard key={stat.id} stat={stat} index={i} />
             ))}
           </div>
 
         </div>
 
         <div className="relative mx-auto w-full max-w-[400px] animate-fade-in-up" style={{ animationDelay: '300ms' }}>
-          {/* Reduced to 2 glow divs (was 3) */}
           <div className="absolute -left-4 top-10 h-24 w-24 rounded-full bg-[#0ea5e9]/30 blur-2xl animate-pulse-glow" />
           <div className="absolute -right-5 bottom-16 h-28 w-28 rounded-full bg-[#8b5cf6]/25 blur-2xl animate-pulse-glow" style={{ animationDelay: '0.5s' }} />
 

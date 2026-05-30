@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase'
 import { Plus, Save, ArrowLeft, AlertCircle, X, CheckCircle } from '../lib/icons'
@@ -37,6 +38,7 @@ const levelLabel = (col) => {
 }
 
 export default function EditTestPage() {
+  const { t } = useTranslation()
   const navigate  = useNavigate()
   const location  = useLocation()
   const { id: paramId } = useParams()
@@ -221,7 +223,7 @@ export default function EditTestPage() {
   if (loading) {
     return (
       <div className="min-h-screen site-bg flex items-center justify-center mt-[60px]">
-        <LoadingSpinner text="Yuklanmoqda..." />
+        <LoadingSpinner text={t('profile.loading')} />
       </div>
     )
   }

@@ -1,12 +1,15 @@
 import { memo, useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, LogOut, User, ChevronDown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { navLinks } from '../data/siteData';
 import { useAuth } from '../context/AuthContext';
 import { toastSuccess } from '../utils/errorHandler';
 import ConfirmModal from './ui/ConfirmModal';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const NavItem = memo(function NavItem({ link, className, onClick }) {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -27,7 +30,7 @@ const NavItem = memo(function NavItem({ link, className, onClick }) {
   if (link.href.includes('#')) {
     return (
       <Link to={link.href} onClick={handleHashLink} className={className}>
-        {link.label}
+        {t(link.label)}
       </Link>
     );
   }
@@ -40,12 +43,13 @@ const NavItem = memo(function NavItem({ link, className, onClick }) {
         `${className}${isActive ? ' text-white bg-white/10' : ''}`
       }
     >
-      {link.label}
+      {t(link.label)}
     </NavLink>
   );
 });
 
 export default function Header() {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -58,7 +62,7 @@ export default function Header() {
   const handleLogout = async () => {
     try {
       await logout();
-      toastSuccess("Tizimdan muvaffaqiyatli chiqdingiz.");
+      toastSuccess(t('header.logoutSuccess'));
       setIsOpen(false);
       setIsProfileOpen(false);
       setShowLogoutModal(false);
@@ -177,6 +181,7 @@ export default function Header() {
 
           {/* Desktop Auth */}
           <div className="hidden md:flex items-center gap-3 ml-auto flex-shrink-0 pr-1 sm:pr-2">
+            <LanguageSwitcher />
             {loading ? (
               // Auth loading skeleton - matches profile button width (~120px)
               <div className="h-10 w-[120px] rounded-xl bg-white/10 animate-pulse" />
@@ -219,7 +224,7 @@ export default function Header() {
                       <div className="w-8 h-8 rounded-lg bg-blue-500/12 border border-blue-500/20 flex items-center justify-center flex-shrink-0">
                         <User className="w-4 h-4 text-blue-400" />
                       </div>
-                      Profile
+                      {t('header.profile')}
                     </Link>
 
                     <div className="h-px bg-white/6 my-2" />
@@ -231,7 +236,7 @@ export default function Header() {
                       <div className="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center flex-shrink-0">
                         <LogOut className="w-4 h-4 text-red-400" />
                       </div>
-                      Logout
+                      {t('header.logout')}
                     </button>
                   </div>
                 </div>
@@ -243,13 +248,13 @@ export default function Header() {
                   to="/login"
                   className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-400 border border-white/12 bg-white/3 hover:text-white hover:border-white/22 hover:bg-white/7 transition-all duration-200 whitespace-nowrap flex-shrink-0"
                 >
-                  Login
+                  {t('header.login')}
                 </Link>
                 <Link
                   to="/register"
                   className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-br from-[#3b82f6] to-[#7c3aed] shadow-lg shadow-indigo-500/40 hover:shadow-xl hover:shadow-indigo-500/65 hover:-translate-y-px transition-all duration-200 whitespace-nowrap flex-shrink-0"
                 >
-                  Sign Up
+                  {t('header.signUp')}
                 </Link>
               </>
             )}
@@ -301,6 +306,10 @@ export default function Header() {
 
           <div className="border-t border-white/6 pt-4 sm:pt-5 mt-4 sm:mt-5 space-y-2">
 
+            <div className="px-1 pb-1">
+              <LanguageSwitcher className="w-full justify-center" />
+            </div>
+
             {loading ? (
               // Auth loading skeleton for mobile - matches profile menu items count (3-4 items)
               <div className="space-y-2">
@@ -334,14 +343,14 @@ export default function Header() {
                       : (currentUser?.email?.[0]?.toUpperCase() || <User className="w-3 h-3" />)
                     }
                   </div>
-                  Profile
+                  {t('header.profile')}
                 </Link>
                 <button
                   onClick={() => setShowLogoutModal(true)}
                   className="flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-sm font-medium text-red-400 hover:text-red-300 hover:bg-white/5 transition-all duration-200 w-full"
                 >
                   <LogOut className="w-4 h-4" />
-                  Logout
+                  {t('header.logout')}
                 </button>
               </>
             ) : (
@@ -351,14 +360,14 @@ export default function Header() {
                   onClick={() => setIsOpen(false)}
                   className="block w-full px-5 sm:px-5 py-3 sm:py-3 text-center text-sm font-medium text-slate-400 rounded-xl hover:text-white hover:bg-white/5 transition-all duration-200"
                 >
-                  Login
+                  {t('header.login')}
                 </Link>
                 <Link
                   to="/register"
                   onClick={() => setIsOpen(false)}
                   className="block w-full px-5 sm:px-5 py-3 sm:py-3 text-center text-sm font-medium text-white bg-gradient-to-br from-[#3b82f6] to-[#7c3aed] rounded-xl shadow-lg shadow-indigo-500/40 hover:shadow-xl hover:shadow-indigo-500/65 transition-all duration-200"
                 >
-                  Sign Up
+                  {t('header.signUp')}
                 </Link>
               </>
             )}
@@ -374,9 +383,9 @@ export default function Header() {
       onClose={() => setShowLogoutModal(false)}
       onConfirm={handleLogout}
       variant="default"
-      title="Tizimdan chiqish"
-      message="Hisobingizdan chiqmoqchimisiz? Landing page ga yo'naltirilasiz."
-      confirmLabel="Chiqish"
+      title={t('header.logoutTitle')}
+      message={t('header.logoutMessage')}
+      confirmLabel={t('header.logoutConfirm')}
     />
     </>
   );

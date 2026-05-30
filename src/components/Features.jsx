@@ -1,9 +1,12 @@
 import { Timer, Zap, ChartBar as BarChart2, TrendingUp, Globe, ShieldCheck } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { features } from '../data/siteData';
 
 const iconMap = { Timer, Zap, BarChart2, TrendingUp, Globe, ShieldCheck };
 
 export default function Features() {
+  const { t } = useTranslation();
+
   return (
     <section id="features" className="section-panel py-14">
       <div className="absolute right-0 top-0 h-[300px] w-[300px] md:h-[500px] md:w-[500px] rounded-full bg-[#0ea5e9]/08 blur-3xl pointer-events-none" />
@@ -15,27 +18,27 @@ export default function Features() {
           <div className="animate-fade-in-up">
             <div className="gold-badge mb-4">
               <span className="h-1.5 w-1.5 rounded-full bg-[#f59e0b]" />
-              <span>Platform Features</span>
+              <span>{t('features.badge')}</span>
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 leading-tight">
-              Built for{' '}
+              {t('features.title')}{' '}
               <span className="gradient-text">
-                serious learners
+                {t('features.highlight')}
               </span>
             </h2>
             <p className="text-gray-400 text-sm leading-relaxed mb-6">
-              Every feature is designed around one goal: getting you to your target band score as efficiently as possible.
+              {t('features.subtitle')}
             </p>
 
             {/* Visual stat cards */}
             <div className="grid grid-cols-2 gap-3">
               <div className="premium-card premium-card-hover p-4">
                 <div className="mb-1 text-2xl font-bold text-[#0ea5e9]">98%</div>
-                <div className="text-gray-400 text-xs">Satisfaction rate</div>
+                <div className="text-gray-400 text-xs">{t('features.satisfaction')}</div>
               </div>
               <div className="premium-card premium-card-hover p-4">
                 <div className="mb-1 text-2xl font-bold text-[#8b5cf6]">3 mo</div>
-                <div className="text-gray-400 text-xs">Avg time to goal</div>
+                <div className="text-gray-400 text-xs">{t('features.avgTime')}</div>
               </div>
             </div>
           </div>
@@ -53,8 +56,12 @@ export default function Features() {
                   <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-gradient-to-br from-[#0ea5e9]/20 to-[#8b5cf6]/15 group-hover:scale-105 transition-transform">
                     {Icon && <Icon className="w-5 h-5 text-[#0ea5e9]" />}
                   </div>
-                  <h3 className="text-white font-semibold text-sm mb-1">{feat.title}</h3>
-                  <p className="text-gray-400 text-xs leading-relaxed">{feat.description}</p>
+                  <h3 className="text-white font-semibold text-sm mb-1">
+                    {t(`features.${feat.id}.title`)}
+                  </h3>
+                  <p className="text-gray-400 text-xs leading-relaxed">
+                    {t(`features.${feat.id}.description`)}
+                  </p>
                 </div>
               );
             })}

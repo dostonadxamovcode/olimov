@@ -1,20 +1,17 @@
 import { Users, Star, Clock, CheckCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const milestones = [
-  { icon: Users, value: '500+', label: 'Students Trained' },
-  { icon: Star, value: '7.0', label: 'Avg Band Score' },
-  { icon: Clock, value: '24/7', label: 'Platform Access' },
-  { icon: CheckCircle, value: '30+', label: 'Achievements' },
-];
-
-const values = [
-  'Expert-curated CEFR content aligned with official band descriptors',
-  'Personalized learning paths for every student',
-  'Regular content updates to reflect latest exam trends',
-  'Community of learners and peer study support',
+  { icon: Users, value: '500+', key: 'm0' },
+  { icon: Star, value: '7.0', key: 'm1' },
+  { icon: Clock, value: '24/7', key: 'm2' },
+  { icon: CheckCircle, value: '30+', key: 'm3' },
 ];
 
 export default function About() {
+  const { t } = useTranslation();
+  const values = t('about.values', { returnObjects: true });
+
   return (
     <section id="about" className="section-deep py-14">
       <div className="absolute left-0 top-0 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#0ea5e9]/08 blur-3xl" />
@@ -25,24 +22,24 @@ export default function About() {
           <div className="animate-fade-in-up">
             <div className="gold-badge mb-4">
               <span className="h-1.5 w-1.5 rounded-full bg-[#f59e0b]" />
-              <span>About Us</span>
+              <span>{t('about.badge')}</span>
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 leading-tight">
-              Dedicated to your{' '}
+              {t('about.title')}{' '}
               <span className="gradient-text">
-                CEFR success
+                {t('about.highlight')}
               </span>
             </h2>
             <p className="text-gray-400 text-sm leading-relaxed mb-4">
-              CEFRPro was founded by certified CEFR instructors and education technologists who believe great exam preparation should be accessible to everyone — especially Uzbek students with global ambitions.
+              {t('about.desc1')}
             </p>
             <p className="text-gray-400 text-sm leading-relaxed mb-6">
-              Our platform combines proven teaching methodologies with modern technology for an effective and engaging preparation experience.
+              {t('about.desc2')}
             </p>
 
             {/* Values list */}
             <ul className="space-y-3">
-              {values.map((val, i) => (
+              {Array.isArray(values) && values.map((val, i) => (
                 <li key={i} className="flex items-start gap-3 text-gray-300 text-sm">
                   <div className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-[#0ea5e9]">
                     <CheckCircle className="w-3 h-3 text-white" />
@@ -69,7 +66,7 @@ export default function About() {
                   <div className="gradient-text mb-1 text-2xl font-bold">
                     {m.value}
                   </div>
-                  <div className="text-gray-400 text-xs">{m.label}</div>
+                  <div className="text-gray-400 text-xs">{t('about.' + m.key)}</div>
                 </div>
               );
             })}
