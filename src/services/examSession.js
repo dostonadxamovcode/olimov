@@ -11,27 +11,33 @@ export async function createExamSession({ userId, testId, levelId, testTitle }) 
   await setDoc(ref, {
     userId,
     testId,
-    levelId:   levelId  ?? null,
-    testTitle: testTitle ?? null,
-    status:          'active',
-    startedAt:       serverTimestamp(),
+    levelId:          levelId   ?? null,
+    testTitle:        testTitle  ?? null,
+    status:           'active',
+    startedAt:        serverTimestamp(),
+    lastActive:       serverTimestamp(),   // heartbeat field
     terminatedReason: null,
-    terminatedAt:    null,
-    completedAt:     null,
+    terminatedAt:     null,
+    completedAt:      null,
   })
   return ref.id
 }
 
-export async function terminateExamSession(sessionId, reason = 'mobile_app_switch') {
+// Called every HEARTBEAT_INTERVAL ms while exam is active
+export async function updateExamSessionHeartbeat(sessionId) {
+  await updateDoc(doc(db, COL, sessionId), {
+    lastActive: serverTimestamp(),
+  })
+}
+
+export async function terminateExamSession(sessionId, reason = 'app_switch_or_inactivity') {
   try {
     await updateDoc(doc(db, COL, sessionId), {
-      status:          'terminated',
+      status:           'terminated',
       terminatedReason: reason,
-      terminatedAt:    serverTimestamp(),
+      terminatedAt:     serverTimestamp(),
     })
-  } catch {
-    // fire-and-forget — navigation happens regardless
-  }
+  } catch { /* fire-and-forget */ }
 }
 
 export async function completeExamSession(sessionId) {
@@ -40,13 +46,10 @@ export async function completeExamSession(sessionId) {
       status:      'completed',
       completedAt: serverTimestamp(),
     })
-  } catch {
-    // non-critical — result already saved
-  }
+  } catch { /* non-critical */ }
 }
 
-// Returns the most recent non-active session (terminated) for userId+testId.
-// Used to block re-entry after violation.
+// Returns the most recent session for userId+testId (any status)
 export async function getLatestSession(userId, testId) {
   try {
     const q = query(
