@@ -245,5 +245,13 @@
     "title": "Something went wrong",
     "desc": "An error occurred while loading this content. Please try again later.",
     "tryAgain": "Try Again", "details": "Error Details"
+  },
+  "examTerminated": {
+    "title": "Exam Session Terminated",
+    "message": "Switching to another app or window was detected during the exam. The session has been terminated for security reasons.",
+    "reason": "Security violation: app/tab switch",
+    "note": "This decision is final. If you believe this is an error, please contact your instructor.",
+    "backHome": "Back to Home",
+    "caption": "Exam security system"
   }
 }

@@ -245,5 +245,13 @@
     "title": "Xatolik yuz berdi",
     "desc": "Ushbu kontentni yuklashda xatolik yuz berdi. Keyinroq qayta urinib ko'ring.",
     "tryAgain": "Qayta Urinish", "details": "Xatolik Tafsilotlari"
+  },
+  "examTerminated": {
+    "title": "Test Sessiyasi Tugatildi",
+    "message": "Test vaqtida boshqa ilova yoki oynaga o'tish aniqlandi. Sessiya xavfsizlik sababli yakunlandi.",
+    "reason": "Xavfsizlik buzilishi: ilova/oyna almashtirish",
+    "note": "Bu qaror qat'iy. Agar xato deb hisoblasangiz, o'qituvchingizga murojaat qiling.",
+    "backHome": "Bosh sahifaga qaytish",
+    "caption": "Imtihon xavfsizlik tizimi"
   }
 }

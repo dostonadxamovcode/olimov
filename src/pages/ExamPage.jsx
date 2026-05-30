@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '../firebase'
@@ -6,6 +6,7 @@ import { saveResult } from '../services/firestore'
 import { getTestQuestions } from '../services/questionPoolService'
 import { useAuth } from '../context/AuthContext'
 import { useTranslation } from 'react-i18next'
+import { useExamSecurity } from '../hooks/useExamSecurity'
 import { Clock, X, ChevronRight, ChevronLeft, AlertCircle, Check } from 'lucide-react'
 import { toastError, toastSuccess } from '../utils/errorHandler'
 import { LoadingSpinner } from '../components/ui/SkeletonLoader'
@@ -138,6 +139,38 @@ export default function ExamPage() {
 
   const { display: timerDisplay, secs } = useTimer(60 * 60)
 
+  // ── Practice mode: questions passed via navigation state ──────────────────
+  const isPractice = !!(location.state?.questions?.length > 0) || testId === 'practice'
+  const userId = user?.uid ?? 'anonymous'
+
+  // Auto-submit callback used by security hook on violation
+  const autoSubmit = useCallback(async () => {
+    const questions = test?.questions ?? []
+    if (!questions.length) return
+    let score = 0
+    questions.forEach((q, i) => { if (calcIsCorrect(q, selected[i])) score++ })
+    await saveResult({
+      userId,
+      testId,
+      testTitle: test?.title ?? '',
+      level:     levelId,
+      score,
+      total:     questions.length,
+      answers:   selected,
+      terminated: true,
+    })
+  }, [test, selected, userId, testId, levelId])
+
+  const { markCompleted } = useExamSecurity({
+    isActive:  !loading && !!test && !isPractice,
+    isPractice,
+    userId,
+    testId:    testId ?? '',
+    levelId,
+    testTitle: test?.title,
+    autoSubmit,
+  })
+
   useEffect(() => {
     const fetchTest = async () => {
       if (location.state?.questions?.length > 0) {
@@ -229,6 +262,9 @@ export default function ExamPage() {
   const handleFinalSubmit = async () => {
     if (submitting) return
     setSubmitting(true)
+
+    // Mark session completed BEFORE navigating (disarms security listeners)
+    await markCompleted()
 
     const questions = test?.questions ?? []
     let score = 0
