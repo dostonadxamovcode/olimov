@@ -4,6 +4,7 @@ import { doc, getDoc } from 'firebase/firestore'
 import { db } from '../firebase'
 import { saveResult } from '../services/firestore'
 import { getTestQuestions } from '../services/questionPoolService'
+import { getExamSession } from '../services/examSession'
 import { useAuth } from '../context/AuthContext'
 import { useTranslation } from 'react-i18next'
 import { useExamSecurity } from '../hooks/useExamSecurity'
@@ -123,10 +124,16 @@ function WordOrderInput({ question, answer, onChange, t }) {
 
 export default function ExamPage() {
   const { t, i18n } = useTranslation()
-  const { testId }  = useParams()
-  const navigate    = useNavigate()
-  const location    = useLocation()
-  const { user }    = useAuth()
+  // sessionId  → new route: /exam/:sessionId  (session-based, survives refresh)
+  // testId     → legacy routes: /tests/:testId or /exam/:level/:testId
+  const { sessionId, testId, level: levelParam } = useParams()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { user } = useAuth()
+
+  // Session-based mode = navigated via /exam/:sessionId (new secure flow)
+  // Legacy mode        = navigated via /tests/:testId or /exam/:level/:testId
+  const isSessionMode = !!sessionId && !testId
 
   const [test,            setTest]            = useState(null)
   const [levelId,         setLevelId]         = useState(null)
@@ -140,31 +147,9 @@ export default function ExamPage() {
 
   const { display: timerDisplay, secs } = useTimer(60 * 60)
 
-  // ── UI: detect if questions came from LevelSelection (practice flow) ────────
-  // This only labels the test as "practice" in the UI.
-  // It NEVER gates security — security always runs.
-  const isPracticeUI = !!(location.state?.questions?.length > 0) || testId === 'practice'
   const userId = user?.uid ?? 'anonymous'
 
-  // ── Security testId: practice tests need a unique per-session ID ───────────
-  // Real tests: use Firestore document ID from URL param
-  // Practice tests: generate a unique ID so sessions don't collide between
-  //   different practice attempts from the same user
-  const practiceIdRef = useRef(
-    isPracticeUI
-      ? `prac_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`
-      : null
-  )
-  const securityTestId = isPracticeUI ? practiceIdRef.current : (testId ?? '')
-
-  console.log('[ExamPage] testId:', testId,
-    '| isPracticeUI:', isPracticeUI,
-    '| securityTestId:', securityTestId,
-    '| userId:', userId,
-    '| isActive (after load):', !loading && !!test)
-
-  // Keep latest exam state in refs so autoSubmit is always fresh
-  // (event handlers capture refs, not stale closure values)
+  // Keep latest exam state in refs — event handlers read from here, no stale closures
   const testRef     = useRef(test)
   const selectedRef = useRef(selected)
   const levelIdRef  = useRef(levelId)
@@ -172,7 +157,15 @@ export default function ExamPage() {
   selectedRef.current = selected
   levelIdRef.current  = levelId
 
-  // autoSubmit reads from refs — always has the very latest answers
+  // The testId used for saving results:
+  // - session mode: loaded from Firestore session document
+  // - legacy mode: from URL param
+  const resultTestIdRef = useRef(testId ?? '')
+
+  console.log('[ExamPage] sessionId:', sessionId, '| testId:', testId,
+    '| isSessionMode:', isSessionMode, '| userId:', userId)
+
+  // autoSubmit — reads latest state from refs (always fresh)
   const autoSubmit = useCallback(async () => {
     const questions = testRef.current?.questions ?? []
     if (!questions.length) return
@@ -180,7 +173,7 @@ export default function ExamPage() {
     questions.forEach((q, i) => { if (calcIsCorrect(q, selectedRef.current[i])) score++ })
     await saveResult({
       userId,
-      testId,
+      testId:    resultTestIdRef.current,
       testTitle: testRef.current?.title ?? '',
       level:     levelIdRef.current,
       score,
@@ -188,18 +181,12 @@ export default function ExamPage() {
       answers:   selectedRef.current,
       terminated: true,
     })
-  }, [userId, testId]) // stable — reads state via refs, not closure
+  }, [userId])
 
-  // isActive now depends only on loading + test, NOT on practice mode
-  // Security is always active once the exam is loaded
-  const { markCompleted } = useExamSecurity({
-    isActive:  !loading && !!test,
-    userId,
-    testId:    securityTestId,
-    levelId,
-    testTitle: test?.title,
-    autoSubmit,
-  })
+  // ── useExamSecurity — new URL-based interface ─────────────────────────────
+  // sessionId from URL survives refresh, app switch, bfcache restore.
+  // For legacy mode: sessionId is undefined → security hook skips (old behavior).
+  const { markCompleted } = useExamSecurity(sessionId ?? '', autoSubmit)
 
   // ── Back button / Android back gesture protection ─────────────────────────
   const examIsActiveRef = useRef(false)
@@ -226,7 +213,66 @@ export default function ExamPage() {
   }, []) // attached once — reads latest state via examIsActiveRef
 
   useEffect(() => {
-    const fetchTest = async () => {
+    const loadExam = async () => {
+
+      // ── SESSION MODE: /exam/:sessionId ─────────────────────────────────────
+      // sessionId from URL is source of truth — survives refresh.
+      if (isSessionMode && sessionId) {
+        const session = await getExamSession(sessionId)
+
+        if (!session || session.status !== 'active') {
+          // Session terminated or not found — security hook already redirects,
+          // but set error here as a safety net.
+          setError(t('exam.notFoundMsg'))
+          setLoading(false)
+          return
+        }
+
+        const { testId: sessionTestId, levelId: sessionLevelId, isPractice } = session
+        resultTestIdRef.current = sessionTestId ?? ''
+
+        if (isPractice) {
+          // Practice questions were stored in sessionStorage before navigation
+          const raw = sessionStorage.getItem(`exam_questions_${sessionId}`)
+          if (!raw) {
+            setError(t('exam.notFoundMsg'))
+            setLoading(false)
+            return
+          }
+          const questions = JSON.parse(raw)
+          setLevelId(sessionLevelId ?? 'a1')
+          setTest({ title: session.testTitle ?? 'Practice', questions })
+          setLoading(false)
+          return
+        }
+
+        // Real test — fetch from Firestore using session's testId + levelId
+        setLevelId(sessionLevelId)
+        try {
+          const snap = await getDoc(doc(db, `${sessionLevelId}Tests`, sessionTestId))
+          if (!snap.exists()) {
+            setError(t('exam.notFoundMsg'))
+            setLoading(false)
+            return
+          }
+          const testData = { id: snap.id, ...snap.data() }
+          if (!testData.questions?.length) {
+            setError(t('exam.noRealQuestions'))
+            setLoading(false)
+            return
+          }
+          const result = await getTestQuestions(testData, sessionLevelId)
+          setTest({ ...testData, questions: result.questions })
+        } catch (err) {
+          setError(t('exam.loadError'))
+          toastError(err)
+        } finally {
+          setLoading(false)
+        }
+        return
+      }
+
+      // ── LEGACY MODE: /tests/:testId or /exam/:level/:testId ────────────────
       if (location.state?.questions?.length > 0) {
         setLevelId(location.state.levelId || 'a1')
         setTest({
@@ -243,7 +289,7 @@ export default function ExamPage() {
         return
       }
 
-      let detectedLevelId = location.state?.levelId
+      let detectedLevelId = levelParam ?? location.state?.levelId
 
       if (!detectedLevelId) {
         for (const level of LEVEL_COLLECTIONS) {
@@ -262,6 +308,7 @@ export default function ExamPage() {
       }
 
       setLevelId(detectedLevelId)
+      resultTestIdRef.current = testId
 
       try {
         const snap = await getDoc(doc(db, `${detectedLevelId}Tests`, testId))
@@ -270,15 +317,12 @@ export default function ExamPage() {
           setLoading(false)
           return
         }
-
         const testData = { id: snap.id, ...snap.data() }
-
         if (!testData.questions?.length) {
           setError(t('exam.noRealQuestions'))
           setLoading(false)
           return
         }
-
         const questionResult = await getTestQuestions(testData, detectedLevelId)
         setTest({ ...testData, questions: questionResult.questions })
       } catch (err) {
@@ -289,8 +333,8 @@ export default function ExamPage() {
       }
     }
 
-    fetchTest()
-  }, [testId, location.state])
+    loadExam()
+  }, [sessionId, testId, isSessionMode, levelParam, location.state])
 
   const handleAnswer = (questionIndex, value) => {
     setSelected(prev => ({ ...prev, [questionIndex]: value }))
@@ -329,7 +373,7 @@ export default function ExamPage() {
     try {
       await saveResult({
         userId:    user?.uid ?? 'anonymous',
-        testId,
+        testId:    resultTestIdRef.current,
         testTitle: test.title,
         level:     levelId,
         score,
@@ -342,7 +386,11 @@ export default function ExamPage() {
     }
 
     navigate('/test-result', {
-      state: { score, total: questions.length, questions, answers: selected, testTitle: test.title, level: levelId, testId },
+      state: {
+        score, total: questions.length, questions, answers: selected,
+        testTitle: test.title, level: levelId,
+        testId: resultTestIdRef.current,
+      },
     })
   }
 

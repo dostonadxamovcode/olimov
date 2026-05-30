@@ -2,21 +2,47 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ClipboardList, Clock, AlertCircle, ArrowLeft, BookOpen } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useAuth } from '../context/AuthContext'
+import { createExamSession } from '../services/examSession'
 import { LoadingSpinner } from '../components/ui/SkeletonLoader'
 import { useLevelTests } from '../hooks/useLevelTests'
 
 export default function BeginnerPage() {
   const { t } = useTranslation()
+  const { user } = useAuth()
   const { tests: allDocs, loading, error } = useLevelTests('a1')
   const tests = allDocs.filter(d => !d.type && d.isPublished)
 
-  const [selectedTest, setSelectedTest] = useState(null)
+  const [selectedTest, setSelectedTest]       = useState(null)
   const [showConfirmation, setShowConfirmation] = useState(false)
+  const [starting, setStarting]               = useState(false)
   const navigate = useNavigate()
 
   const handleStartTest = (test) => { setSelectedTest(test); setShowConfirmation(true) }
-  const handleConfirmStart = () => { if (selectedTest) navigate(`/tests/${selectedTest.id}`) }
   const handleCancelStart = () => { setSelectedTest(null); setShowConfirmation(false) }
+
+  const handleConfirmStart = async () => {
+    if (!selectedTest || starting) return
+    setStarting(true)
+    try {
+      // Create Firestore session BEFORE navigating.
+      // sessionId goes into the URL → survives refresh and app switch.
+      const sessionId = await createExamSession({
+        userId:     user?.uid ?? 'anonymous',
+        testId:     selectedTest.id,
+        levelId:    'a1',
+        testTitle:  selectedTest.title,
+        isPractice: false,
+      })
+      navigate(`/exam/${sessionId}`)
+    } catch (err) {
+      console.error('[BeginnerPage] createExamSession failed:', err)
+      // Fallback to legacy route
+      navigate(`/tests/${selectedTest.id}`)
+    } finally {
+      setStarting(false)
+    }
+  }
 
   return (
     <div className="min-h-screen site-bg py-8 px-4 sm:px-6 lg:px-8 mt-[60px]">
@@ -138,8 +164,10 @@ export default function BeginnerPage() {
               </button>
               <button
                 onClick={handleConfirmStart}
-                className="flex-1 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-white font-semibold shadow-lg shadow-emerald-500/30 hover:opacity-90 transition-opacity"
+                disabled={starting}
+                className="flex-1 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-white font-semibold shadow-lg shadow-emerald-500/30 hover:opacity-90 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
+                {starting && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
                 {t('beginner.startModal.start')}
               </button>
             </div>

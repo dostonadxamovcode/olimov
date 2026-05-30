@@ -1,29 +1,42 @@
 import {
-  collection, doc, setDoc, updateDoc, getDocs,
+  collection, doc, setDoc, updateDoc, getDoc, getDocs,
   query, where, orderBy, limit, serverTimestamp,
 } from 'firebase/firestore'
 import { db } from '../firebase'
 
 const COL = 'examSessions'
 
-export async function createExamSession({ userId, testId, levelId, testTitle }) {
+export async function createExamSession({
+  userId, testId, levelId, testTitle, isPractice = false,
+}) {
   const ref = doc(collection(db, COL))
   await setDoc(ref, {
     userId,
     testId,
     levelId:          levelId   ?? null,
     testTitle:        testTitle  ?? null,
+    isPractice:       !!isPractice,
     status:           'active',
     startedAt:        serverTimestamp(),
-    lastActive:       serverTimestamp(),   // heartbeat field
+    lastActive:       serverTimestamp(),
     terminatedReason: null,
     terminatedAt:     null,
     completedAt:      null,
   })
-  return ref.id
+  return ref.id   // <-- sessionId, used as URL param
 }
 
-// Called every HEARTBEAT_INTERVAL ms while exam is active
+// Fetch a single session by its Firestore document ID
+export async function getExamSession(sessionId) {
+  try {
+    const snap = await getDoc(doc(db, COL, sessionId))
+    if (!snap.exists()) return null
+    return { id: snap.id, ...snap.data() }
+  } catch {
+    return null
+  }
+}
+
 export async function updateExamSessionHeartbeat(sessionId) {
   await updateDoc(doc(db, COL, sessionId), {
     lastActive: serverTimestamp(),
@@ -49,7 +62,7 @@ export async function completeExamSession(sessionId) {
   } catch { /* non-critical */ }
 }
 
-// Returns the most recent session for userId+testId (any status)
+// Legacy: returns most recent session for userId+testId (used by old flow)
 export async function getLatestSession(userId, testId) {
   try {
     const q = query(

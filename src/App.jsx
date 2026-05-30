@@ -93,6 +93,7 @@ const router = createBrowserRouter([
       { path: '*',      element: <LazyPage><NotFound /></LazyPage> },
     ],
   },
+  { path: '/exam/:sessionId',       element: <LazyPage><ExamPage /></LazyPage> },
   { path: '/tests/:testId',        element: <LazyPage><ExamPage /></LazyPage> },
   { path: '/exam/:level/:testId',  element: <LazyPage><ExamPage /></LazyPage> },
   { path: '/test-result',          element: <LazyPage><TestResultPage /></LazyPage> },

@@ -1,73 +1,53 @@
 import { useEffect, useRef, useCallback } from 'react'
 import {
-  createExamSession,
+  getExamSession,
   updateExamSessionHeartbeat,
   terminateExamSession,
   completeExamSession,
-  getLatestSession,
 } from '../services/examSession'
 
-// ── Constants ─────────────────────────────────────────────────────────────────
-const HEARTBEAT_MS    = 5_000   // send heartbeat every 5 s
-const GAP_THRESHOLD   = 8_000   // gap > 8 s on return = violation
-const MOUNT_THRESHOLD = 12_000  // Firestore stale check on mount
-
-const FLAG = (tid, uid) => `xs_${tid}_${uid}`
+const HEARTBEAT_MS    = 5_000   // heartbeat interval
+const GAP_THRESHOLD   = 8_000   // max allowed away-time
+const MOUNT_THRESHOLD = 12_000  // stale heartbeat check on mount/refresh
 
 /**
- * Server-based exam security — heartbeat + inactivity detection.
+ * URL-based exam security.
  *
- * SECURITY IS ALWAYS ACTIVE regardless of test type (practice or real).
- * isPractice was intentionally removed from this hook.
+ * sessionId comes from the URL (/exam/:sessionId) — NOT from location.state or
+ * any React ref. This means it survives:
+ *   - page refresh
+ *   - mobile app switch
+ *   - bfcache restore
+ *   - tab switching
  *
- * Flow:
- *  1. Heartbeat updates Firestore `lastActive` every 5 s while exam is open
- *  2. visibilitychange/pagehide → heartbeat stops, hiddenAt recorded
- *  3. visibilitychange(visible)/pageshow → gap check
- *     gap > 8 s → TERMINATE
- *     gap ≤ 8 s → resume heartbeat
- *  4. On mount (refresh/new tab): Firestore session checked
- *     status=terminated OR lastActive stale → TERMINATE
+ * Single stop condition:  if (!sessionId) return
+ * No isPractice, no isActive prop, no UI-mode checks.
+ *
+ * @param {string}   sessionId   Firestore examSessions doc ID (from useParams)
+ * @param {Function} autoSubmit  async fn — saves answers before termination
  */
-export function useExamSecurity({
-  isActive,
-  userId,
-  testId,
-  levelId,
-  testTitle,
-  autoSubmit,
-}) {
-  // ── Refs — updated synchronously on every render ───────────────────────────
-  const isActiveRef   = useRef(isActive)
-  const userIdRef     = useRef(userId)
-  const testIdRef     = useRef(testId)
-  const autoSubmitRef = useRef(autoSubmit)
+export function useExamSecurity(sessionId, autoSubmit) {
+  const autoSubmitRef   = useRef(autoSubmit)
+  autoSubmitRef.current = autoSubmit          // always current, no useEffect lag
 
-  isActiveRef.current   = isActive
-  userIdRef.current     = userId
-  testIdRef.current     = testId
-  autoSubmitRef.current = autoSubmit
-
-  const sessionIdRef   = useRef(null)
   const terminatedRef  = useRef(false)
-  const sessionCreated = useRef(false)
+  const sessionValidRef = useRef(false)       // true after Firestore mount check passes
   const heartbeatRef   = useRef(null)
   const hiddenAtRef    = useRef(null)
 
   // ── startHeartbeat ──────────────────────────────────────────────────────────
   const startHeartbeat = useCallback(() => {
-    if (heartbeatRef.current) return
+    if (heartbeatRef.current) return          // prevent duplicate intervals
 
     heartbeatRef.current = setInterval(() => {
-      const sid = sessionIdRef.current
-      if (!sid || terminatedRef.current) return
-      updateExamSessionHeartbeat(sid)
+      if (!sessionId || terminatedRef.current) return
+      updateExamSessionHeartbeat(sessionId)
         .then(() => console.log('[ExamSecurity] heartbeat sent'))
         .catch(e => console.log('[ExamSecurity] heartbeat error:', e))
     }, HEARTBEAT_MS)
 
     console.log('[ExamSecurity] heartbeat started')
-  }, [])
+  }, [sessionId])
 
   // ── stopHeartbeat ───────────────────────────────────────────────────────────
   const stopHeartbeat = useCallback(() => {
@@ -79,90 +59,74 @@ export function useExamSecurity({
 
   // ── terminate ───────────────────────────────────────────────────────────────
   const terminate = useCallback((reason = 'app_switch_or_inactivity') => {
-    if (!isActiveRef.current)  { console.log('[ExamSecurity] skip — not active'); return }
-    if (terminatedRef.current) { console.log('[ExamSecurity] skip — already terminated'); return }
-
+    if (terminatedRef.current) {
+      console.log('[ExamSecurity] already terminated')
+      return
+    }
     terminatedRef.current = true
     stopHeartbeat()
 
-    const uid = userIdRef.current
-    const tid = testIdRef.current
+    console.log('EXAM TERMINATED — reason:', reason, '| sessionId:', sessionId)
 
-    console.log('EXAM TERMINATED — reason:', reason)
-
-    // 1. sessionStorage flag (synchronous — survives page reload and bfcache)
-    try { sessionStorage.setItem(FLAG(tid, uid), '1') } catch {}
-
-    // 2. Auto-submit current answers (fire-and-forget)
+    // 1. Auto-submit current answers (fire-and-forget)
     try { autoSubmitRef.current?.() } catch {}
 
-    // 3. Firestore session update (fire-and-forget)
-    if (sessionIdRef.current) {
-      terminateExamSession(sessionIdRef.current, reason)
-    }
+    // 2. Firestore update (fire-and-forget)
+    if (sessionId) terminateExamSession(sessionId, reason)
 
-    // 4. Redirect — window.location works even when React is not rendering
-    console.log('[ExamSecurity] redirecting to /exam-terminated')
+    // 3. Redirect — works even when JS is semi-frozen
     window.location.replace('/exam-terminated')
-  }, [stopHeartbeat])
+  }, [sessionId, stopHeartbeat])
 
-  // ── 1. Re-entry check on mount ─────────────────────────────────────────────
+  // ── Mount: validate session from Firestore (survives refresh) ──────────────
+  // sessionId from URL param is the only source of truth.
   useEffect(() => {
-    if (!isActive || !userId || !testId) return
+    if (!sessionId) return
 
-    const flag = FLAG(testId, userId)
+    console.log('[ExamSecurity] mount — validating session:', sessionId)
 
-    // Fast path: sessionStorage (no network)
-    if (sessionStorage.getItem(flag)) {
-      console.log('[ExamSecurity] re-entry blocked (sessionStorage)')
-      window.location.replace('/exam-terminated')
-      return
-    }
-
-    // Slow path: Firestore (handles new browser session / different device)
-    getLatestSession(userId, testId).then(session => {
-      if (!session) return
-
-      if (session.status === 'terminated') {
-        try { sessionStorage.setItem(flag, '1') } catch {}
-        console.log('[ExamSecurity] re-entry blocked (Firestore terminated)')
+    getExamSession(sessionId).then(session => {
+      if (!session) {
+        console.log('[ExamSecurity] session not found — redirecting')
         window.location.replace('/exam-terminated')
         return
       }
 
-      // Check for stale heartbeat on mount (user was away, then refreshed)
+      if (session.status !== 'active') {
+        console.log('[ExamSecurity] session not active:', session.status, '— redirecting')
+        window.location.replace('/exam-terminated')
+        return
+      }
+
+      // Check for stale heartbeat (user was away, then refreshed)
       if (session.lastActive) {
         const lastMs = session.lastActive.toMillis?.() ?? (session.lastActive.seconds * 1000)
         const gap    = Date.now() - lastMs
         console.log('[ExamSecurity] mount lastActive gap:', gap, 'ms')
         if (gap > MOUNT_THRESHOLD) {
-          console.log('[ExamSecurity] stale session on mount — gap:', gap, 'ms')
+          console.log('[ExamSecurity] stale session on mount — terminating')
           terminate('app_switch_or_inactivity')
+          return
         }
       }
-    }).catch(() => {})
-  }, [isActive, userId, testId, terminate])
 
-  // ── 2. Session creation (once) ─────────────────────────────────────────────
+      // Session is valid
+      sessionValidRef.current = true
+      console.log('[ExamSecurity] session valid — starting heartbeat')
+      startHeartbeat()
+    }).catch(e => {
+      // Network error — start heartbeat anyway (don't lock out on bad network)
+      console.log('[ExamSecurity] session fetch error (network?):', e)
+      sessionValidRef.current = true
+      startHeartbeat()
+    })
+
+    return () => stopHeartbeat()
+  }, [sessionId, startHeartbeat, stopHeartbeat, terminate])
+
+  // ── Visibility + pagehide + pageshow listeners ─────────────────────────────
   useEffect(() => {
-    if (!isActive || !userId || !testId || sessionCreated.current) return
-    sessionCreated.current = true
-
-    createExamSession({ userId, testId, levelId, testTitle })
-      .then(id => {
-        sessionIdRef.current = id
-        console.log('[ExamSecurity] session created:', id)
-      })
-      .catch(e => console.log('[ExamSecurity] createExamSession error:', e))
-    // levelId/testTitle excluded from deps — prevent duplicate creation
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isActive, userId, testId])
-
-  // ── 3. Heartbeat + visibility management ──────────────────────────────────
-  useEffect(() => {
-    if (!isActive) return
-
-    startHeartbeat()
+    if (!sessionId) return
 
     const onHide = (source) => {
       console.log('[ExamSecurity] page hidden —', source)
@@ -177,22 +141,28 @@ export function useExamSecurity({
       console.log('[ExamSecurity] returned via', source, '— gap:', gap, 'ms')
 
       if (gap > GAP_THRESHOLD) {
-        console.log('[ExamSecurity] VIOLATION — gap:', gap, 'ms > threshold:', GAP_THRESHOLD, 'ms')
+        console.log('[ExamSecurity] VIOLATION — gap:', gap, 'ms')
         terminate('app_switch_or_inactivity')
-      } else {
-        console.log('[ExamSecurity] gap OK — resuming heartbeat')
-        hiddenAtRef.current = null
-        startHeartbeat()
+        return
       }
+
+      // Gap is within threshold — resume
+      console.log('[ExamSecurity] gap OK — resuming')
+      hiddenAtRef.current = null
+      if (sessionValidRef.current) startHeartbeat()
+
+      // Extra: confirm session still active in Firestore after brief absence
+      getExamSession(sessionId).then(session => {
+        if (!session || session.status !== 'active') {
+          terminate('session_invalidated')
+        }
+      }).catch(() => {})
     }
 
     const onVisibilityChange = () => {
       console.log('[ExamSecurity] visibilitychange —', document.visibilityState)
-      if (document.hidden) {
-        onHide('visibilitychange')
-      } else {
-        onReturn('visibilitychange')
-      }
+      if (document.hidden) onHide('visibilitychange')
+      else onReturn('visibilitychange')
     }
 
     const onPageHide = (e) => {
@@ -202,13 +172,7 @@ export function useExamSecurity({
 
     const onPageShow = (e) => {
       console.log('[ExamSecurity] pageshow — persisted:', e.persisted)
-      if (e.persisted) {
-        onReturn('pageshow')
-        // Extra guard for bfcache: if exam still active after restore, terminate
-        if (!terminatedRef.current && isActiveRef.current) {
-          terminate('bfcache_restore')
-        }
-      }
+      if (e.persisted) onReturn('pageshow')
     }
 
     document.addEventListener('visibilitychange', onVisibilityChange)
@@ -220,23 +184,18 @@ export function useExamSecurity({
       window.removeEventListener('pagehide', onPageHide)
       window.removeEventListener('pageshow', onPageShow)
       stopHeartbeat()
-      console.log('[ExamSecurity] cleanup')
     }
-  }, [isActive, startHeartbeat, stopHeartbeat, terminate])
+  }, [sessionId, startHeartbeat, stopHeartbeat, terminate])
 
-  // ── 4. markCompleted — disarm before normal submit ─────────────────────────
+  // ── markCompleted — disarm before normal submit ────────────────────────────
   const markCompleted = useCallback(async () => {
     console.log('[ExamSecurity] markCompleted — disarming')
     terminatedRef.current = true
     stopHeartbeat()
-
-    if (sessionIdRef.current) {
-      try { completeExamSession(sessionIdRef.current) } catch {}
+    if (sessionId) {
+      try { completeExamSession(sessionId) } catch {}
     }
-    if (userId && testId) {
-      try { sessionStorage.removeItem(FLAG(testId, userId)) } catch {}
-    }
-  }, [userId, testId, stopHeartbeat])
+  }, [sessionId, stopHeartbeat])
 
   return { markCompleted }
 }
