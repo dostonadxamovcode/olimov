@@ -27,6 +27,7 @@ import {
   PieChart, Pie, Cell, BarChart, Bar
 } from 'recharts'
 import AdminTestsContent from '../components/AdminTestsContent'
+import AdminTour from '../components/AdminTour'
 
 const navItems = [
   { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
@@ -225,6 +226,7 @@ export default function AdminDashboard() {
           {navItems.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
+              data-tour={id === 'students' ? 'students' : id === 'add-test' ? 'add-test' : id === 'tests' ? 'tests' : undefined}
               onClick={() => {
                 if (id === 'add-test') navigate('/admin/add-test')
                 else if (id === 'tests') navigate('/admin/tests')
@@ -266,6 +268,7 @@ export default function AdminDashboard() {
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
           <div style={{ padding: '16px 12px' }}>
             <button
+              data-tour="landing"
               onClick={() => { navigate('/'); setSidebarOpen(false); }}
               style={{
                 display: 'flex', alignItems: 'center', gap: 12,
@@ -417,7 +420,7 @@ export default function AdminDashboard() {
               </div>
 
           {/* Stat Cards */}
-          <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
+          <div className="stats-grid" data-tour="stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
             {stats.map(({ label, value, change, up, color, icon: Icon }) => (
               <div key={label} style={{
                 background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
@@ -584,6 +587,8 @@ export default function AdminDashboard() {
           )}
         </main>
       </div>
+
+      <AdminTour userId={user?.uid} />
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');

@@ -135,6 +135,7 @@ export function AuthProvider({ children }) {
     if (currentUser) {
       const { setUserOffline } = await loadPresence()
       await setUserOffline(currentUser.uid)
+      sessionStorage.removeItem(`admin_tour_done_${currentUser.uid}`)
     }
     await signOut(auth)
     setCurrentUser(null)
