@@ -145,7 +145,7 @@ export default function ExamPage() {
   useEffect(() => {
     const terminateExam = () => {
       if (terminatedRef.current) return
-      if (Date.now() - mountedAtRef.current < 2000) return
+      if (Date.now() - mountedAtRef.current < 500) return
       terminatedRef.current = true
       navigate('/exam-terminated')
       // Firestore update in background - don't block navigation
