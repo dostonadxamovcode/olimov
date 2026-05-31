@@ -6,7 +6,7 @@ import { saveResult } from '../services/firestore'
 import { getTestQuestions } from '../services/questionPoolService'
 import { useAuth } from '../context/AuthContext'
 import { useTranslation } from 'react-i18next'
-import { Clock, X, ChevronRight, ChevronLeft, AlertCircle, Check } from 'lucide-react'
+import { Clock, X, ChevronRight, AlertCircle, Check } from 'lucide-react'
 import { toastError, toastSuccess } from '../utils/errorHandler'
 import { LoadingSpinner } from '../components/ui/SkeletonLoader'
 
@@ -263,10 +263,6 @@ export default function ExamPage() {
     }
   }
 
-  const handlePrevious = () => {
-    if (current > 0) setCurrent(prev => prev - 1)
-  }
-
   const handleFinalSubmit = async () => {
     if (submitting) return
     setSubmitting(true)
@@ -482,15 +478,7 @@ export default function ExamPage() {
               )}
             </div>
 
-            <div className="flex items-center justify-between mt-6 px-1">
-              <button
-                onClick={handlePrevious}
-                disabled={current === 0}
-                className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-semibold border border-slate-600 text-slate-300 hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-              >
-                <ChevronLeft className="w-4 h-4" /> {t('exam.prev')}
-              </button>
-
+            <div className="flex items-center justify-end mt-6 px-1">
               <button
                 onClick={handleNext}
                 disabled={submitting}
