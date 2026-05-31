@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase'
 import { saveResult } from '../services/firestore'
 import { getTestQuestions } from '../services/questionPoolService'
@@ -137,6 +137,47 @@ export default function ExamPage() {
   const [showExitConfirm, setShowExitConfirm] = useState(false)
 
   const { display: timerDisplay, secs } = useTimer(60 * 60)
+
+  // --- EXAM SECURITY ---
+  const mountedAtRef = useRef(Date.now())
+  const terminatedRef = useRef(false)
+
+  useEffect(() => {
+    const terminateExam = () => {
+      if (terminatedRef.current) return
+      if (Date.now() - mountedAtRef.current < 2000) return
+      terminatedRef.current = true
+      navigate('/exam-terminated')
+      // Firestore update in background - don't block navigation
+      if (testId && testId !== 'practice') {
+        const levelForDoc = levelId || location.state?.levelId || 'a1'
+        updateDoc(doc(db, `${levelForDoc}Tests`, testId), {
+          status: 'terminated',
+          terminatedReason: 'left_exam_environment',
+          terminatedAt: serverTimestamp(),
+        }).catch(() => {})
+      }
+    }
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') terminateExam()
+    }
+    const onBlur = () => terminateExam()
+    const onPageHide = () => terminateExam()
+
+    document.addEventListener('visibilitychange', onVisibility)
+    window.addEventListener('blur', onBlur)
+    document.addEventListener('blur', onBlur, true)
+    window.addEventListener('pagehide', onPageHide)
+
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility)
+      window.removeEventListener('blur', onBlur)
+      document.removeEventListener('blur', onBlur, true)
+      window.removeEventListener('pagehide', onPageHide)
+    }
+  }, [testId, levelId, navigate, location.state])
+  // --- END EXAM SECURITY ---
 
   useEffect(() => {
     const fetchTest = async () => {
