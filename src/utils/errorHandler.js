@@ -1,4 +1,28 @@
 import toast from 'react-hot-toast'
+import { createElement } from 'react'
+
+const ToastIcon = ({ type }) => {
+  const icons = {
+    success: '✓',
+    error: '✕',
+    warning: '⚠',
+    info: 'ℹ',
+  }
+  return createElement('div', { className: `toast-icon ${type}` }, icons[type])
+}
+
+const CustomToast = ({ message, type, visible }) =>
+  createElement('div', { className: `custom-toast ${!visible ? 'toast-exit' : ''}` },
+    createElement(ToastIcon, { type }),
+    createElement('div', { className: 'toast-content' },
+      createElement('p', { className: 'toast-message' }, message)
+    ),
+    createElement('div', { className: `toast-progress ${type}` })
+  )
+
+const showToast = (message, type) => {
+  toast.custom((t) => createElement(CustomToast, { message, type, visible: t.visible }), { duration: 4000 })
+}
 
 export const getErrorMessage = (error) => {
   const code = error?.code || error?.message || ''
@@ -58,9 +82,17 @@ export const getErrorMessage = (error) => {
 
 export const toastError = (error) => {
   const message = typeof error === 'string' ? error : getErrorMessage(error)
-  toast.error(message)
+  showToast(message, 'error')
 }
 
 export const toastSuccess = (message) => {
-  toast.success(message)
+  showToast(message, 'success')
+}
+
+export const toastWarning = (message) => {
+  showToast(message, 'warning')
+}
+
+export const toastInfo = (message) => {
+  showToast(message, 'info')
 }

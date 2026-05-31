@@ -21,7 +21,7 @@ import {
   PlusCircle,
   BookOpen,
 } from 'lucide-react'
-import { auth } from '../firebase'
+import { useAuth } from '../context/AuthContext'
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, BarChart, Bar
@@ -86,26 +86,21 @@ const CustomTooltip = ({ active, payload, label }) => {
 export default function AdminDashboard() {
   const [active, setActive] = useState('overview')
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [user, setUser] = useState(null)
+  const { user } = useAuth()
+  const [avatarError, setAvatarError] = useState(false)
   const [usersCount, setUsersCount] = useState(0)
   const [usersCountLoading, setUsersCountLoading] = useState(true)
   const [usersCountError, setUsersCountError] = useState(null)
   const navigate = useNavigate()
   const location = useLocation()
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-      setUser(currentUser)
-    })
-    return () => unsubscribe()
-  }, [])
-
   // Fetch users count from Firestore
+  useEffect(() => { setAvatarError(false) }, [user?.avatar])
+
   useEffect(() => {
     const fetchUsersCount = async () => {
       try {
-        // Check if user is authenticated
-        if (!auth.currentUser) {
+        if (!user) {
           setUsersCountLoading(false)
           return
         }
@@ -126,7 +121,6 @@ export default function AdminDashboard() {
       }
     }
 
-    // Only fetch if user is authenticated
     if (user) {
       fetchUsersCount()
     }
@@ -378,14 +372,19 @@ export default function AdminDashboard() {
                 overflow: 'hidden', flexShrink: 0,
                 border: '2px solid rgba(59,130,246,0.3)',
               }}>
-                {user?.photoURL ? (
-                  <img src={user.photoURL} alt="User" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                {user?.avatar && !avatarError ? (
+                  <img
+                    src={user.avatar}
+                    alt={user.displayName || 'User'}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    onError={() => setAvatarError(true)}
+                  />
                 ) : (
                   <span>{user?.displayName?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'G'}</span>
                 )}
               </div>
               <div className="topbar-userinfo" style={{ textAlign: 'left' }}>
-                <p style={{ fontSize: 11, color: '#94a3b8', margin: 0, fontWeight: 500 }}>Agency</p>
+                <p style={{ fontSize: 11, color: '#94a3b8', margin: 0, fontWeight: 500 }}>Admin</p>
                 <p style={{ fontSize: 13, fontWeight: 600, color: '#f1f5f9', margin: 0, maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {user?.displayName || user?.email || 'Guest'}
                 </p>

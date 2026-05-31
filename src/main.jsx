@@ -11,6 +11,12 @@ if (!container) throw new Error('Root element not found')
 createRoot(container).render(
   <React.StrictMode>
     <App />
-    <Toaster position="bottom-right" />
+    <Toaster
+      position="top-right"
+      toastOptions={{
+        duration: 4000,
+        style: { background: 'transparent', boxShadow: 'none', padding: 0, maxWidth: '420px' },
+      }}
+    />
   </React.StrictMode>
 )
