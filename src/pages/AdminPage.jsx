@@ -28,6 +28,7 @@ import {
 } from 'recharts'
 import AdminTestsContent from '../components/AdminTestsContent'
 import AdminTour from '../components/AdminTour'
+import StudentsList from '../components/StudentsList'
 
 const navItems = [
   { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
@@ -400,6 +401,8 @@ export default function AdminDashboard() {
         <main style={{ padding: '28px 24px', flex: 1, minWidth: 0 }}>
           {active === 'tests' ? (
             <AdminTestsContent />
+          ) : active === 'students' ? (
+            <StudentsList />
           ) : (
             <>
               {/* Page Title */}
