@@ -162,18 +162,13 @@ export default function ExamPage() {
     const onVisibility = () => {
       if (document.visibilityState === 'hidden') terminateExam()
     }
-    const onBlur = () => terminateExam()
     const onPageHide = () => terminateExam()
 
     document.addEventListener('visibilitychange', onVisibility)
-    window.addEventListener('blur', onBlur)
-    document.addEventListener('blur', onBlur, true)
     window.addEventListener('pagehide', onPageHide)
 
     return () => {
       document.removeEventListener('visibilitychange', onVisibility)
-      window.removeEventListener('blur', onBlur)
-      document.removeEventListener('blur', onBlur, true)
       window.removeEventListener('pagehide', onPageHide)
     }
   }, [testId, levelId, navigate, location.state])
