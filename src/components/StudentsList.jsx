@@ -32,7 +32,8 @@ export default function StudentsList() {
     return (
       student.name?.toLowerCase().includes(searchLower) ||
       student.email?.toLowerCase().includes(searchLower) ||
-      student.displayName?.toLowerCase().includes(searchLower)
+      student.displayName?.toLowerCase().includes(searchLower) ||
+      student.username?.toLowerCase().includes(searchLower)
     )
   })
 
@@ -108,7 +109,7 @@ export default function StudentsList() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm font-semibold text-slate-100 truncate">
-                    {student.name || student.displayName || 'Unknown User'}
+                    {student.displayName || student.name || student.username || student.email?.split('@')[0] || 'Unknown User'}
                   </h3>
                   <p className="text-xs text-slate-500 truncate">{student.email || t('studentsList.noEmail')}</p>
                 </div>
@@ -130,11 +131,6 @@ export default function StudentsList() {
               </div>
 
               <div className="flex flex-wrap gap-1.5">
-                {student.emailVerified && (
-                  <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-green-500/15 text-green-400 border border-green-500/20">
-                    {t('studentsList.verified')}
-                  </span>
-                )}
                 {student.level && (
                   <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-violet-500/15 text-violet-400 border border-violet-500/20">
                     {student.level.toUpperCase()}
@@ -160,10 +156,6 @@ export default function StudentsList() {
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/8 text-xs">
             <span className="text-slate-500 font-medium">{t('adminTests.showing')}</span>
             <span className="text-slate-100 font-semibold">{filteredStudents.length}</span>
-          </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-500/10 border border-green-500/20 text-xs">
-            <span className="text-slate-500 font-medium">{t('studentsList.verified')}</span>
-            <span className="text-green-400 font-semibold">{students.filter(s => s.emailVerified).length}</span>
           </div>
         </div>
       )}
