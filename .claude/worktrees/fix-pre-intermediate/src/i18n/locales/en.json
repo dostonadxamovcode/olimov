@@ -1,0 +1,263 @@
+{
+  "nav": {
+    "home": "Home", "services": "Services", "mockTests": "Mock Tests",
+    "results": "Results", "contact": "Contact", "about": "About", "levels": "Levels"
+  },
+  "header": {
+    "login": "Login", "signUp": "Sign Up", "profile": "Profile", "logout": "Logout",
+    "logoutTitle": "Log out",
+    "logoutMessage": "Are you sure you want to log out? You'll be redirected to the home page.",
+    "logoutConfirm": "Log out", "logoutSuccess": "Successfully logged out."
+  },
+  "hero": {
+    "words": ["mastery.", "success.", "precision.", "fluency."],
+    "title": "Master CEFR", "with": "with",
+    "subtitle": "Comprehensive CEFR preparation with mock tests, expert feedback, vocabulary tools, and real-time progress tracking.",
+    "startFree": "Start Free Today", "myResults": "My Results", "watchDemo": "Watch Demo"
+  },
+  "stats": { "st1": "Students", "st2": "Practice Hours", "st3": "Mock Tests" },
+  "about": {
+    "badge": "About Us", "title": "Dedicated to your", "highlight": "CEFR success",
+    "desc1": "CEFRPro was founded by certified CEFR instructors and education technologists who believe great exam preparation should be accessible to everyone — especially Uzbek students with global ambitions.",
+    "desc2": "Our platform combines proven teaching methodologies with modern technology for an effective and engaging preparation experience.",
+    "values": [
+      "Expert-curated CEFR content aligned with official band descriptors",
+      "Personalized learning paths for every student",
+      "Regular content updates to reflect latest exam trends",
+      "Community of learners and peer study support"
+    ],
+    "m0": "Students Trained", "m1": "Avg Band Score", "m2": "Platform Access", "m3": "Achievements"
+  },
+  "features": {
+    "badge": "Platform Features", "title": "Built for", "highlight": "serious learners",
+    "subtitle": "Every feature is designed around one goal: getting you to your target band score as efficiently as possible.",
+    "satisfaction": "Satisfaction rate", "avgTime": "Avg time to goal",
+    "f1": { "title": "Timed Practice", "description": "Train under real-time conditions." },
+    "f2": { "title": "Instant Feedback", "description": "Get results right after submission." },
+    "f3": { "title": "Progress Tracking", "description": "Visualize improvements over time." },
+    "f4": { "title": "Expert Tips", "description": "Teacher-approved strategies." },
+    "f5": { "title": "Global Content", "description": "Content from international sources." },
+    "f6": { "title": "Secure Exams", "description": "Trusted, secure testing environment." }
+  },
+  "services": {
+    "badge": "Our Services", "title": "Comprehensive CEFR", "highlight": "preparation services",
+    "subtitle": "Master every skill with our tailored courses and expert guidance",
+    "getStarted": "Get Started",
+    "s1": { "title": "Listening Practice", "description": "Focused listening exercises with transcripts.", "features": ["Audio transcripts", "Real exam format", "Speed control", "Section-wise practice"] },
+    "s2": { "title": "Reading Drills", "description": "Timed reading passages and strategies.", "features": ["Academic texts", "Time management", "Question types", "Vocabulary building"] },
+    "s3": { "title": "Writing Coaching", "description": "Step-by-step writing feedback and templates.", "features": ["Task 1 & 2", "Sample essays", "Grammar checks", "Band score tips"] },
+    "s4": { "title": "Speaking Sessions", "description": "Mock speaking tests with live feedback.", "features": ["Real exam format", "Record & review", "Fluency practice", "Pronunciation"] },
+    "s5": { "title": "Mock Tests", "description": "Full-length mock exams with scoring.", "features": ["Complete tests", "Instant scoring", "Detailed reports", "Progress tracking"] },
+    "s6": { "title": "Performance Analytics", "description": "Track progress and weak areas.", "features": ["Visual charts", "Skill analysis", "Weakness alerts", "Study recommendations"] }
+  },
+  "contact": {
+    "badge": "Get In Touch", "title": "We'd love to", "highlight": "hear from you",
+    "subtitle": "Have questions about our courses or platform? Reach out and we'll respond within 24 hours.",
+    "emailLabel": "Email", "phoneLabel": "Phone", "locationLabel": "Location",
+    "fullName": "Full Name", "namePlaceholder": "Olimov Asadbek", "emailPlaceholder": "your@email.com",
+    "message": "Message", "messagePlaceholder": "How can we help you?",
+    "send": "Send Message", "sentTitle": "Message Sent!", "sentDesc": "We'll get back to you within 24 hours.",
+    "sendAnother": "Send another message"
+  },
+  "footer": {
+    "tagline": "Master CEFR with confidence", "quickLinks": "Quick Links", "contact": "Contact",
+    "home": "Home", "services": "Services", "results": "Results",
+    "allRights": "All rights reserved.", "privacy": "Privacy Policy", "terms": "Terms of Service"
+  },
+  "login": {
+    "backHome": "Back to Home", "subtitle": "Log in to your account",
+    "welcomeBack": "Welcome back", "credentials": "Enter your credentials to continue",
+    "email": "Email", "password": "Password", "signingIn": "Signing in...", "signIn": "Sign In",
+    "orContinueWith": "or continue with", "continueGoogle": "Continue with Google",
+    "noAccount": "Don't have an account?", "register": "Register",
+    "success": "Successfully logged in.", "googleSuccess": "Successfully logged in with Google."
+  },
+  "register": {
+    "backHome": "Back to Home", "subtitle": "Create your account",
+    "createAccount": "Create account", "joinCefr": "Join CEFRPro and start your journey",
+    "email": "Email", "emailPlaceholder": "your@email.com",
+    "password": "Password", "confirmPassword": "Confirm Password",
+    "registering": "Registering...", "register": "Register",
+    "orContinueWith": "or continue with", "continueGoogle": "Continue with Google",
+    "alreadyAccount": "Already have an account?", "login": "Login",
+    "passwordMismatch": "Passwords do not match",
+    "success": "Successfully registered.", "googleSuccess": "Successfully logged in with Google."
+  },
+  "levels": {
+    "badge": "CEFR Framework", "title": "Choose Your", "highlight": "English Level",
+    "subtitle": "Select your current English proficiency level to start practicing.",
+    "viewTests": "View tests",
+    "questions": "Questions", "questionTypes": "question types",
+    "cancel": "Cancel", "start": "Start", "loading": "Loading...",
+    "noTests": "No tests available for this level yet.",
+    "loadError": "Failed to load tests.",
+    "a1": { "name": "Beginner", "desc": "Basic words and simple phrases." },
+    "a2": { "name": "Elementary", "desc": "Simple conversations on familiar topics." },
+    "b1": { "name": "Intermediate", "desc": "Handle most travel situations and describe experiences." },
+    "b2": { "name": "Upper-Intermediate", "desc": "Fluent interaction with native speakers." },
+    "c1": { "name": "Advanced", "desc": "Fluent expression for social and professional use." },
+    "c2": { "name": "Proficient", "desc": "Near-native precision and fluency." }
+  },
+  "exam": {
+    "typeInstruction": {
+      "multiple_choice": "Select the correct option",
+      "text_input": "Write your answer as text",
+      "translation": "Translate the given phrase",
+      "word_order": "Arrange the words in the correct order"
+    },
+    "question": "Question", "yourAnswer": "Your answer", "clear": "Clear",
+    "selectWords": "Select words from below...",
+    "wordBank": "Word bank", "allWordsUsed": "All words used",
+    "writePlaceholder": "Write your answer here...",
+    "translatePhrase": "Translate the following phrase",
+    "translatePlaceholder": "Write your translation here...",
+    "prev": "Previous", "next": "Next", "finish": "Finish", "submitting": "Submitting...",
+    "notFound": "Test Not Found",
+    "backToLevels": "Back to Levels", "allLevels": "All Levels",
+    "noQuestions": "This test has no questions yet.",
+    "submitSuccess": "Test submitted successfully.",
+    "submitError": "Failed to save result, but your results are shown.",
+    "loadError": "Failed to load the test.",
+    "notFoundMsg": "Test not found. Go back to levels and try again.",
+    "noRealQuestions": "This test has no real questions.",
+    "exitModal": {
+      "title": "Exit Test?",
+      "message": "Your progress will not be saved. You will return to the levels page.",
+      "continue": "Continue", "exit": "Exit"
+    },
+    "backConfirm": {
+      "title": "Exit Test?",
+      "message": "Are you sure you want to exit? The exam will be submitted and your results will be saved.",
+      "continue": "Continue Exam",
+      "exit": "Exit Test"
+    }
+  },
+  "testResult": {
+    "backToLevels": "Back to Home",
+    "resultsTitle": "Results",
+    "level": "Level",
+    "noResults": "No Results Found",
+    "noResultsDesc": "Please complete a test to see your results.",
+    "goToTests": "Go to Tests",
+    "correctSlash": "correct", "incorrectSlash": "incorrect",
+    "totalQuestions": "Total Questions", "correct": "Correct", "incorrect": "Incorrect",
+    "tests": "Tests", "retake": "Retake Test",
+    "details": "Detailed Results",
+    "question": "Question", "correctLabel": "Correct", "incorrectLabel": "Incorrect",
+    "correctAnswer": "Correct answer", "yourAnswer": "Your answer",
+    "yourAnswerLabel": "Your answer: ", "correctAnswerLabel": "Correct answer: ",
+    "explanation": "Explanation: Correct answer is option",
+    "empty": "(empty)"
+  },
+  "beginner": {
+    "backToLevels": "Back to Levels", "level": "A1", "title": "Beginner Tests",
+    "subtitle": "Test your English skills with our beginner level tests",
+    "loading": "Loading tests...", "noTests": "No Tests Available",
+    "noTestsDesc": "There are no published tests for beginner level yet. Check back later!",
+    "questions": "questions", "start": "Start",
+    "startModal": {
+      "title": "Start Test?", "readyFor": "Are you ready to start",
+      "questions": "questions", "timeLimit": "60 minutes time limit",
+      "level": "Level: A1 (Beginner)", "cancel": "Cancel", "start": "Start"
+    }
+  },
+  "profile": {
+    "active": "Active", "adminPanel": "Admin Panel", "logout": "Logout",
+    "profilePicture": "Profile Picture",
+    "uploadPhoto": "Upload Photo", "uploading": "Uploading...",
+    "deleting": "Deleting...", "deletePhoto": "Delete",
+    "fullName": "Full name *", "fullNamePlaceholder": "Enter your name",
+    "email": "Email address", "emailNote": "Email cannot be changed",
+    "username": "Username", "usernamePlaceholder": "username (3-20 characters)",
+    "phone": "Phone number", "phonePlaceholder": "+998 90 000 00 00",
+    "bio": "Bio", "bioPlaceholder": "Write about yourself...",
+    "saving": "Saving...", "save": "Save Profile",
+    "dataLoading": "Loading data...", "loading": "Loading...",
+    "darkMode": "Dark Mode", "toggleTheme": "Toggle theme",
+    "currentTheme": "Current theme", "dark": "Dark", "light": "Light",
+    "activeMode": "mode active", "comingSoon": "coming soon",
+    "logoutModal": { "title": "Log out", "message": "Are you sure you want to log out?", "confirm": "Log out" },
+    "validation": {
+      "nameEmpty": "Name cannot be empty",
+      "usernameBad": "Username: 3-20 letters, numbers or _",
+      "phoneBad": "Phone number is in incorrect format"
+    },
+    "toasts": {
+      "photoUpdated": "Profile photo updated", "photoError": "Error saving photo",
+      "photoDeleted": "Profile photo deleted", "photoDeleteError": "Error deleting photo",
+      "profileSaved": "Profile successfully updated", "profileError": "Error updating profile",
+      "logoutSuccess": "Successfully logged out.", "logoutError": "Error logging out"
+    },
+    "tabs": {
+      "account": "Account Settings", "security": "Login & Security",
+      "notifications": "Notifications", "interface": "Interface"
+    }
+  },
+  "mockTestComp": {
+    "badge": "Practice Test", "title": "Try Our", "highlight": "Mock Test",
+    "loading": "Loading questions...",
+    "loadError": "Firebase questions could not be loaded. Showing local sample questions.",
+    "correct": "Correct", "bandScore": "Estimated Band Score", "tryAgain": "Try Again",
+    "prev": "Previous", "next": "Next", "submit": "Submit Quiz",
+    "noQuestions": "No questions found."
+  },
+  "notFound": {
+    "title": "404", "subtitle": "Page Not Found",
+    "desc": "The page you are looking for does not exist or has been moved.",
+    "backHome": "Back to Home"
+  },
+  "underConstruction": {
+    "backHome": "Back to Home", "comingSoon": "This page is under construction"
+  },
+  "adminTests": {
+    "title": "Tests Management", "subtitle": "Manage all level tests",
+    "addNew": "Add New Test", "search": "Search tests...",
+    "loading": "Loading tests...", "noTests": "No tests available",
+    "noMatch": "No tests match your search criteria",
+    "noTestsDesc": "Get started by creating your first test",
+    "createFirst": "Create Your First Test",
+    "published": "Published", "draft": "Draft", "total": "Total", "showing": "Showing",
+    "deleteModal": {
+      "title": "Delete Test",
+      "message": "Are you sure you want to delete this test? This action cannot be undone."
+    }
+  },
+  "studentsList": {
+    "title": "Students", "subtitle": "View all registered students",
+    "search": "Search students by name or email...",
+    "loading": "Loading...", "noFound": "No students found",
+    "noMatch": "Try adjusting your search criteria",
+    "noRegistered": "Students will appear here when they register",
+    "noEmail": "No email provided", "verified": "Verified"
+  },
+  "results": {
+    "backHome": "Back to Home", "title": "Student Results",
+    "subtitle": "View student performance from Firestore", "avg": "Avg",
+    "totalStudents": "Total Students", "averageScore": "Average Score",
+    "passed": "Passed (70%+)", "withLevel": "With CEFR Level",
+    "search": "Search students...", "loading": "Loading...",
+    "loadError": "Failed to load results. Please try again.",
+    "noFound": "No Students Found", "noMatch": "No students match your search",
+    "noData": "No student data available in Firestore",
+    "tableHeaders": {
+      "student": "Student", "level": "Level",
+      "listening": "Listening", "reading": "Reading",
+      "writing": "Writing", "speaking": "Speaking", "average": "Average"
+    }
+  },
+  "confirmModal": { "cancel": "Cancel", "waiting": "Please wait..." },
+  "common": { "select": "Select..." },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "desc": "An error occurred while loading this content. Please try again later.",
+    "tryAgain": "Try Again", "details": "Error Details"
+  },
+  "examTerminated": {
+    "title": "Exam Session Terminated",
+    "message": "Switching to another app or window was detected during the exam. The session has been terminated for security reasons.",
+    "reason": "Security violation: app/tab switch",
+    "note": "This decision is final. If you believe this is an error, please contact your instructor.",
+    "backHome": "Back to Home",
+    "caption": "Exam security system"
+  }
+}
