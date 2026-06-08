@@ -14,7 +14,7 @@ const LEVELS = [
   { key: 'c2', col: 'c2Tests', label: 'C2', name: 'Proficient',        icon: Star,        gradient: 'from-yellow-400 to-amber-300',  glow: 'shadow-yellow-400/30',  border: 'hover:border-yellow-400/50',  badge: 'bg-yellow-400/20 text-yellow-300'   },
 ]
 
-const BATCH = 30
+const BATCH = 50
 
 function shuffle(arr) {
   const a = [...arr]

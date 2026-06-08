@@ -5,7 +5,7 @@ import { db } from '../firebase'
 import { useTranslation } from 'react-i18next'
 import { Sprout, BookOpen, TrendingUp, ChartBar as BarChart2, Trophy as Award, Star, Loader2 } from 'lucide-react'
 
-const QUESTION_COUNT = 30
+const QUESTION_COUNT = 50
 
 const toCollection = (code) => code === 'ielts' ? 'ielts' : `${code}Tests`
 
