@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 const LETTERS = ['A', 'B', 'C', 'D']
 
 function norm(str) {
-  return (str || '').trim().toLowerCase().replace(/\s+/g, ' ')
+  return (str || '').trim().toLowerCase().replace(/\s+/g, ' ').replace(/[.!,?؟]+$/, '')
 }
 
 function checkAnswer(question, answer) {
@@ -21,6 +21,13 @@ function checkAnswer(question, answer) {
   if (question.type === 'word_order') {
     if (!Array.isArray(answer) || !answer.length) return false
     return norm(answer.map(i => question.scrambled_words[i]).join(' ')) === norm(question.correct_answer)
+  }
+  if (question.type === 'translation') {
+    const normalizedAnswer = norm(answer)
+    const accepted = question.acceptedAnswers?.length
+      ? question.acceptedAnswers
+      : [question.correct_answer]
+    return accepted.some(a => norm(a) === normalizedAnswer)
   }
   return norm(answer) === norm(question.correct_answer)
 }
@@ -263,7 +270,11 @@ export default function TestResultPage() {
                         {!isCorrect && (
                           <div className="p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-sm">
                             <span className="text-slate-400 text-xs">{t('testResult.correctAnswerLabel')}</span>
-                            <span className="font-semibold text-emerald-300">{question.correct_answer}</span>
+                            <span className="font-semibold text-emerald-300">
+                              {question.acceptedAnswers?.length
+                                ? question.acceptedAnswers.join(', ')
+                                : question.correct_answer}
+                            </span>
                           </div>
                         )}
                       </div>

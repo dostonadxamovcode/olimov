@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { toastSuccess } from '../utils/errorHandler';
 import ConfirmModal from './ui/ConfirmModal';
 import LanguageSwitcher from './LanguageSwitcher';
+import { scrollToSection } from '../utils/scrollToSection';
 
 const NavItem = memo(function NavItem({ link, className, onClick }) {
   const { t } = useTranslation();
@@ -19,8 +20,7 @@ const NavItem = memo(function NavItem({ link, className, onClick }) {
     const targetPath = path || '/';
     const targetHash = `#${hash}`;
     if (location.pathname === targetPath && location.hash === targetHash) {
-      const el = document.getElementById(hash);
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
+      scrollToSection(hash);
     } else {
       navigate(`${targetPath}${targetHash}`);
     }
@@ -143,6 +143,7 @@ export default function Header() {
   return (
     <>
     <header
+      data-app-header
       className={`fixed top-0 left-0 right-0 z-[100] h-14 sm:h-16 transition-all duration-300 ${
         scrolled || isOpen
           ? 'bg-[#050810]/85 backdrop-blur-xl border-b border-white/7 shadow-lg'
