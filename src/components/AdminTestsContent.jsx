@@ -47,6 +47,13 @@ const TYPE_BADGE = {
   word_order:      { label: 'Word Order',       bg: 'rgba(59,130,246,0.2)', color: '#93c5fd' },
 }
 
+const TYPE_FILTERS = [
+  { value: 'all',             label: 'All Tests' },
+  { value: 'multiple_choice', label: 'Multiple Choice' },
+  { value: 'translation',     label: 'Translation' },
+  { value: 'word_order',      label: 'Word Order' },
+]
+
 // Derive lowercase level key from collection name
 const levelKeyOf = (col) =>
   col.endsWith('Tests') ? col.replace('Tests', '').toLowerCase() : col.toLowerCase()
@@ -58,6 +65,7 @@ export default function AdminTestsContent() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [levelFilter, setLevelFilter] = useState('all')
+  const [typeFilter, setTypeFilter] = useState('all')
   const [deletingId, setDeletingId] = useState(null)
   const [pendingDelete, setPendingDelete] = useState(null)
 
@@ -127,8 +135,17 @@ export default function AdminTestsContent() {
       test.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       test.description?.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesLevel = levelFilter === 'all' || test.levelKey === levelFilter
-    return matchesSearch && matchesLevel
+    const matchesType  = typeFilter  === 'all' || test.type === typeFilter
+    return matchesSearch && matchesLevel && matchesType
   })
+
+  const levelFiltered = levelFilter === 'all' ? tests : tests.filter(t => t.levelKey === levelFilter)
+  const typeCounts = {
+    all:             levelFiltered.length,
+    multiple_choice: levelFiltered.filter(t => t.type === 'multiple_choice').length,
+    translation:     levelFiltered.filter(t => t.type === 'translation').length,
+    word_order:      levelFiltered.filter(t => t.type === 'word_order').length,
+  }
 
   const formatDate = (timestamp) => {
     if (!timestamp) return 'N/A'
@@ -164,10 +181,45 @@ export default function AdminTestsContent() {
         </button>
       </div>
       
-      {/* Filters */}
-      <div style={{ 
-        display: 'flex', gap: 16, marginBottom: 24, 
-        flexWrap: 'wrap', alignItems: 'center' 
+      {/* Type Filter Bar */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+        {TYPE_FILTERS.map((f) => {
+          const isActive = typeFilter === f.value
+          return (
+            <button
+              key={f.value}
+              onClick={() => setTypeFilter(f.value)}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                padding: '8px 16px', borderRadius: 10,
+                background: isActive ? 'rgba(59,130,246,0.18)' : 'rgba(255,255,255,0.04)',
+                border: isActive ? '1px solid rgba(59,130,246,0.45)' : '1px solid rgba(255,255,255,0.08)',
+                color: isActive ? '#93c5fd' : '#64748b',
+                fontSize: 13, fontWeight: isActive ? 600 : 500,
+                cursor: 'pointer',
+                transition: 'all 0.18s ease',
+              }}
+              onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = '#94a3b8'; } }}
+              onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#64748b'; } }}
+            >
+              {f.label}
+              <span style={{
+                fontSize: 11, fontWeight: 600, lineHeight: 1,
+                padding: '2px 7px', borderRadius: 20,
+                background: isActive ? 'rgba(59,130,246,0.3)' : 'rgba(255,255,255,0.07)',
+                color: isActive ? '#bfdbfe' : '#475569',
+              }}>
+                {loading ? '—' : typeCounts[f.value]}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Search + Level Filter */}
+      <div style={{
+        display: 'flex', gap: 16, marginBottom: 24,
+        flexWrap: 'wrap', alignItems: 'center'
       }}>
         {/* Search */}
         <div style={{
@@ -222,11 +274,11 @@ export default function AdminTestsContent() {
             {t('adminTests.noTests')}
           </h3>
           <p style={{ margin: 0, fontSize: 14, color: '#64748b', marginBottom: 24 }}>
-            {searchQuery || levelFilter !== 'all'
+            {searchQuery || levelFilter !== 'all' || typeFilter !== 'all'
               ? t('adminTests.noMatch')
               : t('adminTests.noTestsDesc')}
           </p>
-          {!searchQuery && levelFilter === 'all' && (
+          {!searchQuery && levelFilter === 'all' && typeFilter === 'all' && (
             <button
               onClick={() => navigate('/admin/add-test')}
               style={{

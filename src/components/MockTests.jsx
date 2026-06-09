@@ -68,7 +68,7 @@ export default function MockTests() {
   const band = submitted ? (score >= 5 ? '7.0–8.0' : score >= 3 ? '5.5–6.5' : '4.0–5.0') : null
 
   return (
-    <section id="mock-tests" tabIndex={-1} className="section-deep py-14 outline-none">
+    <section id="mock-tests" tabIndex={-1} data-scroll-highlight className="section-deep py-14 outline-none">
       <div className="absolute right-0 top-0 h-[500px] w-[500px] rounded-full bg-[#0ea5e9]/08 blur-3xl" />
 
       <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">

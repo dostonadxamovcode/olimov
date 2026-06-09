@@ -1,7 +1,7 @@
 export const navLinks = [
   { label: 'nav.home', href: '/#top' },
   { label: 'nav.services', href: '/#services' },
-  { label: 'nav.mockTests', href: '/#mock-tests' },
+  { label: 'nav.mockTests', href: '/#ielts-mock-tests' },
   { label: 'nav.results', href: '/result' },
   { label: 'nav.contact', href: '/#contact' },
   { label: 'nav.about', href: '/about' },
