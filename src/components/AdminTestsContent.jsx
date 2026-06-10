@@ -181,42 +181,7 @@ export default function AdminTestsContent() {
         </button>
       </div>
       
-      {/* Type Filter Bar */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
-        {TYPE_FILTERS.map((f) => {
-          const isActive = typeFilter === f.value
-          return (
-            <button
-              key={f.value}
-              onClick={() => setTypeFilter(f.value)}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 8,
-                padding: '8px 16px', borderRadius: 10,
-                background: isActive ? 'rgba(59,130,246,0.18)' : 'rgba(255,255,255,0.04)',
-                border: isActive ? '1px solid rgba(59,130,246,0.45)' : '1px solid rgba(255,255,255,0.08)',
-                color: isActive ? '#93c5fd' : '#64748b',
-                fontSize: 13, fontWeight: isActive ? 600 : 500,
-                cursor: 'pointer',
-                transition: 'all 0.18s ease',
-              }}
-              onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = '#94a3b8'; } }}
-              onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#64748b'; } }}
-            >
-              {f.label}
-              <span style={{
-                fontSize: 11, fontWeight: 600, lineHeight: 1,
-                padding: '2px 7px', borderRadius: 20,
-                background: isActive ? 'rgba(59,130,246,0.3)' : 'rgba(255,255,255,0.07)',
-                color: isActive ? '#bfdbfe' : '#475569',
-              }}>
-                {loading ? '—' : typeCounts[f.value]}
-              </span>
-            </button>
-          )
-        })}
-      </div>
-
-      {/* Search + Level Filter */}
+      {/* Search + Type + Level Filters */}
       <div style={{
         display: 'flex', gap: 16, marginBottom: 24,
         flexWrap: 'wrap', alignItems: 'center'
@@ -241,6 +206,17 @@ export default function AdminTestsContent() {
             }}
           />
         </div>
+
+        {/* Type Filter */}
+        <CustomSelect
+          value={typeFilter}
+          onValueChange={setTypeFilter}
+          options={TYPE_FILTERS.map(f => ({
+            value: f.value,
+            label: loading ? f.label : `${f.label} (${typeCounts[f.value]})`,
+          }))}
+          className="w-48"
+        />
 
         {/* Level Filter */}
         <CustomSelect

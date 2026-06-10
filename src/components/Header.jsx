@@ -296,6 +296,13 @@ export default function Header() {
         <div className="sticky top-0 h-px z-2 bg-gradient-to-r from-transparent via-white/12 to-transparent" />
 
         <div className="p-4 sm:p-5 space-y-2">
+          {/* Language switcher — top of mobile menu for easy discovery */}
+          <div className="pb-1">
+            <LanguageSwitcher className="w-full" />
+          </div>
+
+          <div className="border-t border-white/6 pt-2" />
+
           {navLinks.map((link) => (
             <NavItem
               key={link.label}
@@ -306,10 +313,6 @@ export default function Header() {
           ))}
 
           <div className="border-t border-white/6 pt-4 sm:pt-5 mt-4 sm:mt-5 space-y-2">
-
-            <div className="px-1 pb-1">
-              <LanguageSwitcher className="w-full justify-center" />
-            </div>
 
             {loading ? (
               // Auth loading skeleton for mobile - matches profile menu items count (3-4 items)

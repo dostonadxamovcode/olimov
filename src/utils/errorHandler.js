@@ -1,13 +1,9 @@
 import toast from 'react-hot-toast'
 import { createElement } from 'react'
+import i18n from '../i18n/i18n'
 
 const ToastIcon = ({ type }) => {
-  const icons = {
-    success: '✓',
-    error: '✕',
-    warning: '⚠',
-    info: 'ℹ',
-  }
+  const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' }
   return createElement('div', { className: `toast-icon ${type}` }, icons[type])
 }
 
@@ -24,60 +20,62 @@ const showToast = (message, type) => {
   toast.custom((t) => createElement(CustomToast, { message, type, visible: t.visible }), { duration: 4000 })
 }
 
+const t = (key) => i18n.t(key)
+
 export const getErrorMessage = (error) => {
   const code = error?.code || error?.message || ''
 
   // Auth errors
   if (code.includes('auth/user-not-found') || code.includes('auth/wrong-password') || code.includes('auth/invalid-credential'))
-    return "Login yoki parol noto'g'ri kiritildi."
+    return t('errors.invalidCredential')
   if (code.includes('auth/email-already-in-use'))
-    return "Bu elektron pochta manzili allaqachon ro'yxatdan o'tkazilgan."
+    return t('errors.emailInUse')
   if (code.includes('auth/weak-password'))
-    return "Parol kamida 6 ta belgidan iborat bo'lishi kerak."
+    return t('errors.weakPassword')
   if (code.includes('auth/invalid-email'))
-    return "Elektron pochta manzili noto'g'ri formatda."
+    return t('errors.invalidEmail')
   if (code.includes('auth/user-disabled'))
-    return "Bu hisob bloklangan. Qo'llab-quvvatlash xizmatiga murojaat qiling."
+    return t('errors.userDisabled')
   if (code.includes('auth/too-many-requests'))
-    return "Juda ko'p urinish. Biroz kutib, qaytadan urinib ko'ring."
+    return t('errors.tooManyRequests')
   if (code.includes('auth/requires-recent-login'))
-    return "Ushbu amalni bajarish uchun qayta tizimga kiring."
+    return t('errors.requiresRecentLogin')
   if (code.includes('auth/popup-closed-by-user'))
-    return "Kirish oynasi yopildi. Qaytadan urinib ko'ring."
+    return t('errors.popupClosed')
   if (code.includes('auth/cancelled-popup-request'))
-    return "So'rov bekor qilindi. Qaytadan urinib ko'ring."
+    return t('errors.popupCancelled')
   if (code.includes('auth/account-exists-with-different-credential'))
-    return "Bu pochta boshqa usul bilan ro'yxatdan o'tkazilgan."
+    return t('errors.differentCredential')
 
   // Firestore errors
   if (code.includes('permission-denied'))
-    return "Sizda ushbu amalni bajarish uchun ruxsat yo'q."
+    return t('errors.permissionDenied')
   if (code.includes('not-found'))
-    return "So'ralgan ma'lumot topilmadi."
+    return t('errors.notFound')
   if (code.includes('already-exists'))
-    return "Bu ma'lumot allaqachon mavjud."
+    return t('errors.alreadyExists')
   if (code.includes('resource-exhausted'))
-    return "So'rovlar limiti oshib ketdi. Keyinroq urinib ko'ring."
+    return t('errors.resourceExhausted')
   if (code.includes('unavailable'))
-    return "Xizmat vaqtincha mavjud emas. Keyinroq urinib ko'ring."
+    return t('errors.unavailable')
   if (code.includes('deadline-exceeded'))
-    return "So'rov vaqti tugadi. Qaytadan urinib ko'ring."
+    return t('errors.deadlineExceeded')
   if (code.includes('aborted'))
-    return "Amal bekor qilindi. Qaytadan urinib ko'ring."
+    return t('errors.aborted')
 
   // Network errors
   if (code.includes('network-request-failed') || code.includes('NetworkError') || code.includes('Failed to fetch'))
-    return "Internet aloqasi mavjud emas. Tarmoqni tekshiring."
+    return t('errors.networkError')
 
   // Storage errors
   if (code.includes('storage/unauthorized'))
-    return "Faylni yuklash uchun ruxsat yo'q."
+    return t('errors.storageUnauthorized')
   if (code.includes('storage/object-not-found'))
-    return "Fayl topilmadi."
+    return t('errors.storageNotFound')
   if (code.includes('storage/quota-exceeded'))
-    return "Saqlash limiti oshib ketdi."
+    return t('errors.storageQuota')
 
-  return "Xatolik yuz berdi. Iltimos, qaytadan urinib ko'ring."
+  return t('errors.default')
 }
 
 export const toastError = (error) => {
@@ -85,14 +83,6 @@ export const toastError = (error) => {
   showToast(message, 'error')
 }
 
-export const toastSuccess = (message) => {
-  showToast(message, 'success')
-}
-
-export const toastWarning = (message) => {
-  showToast(message, 'warning')
-}
-
-export const toastInfo = (message) => {
-  showToast(message, 'info')
-}
+export const toastSuccess = (message) => showToast(message, 'success')
+export const toastWarning = (message) => showToast(message, 'warning')
+export const toastInfo    = (message) => showToast(message, 'info')

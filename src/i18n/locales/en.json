@@ -259,5 +259,29 @@
     "note": "This decision is final. If you believe this is an error, please contact your instructor.",
     "backHome": "Back to Home",
     "caption": "Exam security system"
+  },
+  "errors": {
+    "invalidCredential": "Invalid email or password.",
+    "emailInUse": "This email is already registered.",
+    "weakPassword": "Password must be at least 6 characters.",
+    "invalidEmail": "Email format is invalid.",
+    "userDisabled": "This account has been disabled. Contact support.",
+    "tooManyRequests": "Too many attempts. Please wait and try again.",
+    "requiresRecentLogin": "Please sign in again to perform this action.",
+    "popupClosed": "Sign-in window was closed. Try again.",
+    "popupCancelled": "Request was cancelled. Try again.",
+    "differentCredential": "This email is registered with a different sign-in method.",
+    "permissionDenied": "You don't have permission to perform this action.",
+    "notFound": "Requested data was not found.",
+    "alreadyExists": "This data already exists.",
+    "resourceExhausted": "Request limit exceeded. Try again later.",
+    "unavailable": "Service is temporarily unavailable. Try again later.",
+    "deadlineExceeded": "Request timed out. Try again.",
+    "aborted": "Operation was cancelled. Try again.",
+    "networkError": "No internet connection. Check your network.",
+    "storageUnauthorized": "No permission to upload this file.",
+    "storageNotFound": "File not found.",
+    "storageQuota": "Storage limit exceeded.",
+    "default": "An error occurred. Please try again."
   }
 }

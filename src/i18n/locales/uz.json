@@ -259,5 +259,29 @@
     "note": "Bu qaror qat'iy. Agar xato deb hisoblasangiz, o'qituvchingizga murojaat qiling.",
     "backHome": "Bosh sahifaga qaytish",
     "caption": "Imtihon xavfsizlik tizimi"
+  },
+  "errors": {
+    "invalidCredential": "Login yoki parol noto'g'ri kiritildi.",
+    "emailInUse": "Bu elektron pochta manzili allaqachon ro'yxatdan o'tkazilgan.",
+    "weakPassword": "Parol kamida 6 ta belgidan iborat bo'lishi kerak.",
+    "invalidEmail": "Elektron pochta manzili noto'g'ri formatda.",
+    "userDisabled": "Bu hisob bloklangan. Qo'llab-quvvatlash xizmatiga murojaat qiling.",
+    "tooManyRequests": "Juda ko'p urinish. Biroz kutib, qaytadan urinib ko'ring.",
+    "requiresRecentLogin": "Ushbu amalni bajarish uchun qayta tizimga kiring.",
+    "popupClosed": "Kirish oynasi yopildi. Qaytadan urinib ko'ring.",
+    "popupCancelled": "So'rov bekor qilindi. Qaytadan urinib ko'ring.",
+    "differentCredential": "Bu pochta boshqa usul bilan ro'yxatdan o'tkazilgan.",
+    "permissionDenied": "Sizda ushbu amalni bajarish uchun ruxsat yo'q.",
+    "notFound": "So'ralgan ma'lumot topilmadi.",
+    "alreadyExists": "Bu ma'lumot allaqachon mavjud.",
+    "resourceExhausted": "So'rovlar limiti oshib ketdi. Keyinroq urinib ko'ring.",
+    "unavailable": "Xizmat vaqtincha mavjud emas. Keyinroq urinib ko'ring.",
+    "deadlineExceeded": "So'rov vaqti tugadi. Qaytadan urinib ko'ring.",
+    "aborted": "Amal bekor qilindi. Qaytadan urinib ko'ring.",
+    "networkError": "Internet aloqasi mavjud emas. Tarmoqni tekshiring.",
+    "storageUnauthorized": "Faylni yuklash uchun ruxsat yo'q.",
+    "storageNotFound": "Fayl topilmadi.",
+    "storageQuota": "Saqlash limiti oshib ketdi.",
+    "default": "Xatolik yuz berdi. Iltimos, qaytadan urinib ko'ring."
   }
 }
