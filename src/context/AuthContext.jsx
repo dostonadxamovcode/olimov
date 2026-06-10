@@ -174,35 +174,14 @@ export function AuthProvider({ children }) {
   }
 
   const googleLogin = async () => {
-    const {
-      auth, db,
-      GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult,
-      doc, setDoc, serverTimestamp,
-    } = await loadAuthClient()
+    const { auth, GoogleAuthProvider, signInWithRedirect } = await loadAuthClient()
     const provider = new GoogleAuthProvider()
-
-    // signInWithPopup fails on many production environments (popup blockers,
-    // Safari ITP, Vercel cross-origin postMessage). Fall back to redirect.
-    try {
-      const result = await signInWithPopup(auth, provider)
-      const user = result.user
-      const role = user.email.toLowerCase() === 'superadmin@gmail.com' ? 'superadmin' : 'user'
-      await setDoc(doc(db, 'users', user.uid), { email: user.email, role, createdAt: serverTimestamp() }, { merge: true })
-      return result
-    } catch (err) {
-      // popup-blocked or cross-origin postMessage failure → use redirect flow
-      if (
-        err.code === 'auth/popup-blocked' ||
-        err.code === 'auth/popup-closed-by-user' ||
-        err.code === 'auth/cancelled-popup-request' ||
-        err.message?.includes('Cross-Origin')
-      ) {
-        await signInWithRedirect(auth, provider)
-        // Page reloads — result handled in AuthProvider useEffect via getRedirectResult
-        return null
-      }
-      throw err
-    }
+    // signInWithPopup triggers iframe.js cross-origin postMessage failure on
+    // Vercel (parent on vercel.app, popup relay on firebaseapp.com → blocked).
+    // signInWithRedirect avoids the iframe relay entirely — works on any domain.
+    await signInWithRedirect(auth, provider)
+    // Page reloads after Google login — result is handled in AuthProvider
+    // useEffect via getRedirectResult on the next load.
   }
 
   const logout = async () => {

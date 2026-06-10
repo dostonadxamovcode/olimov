@@ -40,7 +40,7 @@ export default function Register() {
     setError('')
     try {
       await googleLogin()
-      toastSuccess(t('register.googleSuccess'))
+      // signInWithRedirect — page reloads, result handled by AuthProvider
     } catch (err) {
       const msg = getErrorMessage(err)
       toastError(msg)

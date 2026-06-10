@@ -39,7 +39,8 @@ export default function Login() {
         setError('')
         try {
             await googleLogin()
-            toastSuccess(t('login.googleSuccess'))
+            // googleLogin uses signInWithRedirect — page will reload automatically.
+            // Code below this line won't run; result is handled by AuthProvider on reload.
         } catch (err) {
             const msg = getErrorMessage(err)
             toastError(msg)
