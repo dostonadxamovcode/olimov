@@ -104,6 +104,8 @@ export function AuthProvider({ children }) {
                 let role = 'user'
                 if (data?.role === 'superadmin' || user.email.toLowerCase() === 'superadmin@gmail.com') {
                   role = 'superadmin'
+                } else if (data?.role === 'admin') {
+                  role = 'admin'
                 }
                 setUserRole(role)
                 // photoBase64 (uploaded) > photoURL from Firestore > Auth photoURL

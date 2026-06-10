@@ -69,6 +69,7 @@ const router = createBrowserRouter([
       { path: 'skill-tests',            element: <LazyPage><AdminPage /></LazyPage> },
       { path: 'skill-tests/add',        element: <LazyPage><AdminSkillTestFormPage /></LazyPage> },
       { path: 'skill-tests/edit/:id',   element: <LazyPage><AdminSkillTestFormPage /></LazyPage> },
+      { path: 'students',               element: <LazyPage><AdminPage /></LazyPage> },
       { path: 'edit-test/:id',          element: <LazyPage><EditTestPage /></LazyPage> },
     ],
   },

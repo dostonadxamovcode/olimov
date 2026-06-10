@@ -1,16 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, BookOpen, Trash2, AlertCircle, CheckCircle, Pencil } from 'lucide-react';
+import { Plus, BookOpen, Trash2, Pencil, Target } from 'lucide-react';
 import { Loader, ButtonSpinner } from './common/Loader';
+import { toastError, toastSuccess } from '../utils/errorHandler';
 
 export default function AdminSkillTestsContent() {
   const navigate             = useNavigate();
   const [tests,    setTests]    = useState([]);
   const [loading,  setLoading]  = useState(true);
   const [deleting, setDeleting] = useState(null);
-  const [toast,    setToast]    = useState(null);
 
-  // ── Load ────────────────────────────────────────────────────────────────────
   const loadTests = useCallback(async () => {
     setLoading(true);
     try {
@@ -22,7 +21,7 @@ export default function AdminSkillTestsContent() {
       setTests(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     } catch (e) {
       console.error('loadTests:', e);
-      showToast('err', 'Failed to load tests');
+      toastError('Failed to load tests');
     } finally {
       setLoading(false);
     }
@@ -30,12 +29,6 @@ export default function AdminSkillTestsContent() {
 
   useEffect(() => { loadTests(); }, [loadTests]);
 
-  function showToast(type, msg) {
-    setToast({ type, msg });
-    setTimeout(() => setToast(null), 3500);
-  }
-
-  // ── Delete ──────────────────────────────────────────────────────────────────
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this test? This cannot be undone.')) return;
     setDeleting(id);
@@ -43,146 +36,132 @@ export default function AdminSkillTestsContent() {
       const { doc, deleteDoc } = await import('firebase/firestore');
       const { db }             = await import('../firebase');
       await deleteDoc(doc(db, 'skillReadingTests', id));
-      showToast('ok', 'Test deleted');
+      toastSuccess('Test deleted');
       setTests(prev => prev.filter(t => t.id !== id));
-    } catch (e) {
-      showToast('err', 'Delete failed');
+    } catch {
+      toastError('Delete failed');
     } finally {
       setDeleting(null);
     }
   };
 
-  // ── UI ──────────────────────────────────────────────────────────────────────
+  const LEVEL_COLOR = {
+    'A2':  'bg-cyan-500/15 text-cyan-400 border-cyan-500/20',
+    'B1':  'bg-violet-500/15 text-violet-400 border-violet-500/20',
+    'B1+': 'bg-violet-500/15 text-violet-400 border-violet-500/20',
+    'B2':  'bg-orange-500/15 text-orange-400 border-orange-500/20',
+    'B2+': 'bg-orange-500/15 text-orange-400 border-orange-500/20',
+    'C1':  'bg-rose-500/15 text-rose-400 border-rose-500/20',
+  };
+
   return (
-    <div style={{ position: 'relative' }}>
+    <div className="pb-20">
 
-      {/* Toast */}
-      {toast && (
-        <div style={{
-          position: 'fixed', top: 20, right: 20, zIndex: 9999,
-          display: 'flex', alignItems: 'center', gap: 10,
-          padding: '12px 18px', borderRadius: 12,
-          background: toast.type === 'ok' ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
-          border: `1px solid ${toast.type === 'ok' ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)'}`,
-          color: toast.type === 'ok' ? '#86efac' : '#fca5a5',
-          fontSize: 13, fontWeight: 500, backdropFilter: 'blur(12px)',
-          boxShadow: '0 10px 40px rgba(0,0,0,0.4)',
-        }}>
-          {toast.type === 'ok' ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
-          {toast.msg}
-        </div>
-      )}
-
-      {/* ── Header ── */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+      {/* Header */}
+      <div className="flex items-start justify-between mb-6 gap-4">
         <div>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: '#f1f5f9' }}>Skill Reading Tests</h1>
-          <p style={{ margin: '4px 0 0', fontSize: 13, color: '#64748b' }}>Fill-in-the-blanks reading tests</p>
+          <h1 className="text-2xl font-bold text-slate-100">Skill Reading Tests</h1>
+          <p className="text-sm text-slate-500 mt-1">Fill-in-the-blanks reading tests</p>
         </div>
         <button
           onClick={() => navigate('/admin/skill-tests/add')}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 8,
-            padding: '10px 18px', borderRadius: 10, border: 'none', cursor: 'pointer',
-            background: 'linear-gradient(135deg, #3b82f6, #6366f1)',
-            color: '#fff', fontWeight: 600, fontSize: 14,
-          }}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white
+            bg-gradient-to-r from-blue-500 to-violet-500 hover:opacity-90 transition-opacity"
         >
-          <Plus size={16} />
+          <Plus className="w-4 h-4" />
           Add New Test
         </button>
       </div>
 
-      {/* ── List ── */}
-      {loading ? (
-        <div style={{ padding: '40px 0' }}>
-          <Loader size="md" text="Loading tests…" />
+      {/* Loading */}
+      {loading && (
+        <div className="flex justify-center items-center min-h-[400px]">
+          <Loader size="lg" text="Loading tests…" />
         </div>
-      ) : tests.length === 0 ? (
-        <div style={{
-          textAlign: 'center', padding: '60px 20px',
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)',
-          border: '1px dashed rgba(255,255,255,0.08)', borderRadius: 14,
-        }}>
-          <BookOpen size={40} color="#1e3a5f" style={{ marginBottom: 14 }} />
-          <p style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 600, color: '#334155' }}>No skill tests yet</p>
-          <p style={{ margin: 0, fontSize: 13, color: '#1e3a5f' }}>Click "Add New Test" to create the first one</p>
-        </div>
-      ) : (
-        <>
-          <p style={{ margin: '0 0 14px', fontSize: 12, color: '#475569' }}>
-            {tests.length} test{tests.length !== 1 ? 's' : ''}
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {tests.map(test => (
-              <div key={test.id} style={{
-                display: 'flex', alignItems: 'center', gap: 14,
-                padding: '14px 18px',
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
-                border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12,
-              }}>
-
-                {/* Part badge */}
-                <div style={{
-                  width: 42, height: 42, borderRadius: 10, flexShrink: 0,
-                  background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontWeight: 800, fontSize: 11, color: '#60a5fa',
-                }}>
-                  P{test.part}
-                </div>
-
-                {/* Info */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 600, color: '#f1f5f9', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {test.title}
-                  </p>
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: '#60a5fa', background: 'rgba(59,130,246,0.1)', padding: '2px 7px', borderRadius: 4 }}>
-                      {test.level}
-                    </span>
-                    <span style={{ fontSize: 11, color: '#475569' }}>
-                      {test.answers?.length ?? 0} blanks · {test.timeLimit} min
-                    </span>
-                  </div>
-                </div>
-
-                {/* Edit */}
-                <button
-                  onClick={() => navigate(`/admin/skill-tests/edit/${test.id}`)}
-                  title="Edit test"
-                  style={{
-                    width: 34, height: 34, borderRadius: 8, border: 'none',
-                    background: 'rgba(99,102,241,0.08)', color: '#818cf8',
-                    cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    flexShrink: 0,
-                  }}
-                >
-                  <Pencil size={13} />
-                </button>
-
-                {/* Delete */}
-                <button
-                  onClick={() => handleDelete(test.id)}
-                  disabled={deleting === test.id}
-                  title="Delete test"
-                  style={{
-                    width: 34, height: 34, borderRadius: 8, border: 'none',
-                    background: 'rgba(239,68,68,0.08)', color: '#f87171',
-                    cursor: deleting === test.id ? 'not-allowed' : 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    flexShrink: 0, opacity: deleting === test.id ? 0.5 : 1,
-                  }}
-                >
-                  {deleting === test.id ? <ButtonSpinner /> : <Trash2 size={13} />}
-                </button>
-              </div>
-            ))}
-          </div>
-        </>
       )}
 
+      {/* Empty */}
+      {!loading && tests.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-20 rounded-2xl border border-dashed border-white/10 bg-white/[0.02]">
+          <BookOpen className="w-10 h-10 text-slate-700 mb-4" />
+          <h3 className="text-base font-semibold text-slate-300 mb-1.5">No skill tests yet</h3>
+          <p className="text-sm text-slate-500 mb-5">Click "Add New Test" to create the first one</p>
+          <button
+            onClick={() => navigate('/admin/skill-tests/add')}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white
+              bg-gradient-to-r from-blue-500 to-violet-500 hover:opacity-90 transition-opacity"
+          >
+            <Plus className="w-4 h-4" />
+            Add New Test
+          </button>
+        </div>
+      )}
+
+      {/* List */}
+      {!loading && tests.length > 0 && (
+        <div className="flex flex-col gap-3">
+          {tests.map(test => (
+            <div
+              key={test.id}
+              className="flex items-center gap-4 px-5 py-4 rounded-2xl bg-white/[0.04] border border-white/8 hover:border-white/12 transition-colors animate-fadeInUp"
+            >
+              {/* Part badge */}
+              <div className="w-11 h-11 rounded-xl shrink-0 flex flex-col items-center justify-center bg-blue-500/10 border border-blue-500/20">
+                <span className="text-[9px] font-bold text-blue-400 leading-none">PART</span>
+                <span className="text-base font-black text-blue-300 leading-none">{test.part}</span>
+              </div>
+
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-slate-100 truncate mb-1">{test.title}</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className={`px-2 py-0.5 rounded-md text-[11px] font-bold border ${LEVEL_COLOR[test.level] ?? 'bg-white/5 text-slate-400 border-white/10'}`}>
+                    {test.level}
+                  </span>
+                  <span className="text-[11px] text-slate-500">
+                    {test.answers?.length ?? 0} blanks · {test.timeLimit} min
+                  </span>
+                </div>
+              </div>
+
+              {/* Target icon */}
+              <Target className="w-4 h-4 text-slate-700 shrink-0 hidden sm:block" />
+
+              {/* Edit */}
+              <button
+                onClick={() => navigate(`/admin/skill-tests/edit/${test.id}`)}
+                title="Edit"
+                className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0
+                  bg-indigo-500/8 text-indigo-400 hover:bg-indigo-500/15 transition-colors border border-indigo-500/20"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+              </button>
+
+              {/* Delete */}
+              <button
+                onClick={() => handleDelete(test.id)}
+                disabled={deleting === test.id}
+                title="Delete"
+                className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0
+                  bg-red-500/8 text-red-400 hover:bg-red-500/15 transition-colors border border-red-500/20
+                  disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {deleting === test.id ? <ButtonSpinner /> : <Trash2 className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Bottom stats bar */}
+      {!loading && tests.length > 0 && (
+        <div className="fixed bottom-0 left-0 md:left-[220px] right-0 h-14 flex items-center gap-3 px-6 bg-[#0d1b2a]/95 backdrop-blur-md border-t border-white/[0.04] z-[100]">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/[0.04] text-xs">
+            <span className="text-slate-500 font-medium">Total</span>
+            <span className="text-slate-100 font-semibold">{tests.length}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

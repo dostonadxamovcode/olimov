@@ -417,7 +417,7 @@ export default function AdminTestsContent() {
           height: 64,
           padding: '0 24px',
           background: 'rgba(13,27,42,0.95)',
-          borderTop: '1px solid rgba(255,255,255,0.08)',
+          borderTop: '1px solid rgba(255,255,255,0.04)',
           backdropFilter: 'blur(12px)',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           zIndex: 100,
@@ -436,7 +436,7 @@ export default function AdminTestsContent() {
               padding: '8px 16px',
               background: 'rgba(255,255,255,0.05)',
               borderRadius: 8,
-              border: '1px solid rgba(255,255,255,0.1)',
+              border: '1px solid rgba(255,255,255,0.04)',
             }}>
               <span style={{ color: '#64748b', fontWeight: 500 }}>{t('adminTests.total')}</span>
               <span style={{ color: '#f1f5f9', fontWeight: 600 }}>{tests.length}</span>
@@ -448,7 +448,7 @@ export default function AdminTestsContent() {
               padding: '8px 16px',
               background: 'rgba(255,255,255,0.05)',
               borderRadius: 8,
-              border: '1px solid rgba(255,255,255,0.1)',
+              border: '1px solid rgba(255,255,255,0.04)',
             }}>
               <span style={{ color: '#64748b', fontWeight: 500 }}>{t('adminTests.showing')}</span>
               <span style={{ color: '#f1f5f9', fontWeight: 600 }}>{filteredTests.length}</span>

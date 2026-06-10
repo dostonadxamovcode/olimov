@@ -16,19 +16,30 @@ service cloud.firestore {
       return userRole() == 'superadmin';
     }
 
+    function isAdminOrAbove() {
+      return userRole() == 'superadmin' || userRole() == 'admin';
+    }
+
     match /users/{userId} {
       allow create: if signedIn();
 
-      // User can only get their own document
-      allow get: if signedIn() && request.auth.uid == userId;
+      // User can read their own doc; superadmin/admin can read any
+      allow get:  if signedIn() && (request.auth.uid == userId || isAdminOrAbove());
+      allow list: if signedIn() && isAdminOrAbove();
+      allow read: if signedIn() && (request.auth.uid == userId || isAdminOrAbove());
 
-      // Super admin can list all users
-      allow list: if signedIn() && request.auth.token.email == "superAdmin@gmail.com";
+      // User can update own profile — but NOT the role field
+      allow update: if signedIn()
+                       && request.auth.uid == userId
+                       && !('role' in request.resource.data.diff(resource.data).affectedKeys());
 
-      // Super admin can read any user document
-      allow read: if signedIn() && request.auth.token.email == "superAdmin@gmail.com";
+      // Only superadmin can change any user's role
+      allow update: if isSuperadmin();
+    }
 
-      allow update: if signedIn() && request.auth.uid == userId;
+    match /roleAuditLog/{docId} {
+      allow create: if isSuperadmin();
+      allow read:   if isSuperadmin();
     }
 
     match /tests/{docId} {

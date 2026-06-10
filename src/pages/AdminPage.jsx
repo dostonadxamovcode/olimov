@@ -129,6 +129,8 @@ export default function AdminDashboard() {
       setActive('tests')
     } else if (location.pathname === '/admin/skill-tests') {
       setActive('skill-tests')
+    } else if (location.pathname === '/admin/students') {
+      setActive('students')
     } else {
       setActive('overview')
     }
@@ -225,6 +227,7 @@ export default function AdminDashboard() {
               onClick={() => {
                 if (id === 'tests') navigate('/admin/tests')
                 else if (id === 'skill-tests') navigate('/admin/skill-tests')
+                else if (id === 'students') navigate('/admin/students')
                 else setActive(id)
                 setSidebarOpen(false)
               }}
