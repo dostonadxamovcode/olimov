@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FileText, Clock, Target, Timer, ChartBar, Sparkles, Zap, ArrowRight } from 'lucide-react';
 
 function useInView(threshold = 0.1) {
@@ -27,6 +28,10 @@ const TEST_CARDS = [
     icon: FileText,
     title: 'Full CEFR Mock',
     description: 'Complete 3-hour CEFR simulation covering all four skills with strict timing.',
+
+
+
+
     stats: [
       { label: 'Duration', value: '3 hours' },
       { label: 'Sections', value: '4 Skills' },
@@ -117,7 +122,12 @@ const FEATURE_CARDS = [
   },
 ];
 
-export default function IELTSMockTests() {
+export default function 
+
+
+
+MockTests() {
+  const navigate = useNavigate();
   const [sectionRef, inView] = useInView(0.1);
 
   return (
@@ -155,6 +165,10 @@ export default function IELTSMockTests() {
           </h2>
           <p className="text-gray-400 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
             Practice with authentic CEFR simulations. Get detailed feedback, track your progress,
+
+
+
+
             and experience the real exam environment.
           </p>
         </div>
@@ -205,6 +219,7 @@ export default function IELTSMockTests() {
                   {/* CTA */}
                   <button
                     type="button"
+                    onClick={() => { if (i === 2) navigate('/skill-tests'); }}
                     className={`w-full inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r ${card.btnGrad} shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl`}
                   >
                     Start Test

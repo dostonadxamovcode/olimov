@@ -2,11 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard,
-  GraduationCap,
   Users,
   FileText,
-  DollarSign,
-  Settings,
   Search,
   Bell,
   ChevronRight,
@@ -18,8 +15,10 @@ import {
   Menu,
   X,
   Home,
-  PlusCircle,
   BookOpen,
+  Target,
+  GraduationCap,
+  DollarSign,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import {
@@ -28,16 +27,13 @@ import {
 } from 'recharts'
 import AdminTestsContent from '../components/AdminTestsContent'
 import StudentsList from '../components/StudentsList'
+import AdminSkillTestsContent from '../components/AdminSkillTestsContent'
 
 const navItems = [
-  { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'add-test', label: 'Add Test', icon: PlusCircle },
-  { id: 'tests', label: 'Tests', icon: BookOpen },
-  { id: 'programs', label: 'Programs', icon: GraduationCap },
-  { id: 'students', label: 'Students', icon: Users },
-  { id: 'applications', label: 'Applications', icon: FileText },
-  { id: 'commission', label: 'Commission', icon: DollarSign },
-  { id: 'settings', label: 'Settings', icon: Settings },
+  { id: 'overview',    label: 'Dashboard',   icon: LayoutDashboard },
+  { id: 'tests',       label: 'Tests',       icon: BookOpen },
+  { id: 'skill-tests', label: 'Skill Tests', icon: Target },
+  { id: 'students',    label: 'Students',    icon: Users },
 ]
 
 const trendData = [
@@ -131,8 +127,8 @@ export default function AdminDashboard() {
     // Set active state based on current route
     if (location.pathname === '/admin/tests') {
       setActive('tests')
-    } else if (location.pathname === '/admin/add-test') {
-      setActive('add-test')
+    } else if (location.pathname === '/admin/skill-tests') {
+      setActive('skill-tests')
     } else {
       setActive('overview')
     }
@@ -227,9 +223,8 @@ export default function AdminDashboard() {
             <button
               key={id}
               onClick={() => {
-                if (id === 'add-test') navigate('/admin/add-test')
-                else if (id === 'tests') navigate('/admin/tests')
-                else if (id === 'students') setActive(id)
+                if (id === 'tests') navigate('/admin/tests')
+                else if (id === 'skill-tests') navigate('/admin/skill-tests')
                 else setActive(id)
                 setSidebarOpen(false)
               }}
@@ -398,6 +393,8 @@ export default function AdminDashboard() {
         <main style={{ padding: '28px 24px', flex: 1, minWidth: 0 }}>
           {active === 'tests' ? (
             <AdminTestsContent />
+          ) : active === 'skill-tests' ? (
+            <AdminSkillTestsContent />
           ) : active === 'students' ? (
             <StudentsList />
           ) : (

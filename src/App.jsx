@@ -29,7 +29,10 @@ const ResultsPage  = lazy(() => import('./pages/ResultsPage'))
 const TestResultPage=lazy(() => import('./pages/TestResultPage'))
 const ExamTerminated=lazy(() => import('./pages/ExamTerminated'))
 const AdminPage    = lazy(() => import('./pages/AdminPage'))
+const AdminSkillTestFormPage = lazy(() => import('./pages/AdminSkillTestFormPage'))
 const Profile        = lazy(() => import('./pages/Profile'))
+const SkillTestsPage  = lazy(() => import('./pages/SkillTestsPage'))
+const SkillReadingPage= lazy(() => import('./pages/SkillReadingPage'))
 
 function LoginGate({ children }) {
   const { currentUser, userRole } = useAuth()
@@ -60,10 +63,13 @@ const router = createBrowserRouter([
     path: '/admin',
     element: <RoleProtectedRoute allowedRoles={['superadmin']} />,
     children: [
-      { index: true,              element: <LazyPage><AdminPage /></LazyPage> },
-      { path: 'add-test',         element: <LazyPage><AddTestPage /></LazyPage> },
-      { path: 'tests',            element: <LazyPage><AdminPage /></LazyPage> },
-      { path: 'edit-test/:id',    element: <LazyPage><EditTestPage /></LazyPage> },
+      { index: true,                    element: <LazyPage><AdminPage /></LazyPage> },
+      { path: 'add-test',               element: <LazyPage><AddTestPage /></LazyPage> },
+      { path: 'tests',                  element: <LazyPage><AdminPage /></LazyPage> },
+      { path: 'skill-tests',            element: <LazyPage><AdminPage /></LazyPage> },
+      { path: 'skill-tests/add',        element: <LazyPage><AdminSkillTestFormPage /></LazyPage> },
+      { path: 'skill-tests/edit/:id',   element: <LazyPage><AdminSkillTestFormPage /></LazyPage> },
+      { path: 'edit-test/:id',          element: <LazyPage><EditTestPage /></LazyPage> },
     ],
   },
   {
@@ -80,6 +86,7 @@ const router = createBrowserRouter([
       { path: 'services/speaking',      element: <LazyPage><Speaking /></LazyPage> },
       { path: 'services/mock-tests',    element: <LazyPage><MockTestsPage /></LazyPage> },
       { path: 'services/analytics',     element: <LazyPage><Analytics /></LazyPage> },
+      { path: 'skill-tests',             element: <LazyPage><SkillTestsPage /></LazyPage> },
       { path: 'level',                  element: <LazyPage><LevelSelection /></LazyPage> },
       { path: 'result',                 element: <LazyPage><ResultsPage /></LazyPage> },
       {
@@ -93,6 +100,7 @@ const router = createBrowserRouter([
       { path: '*',      element: <LazyPage><NotFound /></LazyPage> },
     ],
   },
+  { path: '/skill-tests/reading',  element: <LazyPage><SkillReadingPage /></LazyPage> },
   { path: '/tests/:testId',        element: <LazyPage><ExamPage /></LazyPage> },
   { path: '/exam/:level/:testId',  element: <LazyPage><ExamPage /></LazyPage> },
   { path: '/test-result',          element: <LazyPage><TestResultPage /></LazyPage> },
