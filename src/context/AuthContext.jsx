@@ -62,14 +62,29 @@ export function AuthProvider({ children }) {
           onAuthStateChanged,
           onSnapshot,
           doc,
+          setDoc,
+          serverTimestamp,
           setPersistence,
           browserLocalPersistence,
+          getRedirectResult,
         } = await loadAuthClient()
 
         try {
           await setPersistence(auth, browserLocalPersistence)
         } catch {
           // Non-fatal — continue without explicit persistence setting
+        }
+
+        // Handle redirect-flow result (fires once after Google redirect back)
+        try {
+          const redirectResult = await getRedirectResult(auth)
+          if (redirectResult?.user) {
+            const u = redirectResult.user
+            const role = u.email.toLowerCase() === 'superadmin@gmail.com' ? 'superadmin' : 'user'
+            await setDoc(doc(db, 'users', u.uid), { email: u.email, role, createdAt: serverTimestamp() }, { merge: true })
+          }
+        } catch {
+          // No redirect result or already handled — safe to ignore
         }
 
         unsubscribeAuth = onAuthStateChanged(
@@ -159,13 +174,35 @@ export function AuthProvider({ children }) {
   }
 
   const googleLogin = async () => {
-    const { auth, db, GoogleAuthProvider, signInWithPopup, doc, setDoc, serverTimestamp } = await loadAuthClient()
+    const {
+      auth, db,
+      GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult,
+      doc, setDoc, serverTimestamp,
+    } = await loadAuthClient()
     const provider = new GoogleAuthProvider()
-    const result = await signInWithPopup(auth, provider)
-    const user = result.user
-    const role = user.email.toLowerCase() === 'superadmin@gmail.com' ? 'superadmin' : 'user'
-    await setDoc(doc(db, 'users', user.uid), { email: user.email, role, createdAt: serverTimestamp() }, { merge: true })
-    return result
+
+    // signInWithPopup fails on many production environments (popup blockers,
+    // Safari ITP, Vercel cross-origin postMessage). Fall back to redirect.
+    try {
+      const result = await signInWithPopup(auth, provider)
+      const user = result.user
+      const role = user.email.toLowerCase() === 'superadmin@gmail.com' ? 'superadmin' : 'user'
+      await setDoc(doc(db, 'users', user.uid), { email: user.email, role, createdAt: serverTimestamp() }, { merge: true })
+      return result
+    } catch (err) {
+      // popup-blocked or cross-origin postMessage failure → use redirect flow
+      if (
+        err.code === 'auth/popup-blocked' ||
+        err.code === 'auth/popup-closed-by-user' ||
+        err.code === 'auth/cancelled-popup-request' ||
+        err.message?.includes('Cross-Origin')
+      ) {
+        await signInWithRedirect(auth, provider)
+        // Page reloads — result handled in AuthProvider useEffect via getRedirectResult
+        return null
+      }
+      throw err
+    }
   }
 
   const logout = async () => {
