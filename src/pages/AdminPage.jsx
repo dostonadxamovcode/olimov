@@ -95,33 +95,26 @@ export default function AdminDashboard() {
   useEffect(() => { setAvatarError(false) }, [user?.avatar])
 
   useEffect(() => {
+    if (!user || !userRole) return
+
     const fetchUsersCount = async () => {
+      setUsersCountLoading(true)
+      setUsersCountError(null)
       try {
-        if (!user) {
-          setUsersCountLoading(false)
-          return
-        }
-
-        setUsersCountLoading(true)
-        setUsersCountError(null)
-
         const { getCountFromServer, collection } = await import('firebase/firestore')
         const { db: firestoreDb } = await import('../firebase')
-
         const snapshot = await getCountFromServer(collection(firestoreDb, 'users'))
         setUsersCount(snapshot.data().count)
-      } catch {
+      } catch (e) {
+        console.error('fetchUsersCount:', e)
         setUsersCountError(true)
-        setUsersCount(0)
       } finally {
         setUsersCountLoading(false)
       }
     }
 
-    if (user) {
-      fetchUsersCount()
-    }
-  }, [user])
+    fetchUsersCount()
+  }, [user, userRole])
 
   useEffect(() => {
     // Set active state based on current route
@@ -140,8 +133,8 @@ export default function AdminDashboard() {
   const stats = [
     {
       label: 'Students Registration',
-      value: usersCountLoading ? '...' : usersCount.toString(),
-      change: usersCountError ? 'Error loading' : 'Total registered',
+      value: usersCountLoading ? '...' : usersCountError ? '—' : usersCount.toString(),
+      change: usersCountError ? 'Could not load' : 'Total registered',
       up: true,
       color: '#3b82f6',
       icon: Users,
