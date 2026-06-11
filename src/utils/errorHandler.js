@@ -25,6 +25,16 @@ const t = (key) => i18n.t(key)
 export const getErrorMessage = (error) => {
   const code = error?.code || error?.message || ''
 
+  // Log unknown auth errors for debugging
+  if (code && code.includes('auth/')) {
+    console.error('Google Auth Error:', {
+      code: error?.code,
+      message: error?.message,
+      email: error?.customData?.email,
+      credential: error?.credential,
+    })
+  }
+
   // Auth errors
   if (code.includes('auth/user-not-found') || code.includes('auth/wrong-password') || code.includes('auth/invalid-credential'))
     return t('errors.invalidCredential')
@@ -46,6 +56,14 @@ export const getErrorMessage = (error) => {
     return t('errors.popupCancelled')
   if (code.includes('auth/account-exists-with-different-credential'))
     return t('errors.differentCredential')
+  if (code.includes('auth/unauthorized-domain'))
+    return t('errors.unauthorizedDomain')
+  if (code.includes('auth/operation-not-allowed'))
+    return t('errors.operationNotAllowed')
+  if (code.includes('auth/popup-blocked'))
+    return t('errors.popupBlocked')
+  if (code.includes('auth/internal-error'))
+    return t('errors.internalError')
 
   // Firestore errors
   if (code.includes('permission-denied'))

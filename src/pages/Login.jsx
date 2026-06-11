@@ -37,14 +37,22 @@ export default function Login() {
 
     const handleGoogle = async () => {
         setError('')
+        console.log('Google login started. hostname:', window.location.hostname)
         try {
             await googleLogin()
             // googleLogin uses signInWithRedirect — page will reload automatically.
             // Code below this line won't run; result is handled by AuthProvider on reload.
         } catch (err) {
+            console.error('Google Auth Error:', {
+                code: err?.code,
+                message: err?.message,
+                email: err?.customData?.email,
+                credential: err?.credential,
+                hostname: window.location.hostname,
+            })
             const msg = getErrorMessage(err)
-            toastError(msg)
-            setError(msg)
+            toastError(`${msg} (${err?.code || 'unknown'})`)
+            setError(`${msg} (${err?.code || 'unknown'})`)
         }
     }
 

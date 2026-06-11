@@ -83,8 +83,16 @@ export function AuthProvider({ children }) {
             const role = u.email.toLowerCase() === 'superadmin@gmail.com' ? 'superadmin' : 'user'
             await setDoc(doc(db, 'users', u.uid), { email: u.email, role, createdAt: serverTimestamp() }, { merge: true })
           }
-        } catch {
-          // No redirect result or already handled — safe to ignore
+        } catch (redirectErr) {
+          // Log redirect errors so they are visible in the console
+          if (redirectErr?.code) {
+            console.error('Google Redirect Auth Error:', {
+              code: redirectErr?.code,
+              message: redirectErr?.message,
+              email: redirectErr?.customData?.email,
+              authDomain: window.location.hostname,
+            })
+          }
         }
 
         unsubscribeAuth = onAuthStateChanged(

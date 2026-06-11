@@ -1,23 +1,46 @@
 {
   "nav": {
-    "home": "Bosh sahifa", "services": "Xizmatlar", "mockTests": "Sinov testlar",
-    "results": "Natijalar", "contact": "Aloqa", "about": "Biz haqimizda", "levels": "Darajalar"
+    "home": "Bosh sahifa",
+    "services": "Xizmatlar",
+    "mockTests": "Sinov testlar",
+    "results": "Natijalar",
+    "contact": "Aloqa",
+    "about": "Biz haqimizda",
+    "levels": "Darajalar"
   },
   "header": {
-    "login": "Kirish", "signUp": "Ro'yxatdan o'tish", "profile": "Profil", "logout": "Chiqish",
+    "login": "Kirish",
+    "signUp": "Ro'yxatdan o'tish",
+    "profile": "Profil",
+    "logout": "Chiqish",
     "logoutTitle": "Tizimdan chiqish",
     "logoutMessage": "Hisobingizdan chiqmoqchimisiz? Bosh sahifaga yo'naltirilasiz.",
-    "logoutConfirm": "Chiqish", "logoutSuccess": "Tizimdan muvaffaqiyatli chiqdingiz."
+    "logoutConfirm": "Chiqish",
+    "logoutSuccess": "Tizimdan muvaffaqiyatli chiqdingiz."
   },
   "hero": {
-    "words": ["mukammallik.", "muvaffaqiyat.", "aniqlik.", "ravonlik."],
-    "title": "CEFR'ni o'zlashtiring", "with": "bilan",
+    "words": [
+      "mukammallik.",
+      "muvaffaqiyat.",
+      "aniqlik.",
+      "ravonlik."
+    ],
+    "title": "CEFR'ni o'zlashtiring",
+    "with": "bilan",
     "subtitle": "Sinov testlar, ekspert fikr-mulohazalar, lug'at vositalari va real vaqtdagi rivojlanishni kuzatish bilan to'liq CEFR tayyorlovi.",
-    "startFree": "Bepul Boshlash", "myResults": "Mening Natijalarim", "watchDemo": "Demo Ko'rish"
+    "startFree": "Bepul Boshlash",
+    "myResults": "Mening Natijalarim",
+    "watchDemo": "Demo Ko'rish"
   },
-  "stats": { "st1": "O'quvchilar", "st2": "Mashg'ulot Soatlari", "st3": "Sinov Testlar" },
+  "stats": {
+    "st1": "O'quvchilar",
+    "st2": "Mashg'ulot Soatlari",
+    "st3": "Sinov Testlar"
+  },
   "about": {
-    "badge": "Biz Haqimizda", "title": "Sizning", "highlight": "CEFR muvaffaqiyatingiz",
+    "badge": "Biz Haqimizda",
+    "title": "Sizning",
+    "highlight": "CEFR muvaffaqiyatingiz",
     "desc1": "CEFRPro sertifikatlangan CEFR o'qituvchilari va ta'lim texnologlari tomonidan tashkil etilgan — ular yaxshi imtihon tayyorgarligining hammaga, xususan global maqsadlari bo'lgan o'zbek talabalarga mavjud bo'lishi kerak deb hisoblashadi.",
     "desc2": "Platformamiz samarali va qiziqarli tayyorgarlik tajribasi uchun zamonaviy texnologiya bilan isbotlangan o'qitish metodologiyalarini birlashtiradi.",
     "values": [
@@ -26,77 +49,211 @@
       "So'nggi imtihon tendentsiyalarini aks ettirish uchun muntazam kontent yangilanishlari",
       "O'quvchilar jamoasi va tengdoshlar bilan o'rganish ko'magi"
     ],
-    "m0": "Tayyorlangan O'quvchilar", "m1": "O'rtacha Ball", "m2": "Platformaga Kirish", "m3": "Yutuqlar"
+    "m0": "Tayyorlangan O'quvchilar",
+    "m1": "O'rtacha Ball",
+    "m2": "Platformaga Kirish",
+    "m3": "Yutuqlar"
   },
   "features": {
-    "badge": "Platforma Imkoniyatlari", "title": "Jiddiy", "highlight": "o'quvchilar uchun",
+    "badge": "Platforma Imkoniyatlari",
+    "title": "Jiddiy",
+    "highlight": "o'quvchilar uchun",
     "subtitle": "Har bir funksiya bitta maqsad atrofida yaratilgan: sizni maqsadli ball darajasiga imkon qadar samarali etkazish.",
-    "satisfaction": "Qoniqish darajasi", "avgTime": "Maqsadga o'rtacha vaqt",
-    "f1": { "title": "Vaqtli Mashq", "description": "Real vaqt sharoitida mashq qiling." },
-    "f2": { "title": "Darhol Natija", "description": "Topshiriqdan keyin darhol natija oling." },
-    "f3": { "title": "Rivojlanishni Kuzatish", "description": "Vaqt o'tishi bilan yaxshilanishlarni ko'ring." },
-    "f4": { "title": "Ekspert Maslahatlari", "description": "O'qituvchi tasdiqlagan strategiyalar." },
-    "f5": { "title": "Global Kontent", "description": "Xalqaro manbalardan olingan kontent." },
-    "f6": { "title": "Xavfsiz Imtihonlar", "description": "Ishonchli, xavfsiz test muhiti." }
+    "satisfaction": "Qoniqish darajasi",
+    "avgTime": "Maqsadga o'rtacha vaqt",
+    "f1": {
+      "title": "Vaqtli Mashq",
+      "description": "Real vaqt sharoitida mashq qiling."
+    },
+    "f2": {
+      "title": "Darhol Natija",
+      "description": "Topshiriqdan keyin darhol natija oling."
+    },
+    "f3": {
+      "title": "Rivojlanishni Kuzatish",
+      "description": "Vaqt o'tishi bilan yaxshilanishlarni ko'ring."
+    },
+    "f4": {
+      "title": "Ekspert Maslahatlari",
+      "description": "O'qituvchi tasdiqlagan strategiyalar."
+    },
+    "f5": {
+      "title": "Global Kontent",
+      "description": "Xalqaro manbalardan olingan kontent."
+    },
+    "f6": {
+      "title": "Xavfsiz Imtihonlar",
+      "description": "Ishonchli, xavfsiz test muhiti."
+    }
   },
   "services": {
-    "badge": "Xizmatlarimiz", "title": "To'liq CEFR", "highlight": "tayyorgarlik xizmatlari",
+    "badge": "Xizmatlarimiz",
+    "title": "To'liq CEFR",
+    "highlight": "tayyorgarlik xizmatlari",
     "subtitle": "Moslashtirilgan kurslar va ekspert ko'magimiz bilan har bir ko'nikmani o'zlashtiring",
     "getStarted": "Boshlash",
-    "s1": { "title": "Tinglash Mashqi", "description": "Transkripsiyalar bilan tinglash mashqlari.", "features": ["Audio transkripsiyalar", "Haqiqiy imtihon formati", "Tezlik nazorati", "Qism-qism mashq"] },
-    "s2": { "title": "O'qish Mashqlari", "description": "Vaqtli o'qish matnlari va strategiyalar.", "features": ["Akademik matnlar", "Vaqtni boshqarish", "Savol turlari", "Lug'at boyitish"] },
-    "s3": { "title": "Yozish Yo'riqnomasi", "description": "Bosqichma-bosqich yozish fikr-mulohazalari va shablonlar.", "features": ["1 va 2-topshiriq", "Namuna insholar", "Grammatika tekshiruvi", "Ball bo'yicha maslahatlar"] },
-    "s4": { "title": "Gapirish Sessiyalari", "description": "Jonli fikr-mulohaza bilan sinov gapirish testlari.", "features": ["Haqiqiy imtihon formati", "Yozib olish va ko'rib chiqish", "Ravonlik mashqi", "Talaffuz"] },
-    "s5": { "title": "Sinov Testlar", "description": "Baholash bilan to'liq hajmdagi sinov imtihonlari.", "features": ["To'liq testlar", "Darhol baholash", "Batafsil hisobotlar", "Rivojlanishni kuzatish"] },
-    "s6": { "title": "Ishlash Tahlili", "description": "Rivojlanish va zaif tomonlarni kuzatish.", "features": ["Vizual grafiklar", "Ko'nikma tahlili", "Zaiflik ogohlantirishlari", "O'quv tavsiyalari"] }
+    "s1": {
+      "title": "Tinglash Mashqi",
+      "description": "Transkripsiyalar bilan tinglash mashqlari.",
+      "features": [
+        "Audio transkripsiyalar",
+        "Haqiqiy imtihon formati",
+        "Tezlik nazorati",
+        "Qism-qism mashq"
+      ]
+    },
+    "s2": {
+      "title": "O'qish Mashqlari",
+      "description": "Vaqtli o'qish matnlari va strategiyalar.",
+      "features": [
+        "Akademik matnlar",
+        "Vaqtni boshqarish",
+        "Savol turlari",
+        "Lug'at boyitish"
+      ]
+    },
+    "s3": {
+      "title": "Yozish Yo'riqnomasi",
+      "description": "Bosqichma-bosqich yozish fikr-mulohazalari va shablonlar.",
+      "features": [
+        "1 va 2-topshiriq",
+        "Namuna insholar",
+        "Grammatika tekshiruvi",
+        "Ball bo'yicha maslahatlar"
+      ]
+    },
+    "s4": {
+      "title": "Gapirish Sessiyalari",
+      "description": "Jonli fikr-mulohaza bilan sinov gapirish testlari.",
+      "features": [
+        "Haqiqiy imtihon formati",
+        "Yozib olish va ko'rib chiqish",
+        "Ravonlik mashqi",
+        "Talaffuz"
+      ]
+    },
+    "s5": {
+      "title": "Sinov Testlar",
+      "description": "Baholash bilan to'liq hajmdagi sinov imtihonlari.",
+      "features": [
+        "To'liq testlar",
+        "Darhol baholash",
+        "Batafsil hisobotlar",
+        "Rivojlanishni kuzatish"
+      ]
+    },
+    "s6": {
+      "title": "Ishlash Tahlili",
+      "description": "Rivojlanish va zaif tomonlarni kuzatish.",
+      "features": [
+        "Vizual grafiklar",
+        "Ko'nikma tahlili",
+        "Zaiflik ogohlantirishlari",
+        "O'quv tavsiyalari"
+      ]
+    }
   },
   "contact": {
-    "badge": "Bog'lanish", "title": "Biz sizdan", "highlight": "eshitishni xohlaymiz",
+    "badge": "Bog'lanish",
+    "title": "Biz sizdan",
+    "highlight": "eshitishni xohlaymiz",
     "subtitle": "Kurslar yoki platforma haqida savollaringiz bormi? Murojaat qiling, 24 soat ichida javob beramiz.",
-    "emailLabel": "Elektron pochta", "phoneLabel": "Telefon", "locationLabel": "Manzil",
-    "fullName": "To'liq Ism", "namePlaceholder": "Olimov Asadbek", "emailPlaceholder": "your@email.com",
-    "message": "Xabar", "messagePlaceholder": "Sizga qanday yordam bera olamiz?",
-    "send": "Xabar Yuborish", "sentTitle": "Xabar Yuborildi!", "sentDesc": "24 soat ichida javob beramiz.",
+    "emailLabel": "Elektron pochta",
+    "phoneLabel": "Telefon",
+    "locationLabel": "Manzil",
+    "fullName": "To'liq Ism",
+    "namePlaceholder": "Olimov Asadbek",
+    "emailPlaceholder": "your@email.com",
+    "message": "Xabar",
+    "messagePlaceholder": "Sizga qanday yordam bera olamiz?",
+    "send": "Xabar Yuborish",
+    "sentTitle": "Xabar Yuborildi!",
+    "sentDesc": "24 soat ichida javob beramiz.",
     "sendAnother": "Boshqa xabar yuborish"
   },
   "footer": {
-    "tagline": "CEFR'ni ishonch bilan o'zlashtiring", "quickLinks": "Tezkor Havolalar",
-    "contact": "Aloqa", "home": "Bosh sahifa", "services": "Xizmatlar", "results": "Natijalar",
-    "allRights": "Barcha huquqlar himoyalangan.", "privacy": "Maxfiylik Siyosati", "terms": "Foydalanish Shartlari"
+    "tagline": "CEFR'ni ishonch bilan o'zlashtiring",
+    "quickLinks": "Tezkor Havolalar",
+    "contact": "Aloqa",
+    "home": "Bosh sahifa",
+    "services": "Xizmatlar",
+    "results": "Natijalar",
+    "allRights": "Barcha huquqlar himoyalangan.",
+    "privacy": "Maxfiylik Siyosati",
+    "terms": "Foydalanish Shartlari"
   },
   "login": {
-    "backHome": "Bosh sahifaga qaytish", "subtitle": "Hisobingizga kiring",
-    "welcomeBack": "Xush kelibsiz", "credentials": "Davom etish uchun ma'lumotlaringizni kiriting",
-    "email": "Elektron pochta", "password": "Parol", "signingIn": "Kirilmoqda...", "signIn": "Kirish",
-    "orContinueWith": "yoki davom eting", "continueGoogle": "Google orqali davom etish",
-    "noAccount": "Hisobingiz yo'qmi?", "register": "Ro'yxatdan o'tish",
-    "success": "Tizimga muvaffaqiyatli kirdingiz.", "googleSuccess": "Google orqali muvaffaqiyatli kirdingiz."
+    "backHome": "Bosh sahifaga qaytish",
+    "subtitle": "Hisobingizga kiring",
+    "welcomeBack": "Xush kelibsiz",
+    "credentials": "Davom etish uchun ma'lumotlaringizni kiriting",
+    "email": "Elektron pochta",
+    "password": "Parol",
+    "signingIn": "Kirilmoqda...",
+    "signIn": "Kirish",
+    "orContinueWith": "yoki davom eting",
+    "continueGoogle": "Google orqali davom etish",
+    "noAccount": "Hisobingiz yo'qmi?",
+    "register": "Ro'yxatdan o'tish",
+    "success": "Tizimga muvaffaqiyatli kirdingiz.",
+    "googleSuccess": "Google orqali muvaffaqiyatli kirdingiz."
   },
   "register": {
-    "backHome": "Bosh sahifaga qaytish", "subtitle": "Hisobingizni yarating",
-    "createAccount": "Hisob yaratish", "joinCefr": "CEFRPro'ga qo'shiling va sayohatingizni boshlang",
-    "email": "Elektron pochta", "emailPlaceholder": "your@email.com",
-    "password": "Parol", "confirmPassword": "Parolni tasdiqlang",
-    "registering": "Ro'yxatdan o'tilmoqda...", "register": "Ro'yxatdan o'tish",
-    "orContinueWith": "yoki davom eting", "continueGoogle": "Google orqali davom etish",
-    "alreadyAccount": "Hisobingiz bormi?", "login": "Kirish",
+    "backHome": "Bosh sahifaga qaytish",
+    "subtitle": "Hisobingizni yarating",
+    "createAccount": "Hisob yaratish",
+    "joinCefr": "CEFRPro'ga qo'shiling va sayohatingizni boshlang",
+    "email": "Elektron pochta",
+    "emailPlaceholder": "your@email.com",
+    "password": "Parol",
+    "confirmPassword": "Parolni tasdiqlang",
+    "registering": "Ro'yxatdan o'tilmoqda...",
+    "register": "Ro'yxatdan o'tish",
+    "orContinueWith": "yoki davom eting",
+    "continueGoogle": "Google orqali davom etish",
+    "alreadyAccount": "Hisobingiz bormi?",
+    "login": "Kirish",
     "passwordMismatch": "Parollar mos emas",
-    "success": "Muvaffaqiyatli ro'yxatdan o'tdingiz.", "googleSuccess": "Google orqali muvaffaqiyatli kirdingiz."
+    "success": "Muvaffaqiyatli ro'yxatdan o'tdingiz.",
+    "googleSuccess": "Google orqali muvaffaqiyatli kirdingiz."
   },
   "levels": {
-    "badge": "CEFR Tizimi", "title": "O'zingizning", "highlight": "ingliz tili darajangizni tanlang",
+    "badge": "CEFR Tizimi",
+    "title": "O'zingizning",
+    "highlight": "ingliz tili darajangizni tanlang",
     "subtitle": "Mashq boshlash uchun hozirgi ingliz tili darajangizni tanlang.",
     "viewTests": "Testlarni ko'rish",
-    "questions": "Savol", "questionTypes": "savol turi",
-    "cancel": "Bekor", "start": "Boshlash", "loading": "Yuklanmoqda...",
+    "questions": "Savol",
+    "questionTypes": "savol turi",
+    "cancel": "Bekor",
+    "start": "Boshlash",
+    "loading": "Yuklanmoqda...",
     "noTests": "Bu darajada hali testlar mavjud emas.",
     "loadError": "Testlarni yuklashda xatolik yuz berdi.",
-    "a1": { "name": "Boshlang'ich", "desc": "Asosiy so'zlar va oddiy iboralar." },
-    "a2": { "name": "Elementar", "desc": "Tanish mavzularda oddiy suhbatlar." },
-    "b1": { "name": "Pre-Intermediate", "desc": "Ona tili so'zlashuvchilar bilan bemalol muloqot." },
-    "b2": { "name": "O'rta", "desc": "Ko'p sayohat vaziyatlarini hal qiling va tajribalarni tavsiflang." },
-    "c1": { "name": "Rivojlangan", "desc": "Ijtimoiy va kasbiy maqsadlar uchun bemalol ifodalash." },
-    "c2": { "name": "Ustoz", "desc": "Ona tiliga yaqin aniqlik va ravonlik." }
+    "a1": {
+      "name": "Boshlang'ich",
+      "desc": "Asosiy so'zlar va oddiy iboralar."
+    },
+    "a2": {
+      "name": "Elementar",
+      "desc": "Tanish mavzularda oddiy suhbatlar."
+    },
+    "b1": {
+      "name": "Pre-Intermediate",
+      "desc": "Ona tili so'zlashuvchilar bilan bemalol muloqot."
+    },
+    "b2": {
+      "name": "O'rta",
+      "desc": "Ko'p sayohat vaziyatlarini hal qiling va tajribalarni tavsiflang."
+    },
+    "c1": {
+      "name": "Rivojlangan",
+      "desc": "Ijtimoiy va kasbiy maqsadlar uchun bemalol ifodalash."
+    },
+    "c2": {
+      "name": "Ustoz",
+      "desc": "Ona tiliga yaqin aniqlik va ravonlik."
+    }
   },
   "exam": {
     "typeInstruction": {
@@ -105,15 +262,22 @@
       "translation": "Berilgan iborani tarjima qiling",
       "word_order": "So'zlarni to'g'ri tartibda joylashtiring"
     },
-    "question": "Savol", "yourAnswer": "Javobingiz", "clear": "Tozalash",
+    "question": "Savol",
+    "yourAnswer": "Javobingiz",
+    "clear": "Tozalash",
     "selectWords": "So'zlarni quyidan tanlang...",
-    "wordBank": "So'z banki", "allWordsUsed": "Barcha so'zlar ishlatildi",
+    "wordBank": "So'z banki",
+    "allWordsUsed": "Barcha so'zlar ishlatildi",
     "writePlaceholder": "Javobingizni shu yerga yozing...",
     "translatePhrase": "Quyidagi iborani tarjima qiling",
     "translatePlaceholder": "Tarjimangizni shu yerga yozing...",
-    "prev": "Oldingi", "next": "Keyingi", "finish": "Tugatish", "submitting": "Topshirilmoqda...",
+    "prev": "Oldingi",
+    "next": "Keyingi",
+    "finish": "Tugatish",
+    "submitting": "Topshirilmoqda...",
     "notFound": "Test topilmadi",
-    "backToLevels": "Darajalarga qaytish", "allLevels": "Barcha darajalar",
+    "backToLevels": "Darajalarga qaytish",
+    "allLevels": "Barcha darajalar",
     "noQuestions": "Bu testda hali savollar yo'q.",
     "submitSuccess": "Test muvaffaqiyatli topshirildi.",
     "submitError": "Natijani saqlashda xatolik, lekin natijangiz ko'rsatilmoqda.",
@@ -123,7 +287,8 @@
     "exitModal": {
       "title": "Testdan chiqasizmi?",
       "message": "Jarayoningiz saqlanmaydi. Darajalar sahifasiga qaytasiz.",
-      "continue": "Davom etish", "exit": "Chiqish"
+      "continue": "Davom etish",
+      "exit": "Chiqish"
     },
     "backConfirm": {
       "title": "Testdan chiqmoqchimisiz?",
@@ -139,118 +304,192 @@
     "noResults": "Natijalar topilmadi",
     "noResultsDesc": "Natijalarni ko'rish uchun testni yakunlang.",
     "goToTests": "Testlarga o'tish",
-    "correctSlash": "to'g'ri", "incorrectSlash": "noto'g'ri",
-    "totalQuestions": "Jami Savollar", "correct": "To'g'ri", "incorrect": "Noto'g'ri",
-    "tests": "Testlar", "retake": "Qayta yechish",
+    "correctSlash": "to'g'ri",
+    "incorrectSlash": "noto'g'ri",
+    "totalQuestions": "Jami Savollar",
+    "correct": "To'g'ri",
+    "incorrect": "Noto'g'ri",
+    "tests": "Testlar",
+    "retake": "Qayta yechish",
     "details": "Batafsil Natijalar",
-    "question": "Savol", "correctLabel": "To'g'ri", "incorrectLabel": "Noto'g'ri",
-    "correctAnswer": "To'g'ri javob", "yourAnswer": "Sizning javobingiz",
-    "yourAnswerLabel": "Sizning javobingiz: ", "correctAnswerLabel": "To'g'ri javob: ",
+    "question": "Savol",
+    "correctLabel": "To'g'ri",
+    "incorrectLabel": "Noto'g'ri",
+    "correctAnswer": "To'g'ri javob",
+    "yourAnswer": "Sizning javobingiz",
+    "yourAnswerLabel": "Sizning javobingiz: ",
+    "correctAnswerLabel": "To'g'ri javob: ",
     "explanation": "Tushuntirish: To'g'ri javob",
     "empty": "(bo'sh)"
   },
   "beginner": {
-    "backToLevels": "Darajalarga qaytish", "level": "A1", "title": "Boshlang'ich Testlar",
+    "backToLevels": "Darajalarga qaytish",
+    "level": "A1",
+    "title": "Boshlang'ich Testlar",
     "subtitle": "Boshlang'ich darajadagi testlar bilan ingliz tili bilimingizni sinab ko'ring",
-    "loading": "Testlar yuklanmoqda...", "noTests": "Testlar mavjud emas",
+    "loading": "Testlar yuklanmoqda...",
+    "noTests": "Testlar mavjud emas",
     "noTestsDesc": "Boshlang'ich daraja uchun hali chop etilgan testlar yo'q. Keyinroq tekshiring!",
-    "questions": "savol", "start": "Boshlash",
+    "questions": "savol",
+    "start": "Boshlash",
     "startModal": {
-      "title": "Testni Boshlash?", "readyFor": "Boshlashga tayyormisiz:",
-      "questions": "savol", "timeLimit": "60 daqiqa vaqt chegarasi",
-      "level": "Daraja: A1 (Boshlang'ich)", "cancel": "Bekor qilish", "start": "Boshlash"
+      "title": "Testni Boshlash?",
+      "readyFor": "Boshlashga tayyormisiz:",
+      "questions": "savol",
+      "timeLimit": "60 daqiqa vaqt chegarasi",
+      "level": "Daraja: A1 (Boshlang'ich)",
+      "cancel": "Bekor qilish",
+      "start": "Boshlash"
     }
   },
   "profile": {
-    "active": "Faol", "adminPanel": "Admin Paneli", "logout": "Chiqish",
+    "active": "Faol",
+    "adminPanel": "Admin Paneli",
+    "logout": "Chiqish",
     "profilePicture": "Profil Rasmi",
-    "uploadPhoto": "Rasm yuklash", "uploading": "Yuklanmoqda...",
-    "deleting": "O'chirilmoqda...", "deletePhoto": "O'chirish",
-    "fullName": "To'liq ism *", "fullNamePlaceholder": "Ismingizni kiriting",
-    "email": "Email manzil", "emailNote": "Email o'zgartirib bo'lmaydi",
-    "username": "Username", "usernamePlaceholder": "username (3-20 ta belgi)",
-    "phone": "Telefon raqami", "phonePlaceholder": "+998 90 000 00 00",
-    "bio": "Bio", "bioPlaceholder": "O'zingiz haqida yozing...",
-    "saving": "Saqlanmoqda...", "save": "Profilni saqlash",
-    "dataLoading": "Ma'lumotlar yuklanmoqda...", "loading": "Yuklanmoqda...",
-    "darkMode": "Qorong'i rejim", "toggleTheme": "Mavzuni almashtirish",
-    "currentTheme": "Joriy mavzu", "dark": "Qorong'i", "light": "Yorug'",
-    "activeMode": "rejim faol", "comingSoon": "tez orada",
-    "logoutModal": { "title": "Tizimdan chiqish", "message": "Hisobingizdan chiqmoqchimisiz?", "confirm": "Chiqish" },
+    "uploadPhoto": "Rasm yuklash",
+    "uploading": "Yuklanmoqda...",
+    "deleting": "O'chirilmoqda...",
+    "deletePhoto": "O'chirish",
+    "fullName": "To'liq ism *",
+    "fullNamePlaceholder": "Ismingizni kiriting",
+    "email": "Email manzil",
+    "emailNote": "Email o'zgartirib bo'lmaydi",
+    "username": "Username",
+    "usernamePlaceholder": "username (3-20 ta belgi)",
+    "phone": "Telefon raqami",
+    "phonePlaceholder": "+998 90 000 00 00",
+    "bio": "Bio",
+    "bioPlaceholder": "O'zingiz haqida yozing...",
+    "saving": "Saqlanmoqda...",
+    "save": "Profilni saqlash",
+    "dataLoading": "Ma'lumotlar yuklanmoqda...",
+    "loading": "Yuklanmoqda...",
+    "darkMode": "Qorong'i rejim",
+    "toggleTheme": "Mavzuni almashtirish",
+    "currentTheme": "Joriy mavzu",
+    "dark": "Qorong'i",
+    "light": "Yorug'",
+    "activeMode": "rejim faol",
+    "comingSoon": "tez orada",
+    "logoutModal": {
+      "title": "Tizimdan chiqish",
+      "message": "Hisobingizdan chiqmoqchimisiz?",
+      "confirm": "Chiqish"
+    },
     "validation": {
       "nameEmpty": "Ism bo'sh bo'lishi mumkin emas",
       "usernameBad": "Username: 3-20 ta harf, raqam yoki _",
       "phoneBad": "Telefon raqami noto'g'ri formatda"
     },
     "toasts": {
-      "photoUpdated": "Profil rasmi yangilandi", "photoError": "Rasmni saqlashda xatolik yuz berdi",
-      "photoDeleted": "Profil rasmi o'chirildi", "photoDeleteError": "Rasmni o'chirishda xatolik yuz berdi",
-      "profileSaved": "Profil muvaffaqiyatli yangilandi", "profileError": "Profilni yangilashda xatolik yuz berdi",
-      "logoutSuccess": "Tizimdan muvaffaqiyatli chiqdingiz.", "logoutError": "Chiqishda xatolik yuz berdi"
+      "photoUpdated": "Profil rasmi yangilandi",
+      "photoError": "Rasmni saqlashda xatolik yuz berdi",
+      "photoDeleted": "Profil rasmi o'chirildi",
+      "photoDeleteError": "Rasmni o'chirishda xatolik yuz berdi",
+      "profileSaved": "Profil muvaffaqiyatli yangilandi",
+      "profileError": "Profilni yangilashda xatolik yuz berdi",
+      "logoutSuccess": "Tizimdan muvaffaqiyatli chiqdingiz.",
+      "logoutError": "Chiqishda xatolik yuz berdi"
     },
     "tabs": {
-      "account": "Hisob Sozlamalari", "security": "Kirish va Xavfsizlik",
-      "notifications": "Bildirishnomalar", "interface": "Interfeys"
+      "account": "Hisob Sozlamalari",
+      "security": "Kirish va Xavfsizlik",
+      "notifications": "Bildirishnomalar",
+      "interface": "Interfeys"
     }
   },
   "mockTestComp": {
-    "badge": "Sinov Testi", "title": "Bizning", "highlight": "Sinov Testini Ko'ring",
+    "badge": "Sinov Testi",
+    "title": "Bizning",
+    "highlight": "Sinov Testini Ko'ring",
     "loading": "Savollar yuklanmoqda...",
     "loadError": "Firebase savollari yuklanmadi. Mahalliy namunaviy savollar ko'rsatilmoqda.",
-    "correct": "To'g'ri", "bandScore": "Taxminiy Ball", "tryAgain": "Qaytadan Urinish",
-    "prev": "Oldingi", "next": "Keyingi", "submit": "Testni Topshirish",
+    "correct": "To'g'ri",
+    "bandScore": "Taxminiy Ball",
+    "tryAgain": "Qaytadan Urinish",
+    "prev": "Oldingi",
+    "next": "Keyingi",
+    "submit": "Testni Topshirish",
     "noQuestions": "Savollar topilmadi."
   },
   "notFound": {
-    "title": "404", "subtitle": "Sahifa Topilmadi",
+    "title": "404",
+    "subtitle": "Sahifa Topilmadi",
     "desc": "Siz qidirayotgan sahifa mavjud emas yoki ko'chirilgan.",
     "backHome": "Bosh sahifaga qaytish"
   },
   "underConstruction": {
-    "backHome": "Bosh sahifaga qaytish", "comingSoon": "Bu sahifa tayyorlanmoqda"
+    "backHome": "Bosh sahifaga qaytish",
+    "comingSoon": "Bu sahifa tayyorlanmoqda"
   },
   "adminTests": {
-    "title": "Testlar Boshqaruvi", "subtitle": "Barcha daraja testlarini boshqaring",
-    "addNew": "Yangi Test Qo'shish", "search": "Testlarni qidirish...",
-    "loading": "Testlar yuklanmoqda...", "noTests": "Testlar mavjud emas",
+    "title": "Testlar Boshqaruvi",
+    "subtitle": "Barcha daraja testlarini boshqaring",
+    "addNew": "Yangi Test Qo'shish",
+    "search": "Testlarni qidirish...",
+    "loading": "Testlar yuklanmoqda...",
+    "noTests": "Testlar mavjud emas",
     "noMatch": "Qidiruv bo'yicha testlar topilmadi",
     "noTestsDesc": "Birinchi testingizni yaratib boshlang",
     "createFirst": "Birinchi Testni Yarating",
-    "published": "Chop etilgan", "draft": "Qoralama", "total": "Jami", "showing": "Ko'rsatilmoqda",
+    "published": "Chop etilgan",
+    "draft": "Qoralama",
+    "total": "Jami",
+    "showing": "Ko'rsatilmoqda",
     "deleteModal": {
       "title": "Testni o'chirish",
       "message": "Haqiqatan ham bu testni o'chirmoqchimisiz? Bu amalni qaytarib bo'lmaydi."
     }
   },
   "studentsList": {
-    "title": "O'quvchilar", "subtitle": "Barcha ro'yxatdan o'tgan o'quvchilarni ko'ring",
+    "title": "O'quvchilar",
+    "subtitle": "Barcha ro'yxatdan o'tgan o'quvchilarni ko'ring",
     "search": "Ism yoki email bo'yicha qidirish...",
-    "loading": "Yuklanmoqda...", "noFound": "O'quvchilar topilmadi",
+    "loading": "Yuklanmoqda...",
+    "noFound": "O'quvchilar topilmadi",
     "noMatch": "Qidiruv mezonlarini o'zgartiring",
     "noRegistered": "Ro'yxatdan o'tgandan keyin o'quvchilar bu yerda ko'rinadi",
-    "noEmail": "Email ko'rsatilmagan", "verified": "Tasdiqlangan"
+    "noEmail": "Email ko'rsatilmagan",
+    "verified": "Tasdiqlangan"
   },
   "results": {
-    "backHome": "Bosh sahifaga qaytish", "title": "O'quvchi Natijalari",
-    "subtitle": "Firestore'dan o'quvchi ko'rsatkichlarini ko'ring", "avg": "O'rt",
-    "totalStudents": "Jami O'quvchilar", "averageScore": "O'rtacha Ball",
-    "passed": "O'tdi (70%+)", "withLevel": "CEFR Darajali",
-    "search": "O'quvchilarni qidirish...", "loading": "Yuklanmoqda...",
+    "backHome": "Bosh sahifaga qaytish",
+    "title": "O'quvchi Natijalari",
+    "subtitle": "Firestore'dan o'quvchi ko'rsatkichlarini ko'ring",
+    "avg": "O'rt",
+    "totalStudents": "Jami O'quvchilar",
+    "averageScore": "O'rtacha Ball",
+    "passed": "O'tdi (70%+)",
+    "withLevel": "CEFR Darajali",
+    "search": "O'quvchilarni qidirish...",
+    "loading": "Yuklanmoqda...",
     "loadError": "Natijalarni yuklashda xatolik. Qayta urinib ko'ring.",
-    "noFound": "O'quvchilar Topilmadi", "noMatch": "Qidiruv bo'yicha o'quvchilar topilmadi",
+    "noFound": "O'quvchilar Topilmadi",
+    "noMatch": "Qidiruv bo'yicha o'quvchilar topilmadi",
     "noData": "Firestore'da o'quvchi ma'lumotlari mavjud emas",
     "tableHeaders": {
-      "student": "O'quvchi", "level": "Daraja",
-      "listening": "Tinglash", "reading": "O'qish",
-      "writing": "Yozish", "speaking": "Gapirish", "average": "O'rtacha"
+      "student": "O'quvchi",
+      "level": "Daraja",
+      "listening": "Tinglash",
+      "reading": "O'qish",
+      "writing": "Yozish",
+      "speaking": "Gapirish",
+      "average": "O'rtacha"
     }
   },
-  "confirmModal": { "cancel": "Bekor qilish", "waiting": "Kutilmoqda..." },
-  "common": { "select": "Tanlang..." },
+  "confirmModal": {
+    "cancel": "Bekor qilish",
+    "waiting": "Kutilmoqda..."
+  },
+  "common": {
+    "select": "Tanlang..."
+  },
   "errorBoundary": {
     "title": "Xatolik yuz berdi",
     "desc": "Ushbu kontentni yuklashda xatolik yuz berdi. Keyinroq qayta urinib ko'ring.",
-    "tryAgain": "Qayta Urinish", "details": "Xatolik Tafsilotlari"
+    "tryAgain": "Qayta Urinish",
+    "details": "Xatolik Tafsilotlari"
   },
   "examTerminated": {
     "title": "Test Sessiyasi Tugatildi",
@@ -282,6 +521,10 @@
     "storageUnauthorized": "Faylni yuklash uchun ruxsat yo'q.",
     "storageNotFound": "Fayl topilmadi.",
     "storageQuota": "Saqlash limiti oshib ketdi.",
-    "default": "Xatolik yuz berdi. Iltimos, qaytadan urinib ko'ring."
+    "default": "Xatolik yuz berdi. Iltimos, qaytadan urinib ko'ring.",
+    "unauthorizedDomain": "Bu domen Firebase-da ruxsat etilmagan. Firebase Console → Authentication → Authorized domains ga domeningizni qo'shing.",
+    "operationNotAllowed": "Google orqali kirish faollashtirilmagan. Firebase Console-da Google providerini yoqing.",
+    "popupBlocked": "Brauzer pop-up oynasini blokladi. Pop-up-larni ruxsat bering va qaytadan urinib ko'ring.",
+    "internalError": "Firebase ichki xatosi yuz berdi. Qaytadan urinib ko'ring."
   }
 }
