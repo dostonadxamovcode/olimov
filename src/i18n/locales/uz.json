@@ -16,7 +16,8 @@
     "logoutTitle": "Tizimdan chiqish",
     "logoutMessage": "Hisobingizdan chiqmoqchimisiz? Bosh sahifaga yo'naltirilasiz.",
     "logoutConfirm": "Chiqish",
-    "logoutSuccess": "Tizimdan muvaffaqiyatli chiqdingiz."
+    "logoutSuccess": "Tizimdan muvaffaqiyatli chiqdingiz.",
+    "adminPanel": "Admin paneli"
   },
   "hero": {
     "words": [

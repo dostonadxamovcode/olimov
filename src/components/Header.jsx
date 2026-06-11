@@ -1,6 +1,6 @@
 import { memo, useState, useEffect, useRef, useCallback } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, LogOut, User, ChevronDown } from 'lucide-react';
+import { Menu, X, LogOut, User, ChevronDown, LayoutDashboard } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { navLinks } from '../data/siteData';
 import { useAuth } from '../context/AuthContext';
@@ -202,6 +202,18 @@ export default function Header() {
                         <p className="m-0.5 mt-0.5 text-xs text-slate-600 truncate">{currentUser.email}</p>
                       </div>
                       <div className="h-px bg-white/6 mb-2" />
+                      {(isSuperadmin || userRole === 'admin') && (
+                        <Link
+                          to="/admin"
+                          onClick={() => setIsProfileOpen(false)}
+                          className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/6 transition-[color,background-color] duration-150 w-full text-left"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-violet-500/12 border border-violet-500/20 flex items-center justify-center flex-shrink-0">
+                            <LayoutDashboard className="w-4 h-4 text-violet-400" />
+                          </div>
+                          {t('header.adminPanel')}
+                        </Link>
+                      )}
                       <Link
                         to="/profile"
                         className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/6 transition-[color,background-color] duration-150 w-full text-left"
@@ -309,6 +321,16 @@ export default function Header() {
               </div>
             ) : currentUser ? (
               <>
+                {(isSuperadmin || userRole === 'admin') && (
+                  <Link
+                    to="/admin"
+                    onClick={closeMobileMenu}
+                    className="flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-[color,background-color] duration-200 w-full"
+                  >
+                    <LayoutDashboard className="w-4 h-4 text-violet-400 flex-shrink-0" />
+                    {t('header.adminPanel')}
+                  </Link>
+                )}
                 <Link
                   to="/profile"
                   onClick={closeMobileMenu}

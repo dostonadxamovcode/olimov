@@ -16,7 +16,8 @@
     "logoutTitle": "Log out",
     "logoutMessage": "Are you sure you want to log out? You'll be redirected to the home page.",
     "logoutConfirm": "Log out",
-    "logoutSuccess": "Successfully logged out."
+    "logoutSuccess": "Successfully logged out.",
+    "adminPanel": "Admin Panel"
   },
   "hero": {
     "words": [

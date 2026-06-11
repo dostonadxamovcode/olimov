@@ -42,93 +42,69 @@ service cloud.firestore {
       allow read:   if isSuperadmin();
     }
 
+    // ── Test collections — admin and superadmin can manage ─────────────────────
+
     match /tests/{docId} {
-      allow read: if true;
-      allow create, update, delete: if isSuperadmin();
+      allow read: if signedIn();
+      allow create, update, delete: if isAdminOrAbove();
     }
 
-    // Dynamic level-based test collections
-    match /a1Tests/{docId} {
-      allow read: if true;
-      allow create, update, delete: if isSuperadmin();
+    match /skillReadingTests/{docId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdminOrAbove();
     }
 
-    match /a2Tests/{docId} {
-      allow read: if true;
-      allow create, update, delete: if isSuperadmin();
-    }
-
-    match /b1Tests/{docId} {
-      allow read: if true;
-      allow create, update, delete: if isSuperadmin();
-    }
-
-    match /b2Tests/{docId} {
-      allow read: if true;
-      allow create, update, delete: if isSuperadmin();
-    }
-
-    match /c1Tests/{docId} {
-      allow read: if true;
-      allow create, update, delete: if isSuperadmin();
-    }
-
-    match /c2Tests/{docId} {
-      allow read: if true;
-      allow create, update, delete: if isSuperadmin();
-    }
-
-    match /students/{docId} {
-      allow read: if true;
-      allow create, update, delete: if isSuperadmin();
-    }
-
-    match /ielts/{docId} {
-      allow read: if true;
-      allow create, update, delete: if isSuperadmin();
-    }
+    // Level-based test collections
+    match /a1Tests/{docId} { allow read: if signedIn(); allow create, update, delete: if isAdminOrAbove(); }
+    match /a2Tests/{docId} { allow read: if signedIn(); allow create, update, delete: if isAdminOrAbove(); }
+    match /b1Tests/{docId} { allow read: if signedIn(); allow create, update, delete: if isAdminOrAbove(); }
+    match /b2Tests/{docId} { allow read: if signedIn(); allow create, update, delete: if isAdminOrAbove(); }
+    match /c1Tests/{docId} { allow read: if signedIn(); allow create, update, delete: if isAdminOrAbove(); }
+    match /c2Tests/{docId} { allow read: if signedIn(); allow create, update, delete: if isAdminOrAbove(); }
 
     // Question pool collections
-    match /a1Pool/{docId} {
-      allow read: if true;
-      allow create, update, delete: if isSuperadmin();
+    match /a1Pool/{docId} { allow read: if signedIn(); allow create, update, delete: if isAdminOrAbove(); }
+    match /a2Pool/{docId} { allow read: if signedIn(); allow create, update, delete: if isAdminOrAbove(); }
+    match /b1Pool/{docId} { allow read: if signedIn(); allow create, update, delete: if isAdminOrAbove(); }
+    match /b2Pool/{docId} { allow read: if signedIn(); allow create, update, delete: if isAdminOrAbove(); }
+    match /c1Pool/{docId} { allow read: if signedIn(); allow create, update, delete: if isAdminOrAbove(); }
+    match /c2Pool/{docId} { allow read: if signedIn(); allow create, update, delete: if isAdminOrAbove(); }
+
+    match /ielts/{docId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdminOrAbove();
     }
 
-    match /a2Pool/{docId} {
-      allow read: if true;
-      allow create, update, delete: if isSuperadmin();
+    match /questions/{docId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdminOrAbove();
     }
 
-    match /b1Pool/{docId} {
-      allow read: if true;
-      allow create, update, delete: if isSuperadmin();
-    }
-
-    match /b2Pool/{docId} {
-      allow read: if true;
-      allow create, update, delete: if isSuperadmin();
-    }
-
-    match /c1Pool/{docId} {
-      allow read: if true;
-      allow create, update, delete: if isSuperadmin();
-    }
-
-    match /c2Pool/{docId} {
-      allow read: if true;
-      allow create, update, delete: if isSuperadmin();
+    // students collection (CEFR student records) — admin and above
+    match /students/{docId} {
+      allow read: if isAdminOrAbove();
+      allow create, update, delete: if isAdminOrAbove();
     }
 
     match /results/{document=**} {
-      allow read: if isSuperadmin() || (signedIn() && resource.data.userId == request.auth.uid);
+      allow read: if isAdminOrAbove()
+                  || (signedIn() && resource.data.userId == request.auth.uid);
       allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
-      allow list, get: if isSuperadmin();
-      allow update, delete: if isSuperadmin();
+      allow list, get: if isAdminOrAbove();
+      allow update, delete: if isAdminOrAbove();
     }
 
+    // ── Config collections — superadmin writes, anyone reads ──────────────────
+    match /settings/{docId}      { allow read: if isAdminOrAbove(); allow write: if isSuperadmin(); }
+    match /statistics/{docId}    { allow read: if isAdminOrAbove(); allow write: if isAdminOrAbove(); }
+    match /announcements/{docId} { allow read: if true;             allow write: if isAdminOrAbove(); }
+    match /levels/{docId}        { allow read: if signedIn();       allow write: if isAdminOrAbove(); }
+    match /services/{docId}      { allow read: if true;             allow write: if isSuperadmin(); }
+    match /features/{docId}      { allow read: if true;             allow write: if isSuperadmin(); }
+
+    // ── Catch-all: deny everything not explicitly allowed ─────────────────────
     match /{document=**} {
-      allow read: if isSuperadmin() || signedIn();
-      allow list: if isSuperadmin();
+      allow read: if isAdminOrAbove();
       allow write: if isSuperadmin();
     }
   }

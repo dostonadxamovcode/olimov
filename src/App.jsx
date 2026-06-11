@@ -37,11 +37,12 @@ const SkillReadingPage= lazy(() => import('./pages/SkillReadingPage'))
 function LoginGate({ children }) {
   const { currentUser, userRole } = useAuth()
   if (currentUser) {
-    const isAdmin =
+    const hasAdminAccess =
       userRole === 'superadmin' ||
+      userRole === 'admin' ||
       isSuperAdmin(currentUser.email) ||
       currentUser.email.toLowerCase() === 'superadmin@gmail.com'
-    return <Navigate to={isAdmin ? '/admin' : '/'} replace />
+    return <Navigate to={hasAdminAccess ? '/admin' : '/'} replace />
   }
   return children
 }
@@ -61,7 +62,7 @@ const router = createBrowserRouter([
   { path: '/auth',     element: <Navigate to="/login" replace /> },
   {
     path: '/admin',
-    element: <RoleProtectedRoute allowedRoles={['superadmin']} />,
+    element: <RoleProtectedRoute allowedRoles={['superadmin', 'admin']} />,
     children: [
       { index: true,                    element: <LazyPage><AdminPage /></LazyPage> },
       { path: 'add-test',               element: <LazyPage><AddTestPage /></LazyPage> },
