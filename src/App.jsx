@@ -34,6 +34,12 @@ const Profile        = lazy(() => import('./pages/Profile'))
 const SkillTestsPage  = lazy(() => import('./pages/SkillTestsPage'))
 const SkillReadingPage= lazy(() => import('./pages/SkillReadingPage'))
 
+function SuperadminOnlyRoute({ children }) {
+  const { userRole } = useAuth()
+  if (userRole !== 'superadmin') return <Navigate to="/admin" replace />
+  return children
+}
+
 function LoginGate({ children }) {
   const { currentUser, userRole } = useAuth()
   if (currentUser) {
@@ -70,7 +76,7 @@ const router = createBrowserRouter([
       { path: 'skill-tests',            element: <LazyPage><AdminPage /></LazyPage> },
       { path: 'skill-tests/add',        element: <LazyPage><AdminSkillTestFormPage /></LazyPage> },
       { path: 'skill-tests/edit/:id',   element: <LazyPage><AdminSkillTestFormPage /></LazyPage> },
-      { path: 'students',               element: <LazyPage><AdminPage /></LazyPage> },
+      { path: 'students',               element: <SuperadminOnlyRoute><LazyPage><AdminPage /></LazyPage></SuperadminOnlyRoute> },
       { path: 'edit-test/:id',          element: <LazyPage><EditTestPage /></LazyPage> },
     ],
   },

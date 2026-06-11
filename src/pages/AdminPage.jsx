@@ -83,7 +83,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 export default function AdminDashboard() {
   const [active, setActive] = useState('overview')
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const { user } = useAuth()
+  const { user, userRole } = useAuth()
   const [avatarError, setAvatarError] = useState(false)
   const [usersCount, setUsersCount] = useState(0)
   const [usersCountLoading, setUsersCountLoading] = useState(true)
@@ -221,7 +221,7 @@ export default function AdminDashboard() {
 
         {/* Nav */}
         <nav style={{ padding: '20px 12px', flex: 1, marginTop: '0' }}>
-          {navItems.map(({ id, label, icon: Icon }) => (
+          {navItems.filter(item => item.id !== 'students' || userRole === 'superadmin').map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               onClick={() => {
@@ -398,7 +398,7 @@ export default function AdminDashboard() {
             <AdminTestsContent />
           ) : active === 'skill-tests' ? (
             <AdminSkillTestsContent />
-          ) : active === 'students' ? (
+          ) : active === 'students' && userRole === 'superadmin' ? (
             <StudentsList />
           ) : (
             <>
