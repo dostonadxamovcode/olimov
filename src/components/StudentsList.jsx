@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Search, Mail, Calendar, User, Clock } from '../lib/icons'
 import { ShieldCheck, ShieldOff, Shield } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { toastError } from '../utils/errorHandler'
+import { toastError, toastSuccess } from '../utils/errorHandler'
 import { LoadingSpinner } from './ui/SkeletonLoader'
 import { getStudents } from '../services/students'
 import { changeUserRole } from '../services/roleManagement'
@@ -84,7 +84,6 @@ export default function StudentsList() {
   const [searchQuery, setSearchQuery] = useState('')
   const [modal,       setModal]       = useState({ open: false, userId: null, userName: null, action: null })
   const [roleLoading, setRoleLoading] = useState(false)
-  const [toast,       setToast]       = useState(null)
 
   useEffect(() => { fetchStudents() }, [])
 
@@ -97,11 +96,6 @@ export default function StudentsList() {
     } finally {
       setLoading(false)
     }
-  }
-
-  const showToast = (type, msg) => {
-    setToast({ type, msg })
-    setTimeout(() => setToast(null), 3500)
   }
 
   const openModal = (student, action) => {
@@ -117,10 +111,10 @@ export default function StudentsList() {
       setStudents(prev =>
         prev.map(s => s.id === modal.userId ? { ...s, role: newRole } : s)
       )
-      showToast('ok', modal.action === 'promote' ? 'User promoted to admin' : 'Admin demoted to user')
+      toastSuccess(modal.action === 'promote' ? 'User promoted to admin' : 'Admin demoted to user')
       setModal({ open: false })
     } catch (e) {
-      showToast('err', e.message || 'You don\'t have permission')
+      toastError(e.message || 'You don\'t have permission')
     } finally {
       setRoleLoading(false)
     }
@@ -150,22 +144,6 @@ export default function StudentsList() {
 
   return (
     <div className="pb-20">
-
-      {/* Toast */}
-      {toast && (
-        <div style={{
-          position: 'fixed', top: 20, right: 20, zIndex: 9999,
-          display: 'flex', alignItems: 'center', gap: 10,
-          padding: '12px 18px', borderRadius: 12,
-          background: toast.type === 'ok' ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
-          border: `1px solid ${toast.type === 'ok' ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)'}`,
-          color: toast.type === 'ok' ? '#86efac' : '#fca5a5',
-          fontSize: 13, fontWeight: 500, backdropFilter: 'blur(12px)',
-          boxShadow: '0 10px 40px rgba(0,0,0,0.4)',
-        }}>
-          {toast.msg}
-        </div>
-      )}
 
       {/* Confirm Modal */}
       <ConfirmModal
