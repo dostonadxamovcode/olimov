@@ -253,6 +253,7 @@ export default function Profile() {
 
   const displayName = currentUser.displayName || currentUser.email?.split('@')[0] || 'User'
   const isSuperAdminUser = user?.role === 'superadmin' ||
+                           user?.role === 'admin' ||
                            isSuperAdmin(currentUser.email) ||
                            currentUser.email?.toLowerCase() === 'superadmin@gmail.com'
 
