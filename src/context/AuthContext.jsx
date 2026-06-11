@@ -66,33 +66,12 @@ export function AuthProvider({ children }) {
           serverTimestamp,
           setPersistence,
           browserLocalPersistence,
-          getRedirectResult,
         } = await loadAuthClient()
 
         try {
           await setPersistence(auth, browserLocalPersistence)
         } catch {
           // Non-fatal — continue without explicit persistence setting
-        }
-
-        // Handle redirect-flow result (fires once after Google redirect back)
-        try {
-          const redirectResult = await getRedirectResult(auth)
-          if (redirectResult?.user) {
-            const u = redirectResult.user
-            const role = u.email.toLowerCase() === 'superadmin@gmail.com' ? 'superadmin' : 'user'
-            await setDoc(doc(db, 'users', u.uid), { email: u.email, role, createdAt: serverTimestamp() }, { merge: true })
-          }
-        } catch (redirectErr) {
-          // Log redirect errors so they are visible in the console
-          if (redirectErr?.code) {
-            console.error('Google Redirect Auth Error:', {
-              code: redirectErr?.code,
-              message: redirectErr?.message,
-              email: redirectErr?.customData?.email,
-              authDomain: window.location.hostname,
-            })
-          }
         }
 
         unsubscribeAuth = onAuthStateChanged(
@@ -182,14 +161,13 @@ export function AuthProvider({ children }) {
   }
 
   const googleLogin = async () => {
-    const { auth, GoogleAuthProvider, signInWithRedirect } = await loadAuthClient()
+    const { auth, db, GoogleAuthProvider, signInWithPopup, doc, setDoc, serverTimestamp } = await loadAuthClient()
     const provider = new GoogleAuthProvider()
-    // signInWithPopup triggers iframe.js cross-origin postMessage failure on
-    // Vercel (parent on vercel.app, popup relay on firebaseapp.com → blocked).
-    // signInWithRedirect avoids the iframe relay entirely — works on any domain.
-    await signInWithRedirect(auth, provider)
-    // Page reloads after Google login — result is handled in AuthProvider
-    // useEffect via getRedirectResult on the next load.
+    const result = await signInWithPopup(auth, provider)
+    const u = result.user
+    const role = u.email.toLowerCase() === 'superadmin@gmail.com' ? 'superadmin' : 'user'
+    await setDoc(doc(db, 'users', u.uid), { email: u.email, role, createdAt: serverTimestamp() }, { merge: true })
+    return result
   }
 
   const logout = async () => {

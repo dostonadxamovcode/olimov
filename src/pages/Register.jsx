@@ -38,21 +38,18 @@ export default function Register() {
 
   const handleGoogleLogin = async () => {
     setError('')
-    console.log('Google login started. hostname:', window.location.hostname)
     try {
       await googleLogin()
-      // signInWithRedirect — page reloads, result handled by AuthProvider
+      // onAuthStateChanged fires → LoginGate redirects automatically
     } catch (err) {
       console.error('Google Auth Error:', {
         code: err?.code,
         message: err?.message,
         email: err?.customData?.email,
-        credential: err?.credential,
-        hostname: window.location.hostname,
       })
       const msg = getErrorMessage(err)
-      toastError(`${msg} (${err?.code || 'unknown'})`)
-      setError(`${msg} (${err?.code || 'unknown'})`)
+      toastError(msg)
+      setError(msg)
     }
   }
 
