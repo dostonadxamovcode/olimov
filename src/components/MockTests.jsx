@@ -69,7 +69,7 @@ export default function MockTests() {
 
   return (
     <section id="mock-tests" tabIndex={-1} data-scroll-highlight className="section-deep py-14 outline-none">
-      <div className="absolute right-0 top-0 h-[500px] w-[500px] rounded-full bg-[#0ea5e9]/08 blur-3xl" />
+      <div className="absolute right-0 top-0 h-[500px] w-[500px] rounded-full bg-[#0ea5e9]/08 blur-3xl pointer-events-none" />
 
       <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 animate-fade-in-up">
@@ -110,7 +110,7 @@ export default function MockTests() {
               <div className="flex justify-between items-center mb-4">
                 <span className="text-sm font-semibold text-[#0ea5e9]">{t('mockTestComp.badge')} {current + 1} / {total}</span>
                 <div className="w-full ml-4 h-2 bg-gray-700 rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-[#0ea5e9] via-[#8b5cf6] to-[#f43f5e] transition-all duration-300" style={{ width: `${((current + 1) / total) * 100}%` }} />
+                  <div className="h-full bg-gradient-to-r from-[#0ea5e9] via-[#8b5cf6] to-[#f43f5e] transition-[width] duration-300" style={{ width: `${((current + 1) / total) * 100}%` }} />
                 </div>
               </div>
             </div>
@@ -124,7 +124,7 @@ export default function MockTests() {
                   <button
                     key={idx}
                     onClick={() => handleSelect(idx)}
-                    className={`w-full text-left p-4 rounded-xl border transition-all duration-300 ${
+                    className={`w-full text-left p-4 rounded-xl border transition-[background-color,border-color] duration-200 ${
                       isSelected
                         ? 'border-[#0ea5e9]/50 bg-[#0ea5e9]/10 text-white'
                         : 'border-white/10 bg-[#030712]/55 text-gray-200 hover:border-[#0ea5e9]/25 hover:bg-white/[0.06]'

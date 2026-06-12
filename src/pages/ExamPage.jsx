@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase'
@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { Clock, X, ChevronRight, AlertCircle, Check } from 'lucide-react'
 import { toastError, toastSuccess } from '../utils/errorHandler'
 import { LoadingSpinner } from '../components/ui/SkeletonLoader'
+import { useAntiCheatGuard } from '../hooks/useAntiCheatGuard'
 
 function useTimer(initial) {
   const [secs, setSecs] = useState(initial)
@@ -146,39 +147,19 @@ export default function ExamPage() {
   const { display: timerDisplay, secs } = useTimer(60 * 60)
 
   // --- EXAM SECURITY ---
-  const mountedAtRef = useRef(Date.now())
-  const terminatedRef = useRef(false)
-
-  useEffect(() => {
-    const terminateExam = () => {
-      if (terminatedRef.current) return
-      if (Date.now() - mountedAtRef.current < 500) return
-      terminatedRef.current = true
-      navigate('/exam-terminated')
-      // Firestore update in background - don't block navigation
-      if (testId && testId !== 'practice') {
-        const levelForDoc = levelId || location.state?.levelId || 'a1'
-        updateDoc(doc(db, `${levelForDoc}Tests`, testId), {
-          status: 'terminated',
-          terminatedReason: 'left_exam_environment',
-          terminatedAt: serverTimestamp(),
-        }).catch(() => {})
-      }
-    }
-
-    const onVisibility = () => {
-      if (document.visibilityState === 'hidden') terminateExam()
-    }
-    const onPageHide = () => terminateExam()
-
-    document.addEventListener('visibilitychange', onVisibility)
-    window.addEventListener('pagehide', onPageHide)
-
-    return () => {
-      document.removeEventListener('visibilitychange', onVisibility)
-      window.removeEventListener('pagehide', onPageHide)
+  const terminateExam = useCallback(() => {
+    navigate('/exam-terminated')
+    if (testId && testId !== 'practice') {
+      const levelForDoc = levelId || location.state?.levelId || 'a1'
+      updateDoc(doc(db, `${levelForDoc}Tests`, testId), {
+        status: 'terminated',
+        terminatedReason: 'left_exam_environment',
+        terminatedAt: serverTimestamp(),
+      }).catch(() => {})
     }
   }, [testId, levelId, navigate, location.state])
+
+  useAntiCheatGuard({ active: !loading && !!test, onViolation: terminateExam })
   // --- END EXAM SECURITY ---
 
   useEffect(() => {

@@ -1,27 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Clock, Target, Timer, ChartBar, Sparkles, Zap, ArrowRight } from 'lucide-react';
-
-function useInView(threshold = 0.1) {
-  const ref = useRef(null);
-  const [inView, setInView] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          observer.disconnect();
-        }
-      },
-      { threshold }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [threshold]);
-  return [ref, inView];
-}
+import { useInView } from '../hooks/useInView';
 
 const TEST_CARDS = [
   {
@@ -188,7 +167,7 @@ MockTests() {
                 }}
               >
                 <div
-                  className={`premium-card group h-full p-6 flex flex-col ${card.borderClass} ${card.hoverBorderClass} transition-all duration-300 hover:-translate-y-1.5`}
+                  className={`premium-card group h-full p-6 flex flex-col ${card.borderClass} ${card.hoverBorderClass} transition-[transform,border-color] duration-300 hover:-translate-y-1.5`}
                   style={{ boxShadow: `0 0 50px ${card.glow}, var(--shadow-lg)` }}
                 >
                   {/* Icon */}
@@ -220,7 +199,7 @@ MockTests() {
                   <button
                     type="button"
                     onClick={() => { if (i === 2) navigate('/skill-tests'); }}
-                    className={`w-full inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r ${card.btnGrad} shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl`}
+                    className={`w-full inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r ${card.btnGrad} shadow-lg transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-xl`}
                   >
                     Start Test
                     <ArrowRight className="w-4 h-4" />

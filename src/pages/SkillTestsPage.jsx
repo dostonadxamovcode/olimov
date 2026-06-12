@@ -146,7 +146,7 @@ function SkillCard({ skill, visible, onCardClick }) {
       }}
     >
       <div
-        className={`premium-card group h-full flex flex-col p-6 sm:p-7 ${skill.border} transition-all duration-300 hover:-translate-y-2 cursor-pointer`}
+        className={`premium-card group h-full flex flex-col p-6 sm:p-7 ${skill.border} transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-2 cursor-pointer`}
         style={{ boxShadow: `0 0 60px ${skill.glow}, var(--shadow-lg)` }}
         onClick={() => onCardClick(skill)}
         role="button"
@@ -191,7 +191,7 @@ function SkillCard({ skill, visible, onCardClick }) {
         <button
           type="button"
           onClick={e => { e.stopPropagation(); onCardClick(skill); }}
-          className={`w-full inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r ${skill.btnGrad} shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl`}
+          className={`w-full inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r ${skill.btnGrad} shadow-lg transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-xl`}
         >
           Start Practicing
           <ArrowRight className="w-4 h-4" />
@@ -323,7 +323,7 @@ function StartModal({ skill, onClose, onConfirm }) {
                   key={test.part}
                   type="button"
                   onClick={() => setSelected(test.part)}
-                  className={`group relative flex flex-col justify-between gap-3 rounded-xl p-4 text-left border transition-all duration-200 ${
+                  className={`group relative flex flex-col justify-between gap-3 rounded-xl p-4 text-left border transition-[background-color,border-color,box-shadow] duration-200 ${
                     isSelected
                       ? 'bg-blue-500/[0.08] border-blue-400/50 shadow-[0_0_0_1px_rgba(96,165,250,0.2)]'
                       : 'bg-white/[0.03] border-white/[0.07] hover:bg-white/[0.06] hover:border-white/[0.14]'
@@ -381,7 +381,7 @@ function StartModal({ skill, onClose, onConfirm }) {
             <button
               onClick={() => selected && onConfirm(selected)}
               disabled={!selected}
-              className={`flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r ${skill.btnGrad} shadow-lg transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0`}
+              className={`flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r ${skill.btnGrad} shadow-lg transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0`}
             >
               Start Test
               <ChevronRight className="w-4 h-4" />

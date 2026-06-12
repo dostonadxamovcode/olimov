@@ -1,10 +1,81 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft, BookOpen, Clock, CheckCircle2, XCircle, Trophy,
-  RotateCcw, ChevronRight,
+  RotateCcw, ChevronRight, ShieldAlert,
 } from 'lucide-react';
-import { getReadingTestByPart } from '../data/readingTests';  // fallback only
+import { getReadingTestByPart } from '../data/readingTests';
+import { useAntiCheatGuard } from '../hooks/useAntiCheatGuard';
+
+// ── Live countdown timer — isolated component to avoid re-rendering the page ─
+function LiveTimer({ initialMinutes }) {
+  const [seconds, setSeconds] = useState(initialMinutes * 60);
+
+  useEffect(() => {
+    const id = setInterval(() => setSeconds(s => Math.max(0, s - 1)), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const mins  = Math.floor(seconds / 60);
+  const secs  = seconds % 60;
+  const isLow = seconds <= 60;
+  const isMid = seconds <= 300;
+
+  return (
+    <div className={`flex items-center gap-1.5 text-xs font-bold tabular-nums transition-colors duration-500 ${
+      isLow ? 'text-red-400' : isMid ? 'text-amber-400' : 'text-gray-400'
+    }`}>
+      <Clock className={`w-3.5 h-3.5 flex-shrink-0 ${isLow ? 'animate-pulse' : ''}`} />
+      {/* key forces re-mount each second, re-triggering the CSS animation */}
+      <span key={seconds} className="timer-tick">
+        {mins}:{secs.toString().padStart(2, '0')}
+      </span>
+      {/* live dot */}
+      <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+        isLow ? 'bg-red-400 animate-pulse' : 'bg-emerald-400 animate-pulse'
+      }`} />
+    </div>
+  );
+}
+
+// ── Tab-switch violation overlay ──────────────────────────────────────────────
+function ViolationOverlay({ onDismiss }) {
+  return (
+    <div className="fixed inset-0 z-[500] flex items-center justify-center px-4" aria-modal="true" role="alertdialog">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
+
+      {/* Card */}
+      <div
+        className="relative w-full max-w-sm rounded-2xl p-7 text-center"
+        style={{
+          background: 'linear-gradient(145deg, rgba(239,68,68,0.12) 0%, rgba(10,16,35,0.95) 100%)',
+          border: '1px solid rgba(239,68,68,0.25)',
+          boxShadow: '0 32px 80px rgba(0,0,0,0.7), 0 0 60px rgba(239,68,68,0.08)',
+        }}
+      >
+        {/* Icon */}
+        <div className="w-16 h-16 rounded-full bg-red-500/15 border border-red-500/25 flex items-center justify-center mx-auto mb-5">
+          <ShieldAlert className="w-8 h-8 text-red-400" />
+        </div>
+
+        <h2 className="text-lg font-bold text-white mb-2">Test avtomatik yakunlandi</h2>
+        <p className="text-sm text-slate-400 leading-relaxed mb-6">
+          Tab yoki oyna almashtirish aniqlandi.
+          Xavfsizlik sababli javoblaringiz avtomatik topshirildi.
+        </p>
+
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-red-500/80 to-rose-600/80 hover:from-red-500 hover:to-rose-600 transition-all duration-200"
+        >
+          Natijalarni ko'rish
+        </button>
+      </div>
+    </div>
+  );
+}
 
 // ── Inline blank input ────────────────────────────────────────────────────────
 function FillBlank({ index, value, onChange, submitted, isCorrect, correctAnswer }) {
@@ -196,6 +267,7 @@ export default function SkillReadingPage() {
   const [userAnswers, setUserAnswers] = useState(() => Array(test.answers.length).fill(''));
   const [submitted,   setSubmitted]   = useState(false);
   const [results,     setResults]     = useState([]);
+  const [violated,    setViolated]    = useState(false);
 
   const total = test.answers.length;
 
@@ -245,17 +317,33 @@ export default function SkillReadingPage() {
     setUserAnswers(prev => { const n = [...prev]; n[index] = value; return n; });
   };
 
-  const handleCheck = () => {
-    const res = test.answers.map((ans, i) => userAnswers[i].trim().toLowerCase() === ans.toLowerCase());
+  const handleCheck = useCallback(() => {
+    const res = test.answers.map((ans, i) =>
+      (userAnswers[i] ?? '').trim().toLowerCase() === ans.toLowerCase()
+    );
     setResults(res);
     setSubmitted(true);
     setTimeout(() => passageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
-  };
+  }, [test.answers, userAnswers]);
+
+  // Fired by useAntiCheatGuard when a tab/window switch is detected.
+  const handleViolation = useCallback(() => {
+    setViolated(true);
+    // Auto-submit with whatever answers are filled so the user sees results.
+    setResults(test.answers.map((ans, i) =>
+      (userAnswers[i] ?? '').trim().toLowerCase() === ans.toLowerCase()
+    ));
+    setSubmitted(true);
+  }, [test.answers, userAnswers]);
+
+  // Guard is active only while the test is in progress (not yet submitted).
+  useAntiCheatGuard({ active: !submitted, onViolation: handleViolation });
 
   const handleReset = () => {
     setUserAnswers(Array(total).fill(''));
     setSubmitted(false);
     setResults([]);
+    setViolated(false);
   };
 
   const score       = results.filter(Boolean).length;
@@ -267,6 +355,9 @@ export default function SkillReadingPage() {
       className="relative min-h-screen"
       style={{ background: 'linear-gradient(160deg, #020812 0%, #060e1c 45%, #020812 100%)' }}
     >
+      {/* Tab-switch violation overlay */}
+      {violated && <ViolationOverlay onDismiss={() => setViolated(false)} />}
+
       {/* Ambient blobs */}
       <div className="absolute top-0 left-1/4 h-[600px] w-[600px] rounded-full bg-blue-700/[0.05] blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-cyan-700/[0.04] blur-3xl pointer-events-none" />
@@ -276,53 +367,60 @@ export default function SkillReadingPage() {
         className="sticky top-0 z-40 border-b border-white/[0.06]"
         style={{ background: 'rgba(3,9,22,0.88)', backdropFilter: 'blur(20px)' }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[76px] flex items-center gap-5">
           <button
             type="button"
             onClick={() => navigate('/skill-tests')}
-            className="inline-flex items-center gap-1.5 text-slate-400 hover:text-white text-sm font-medium transition-colors duration-200 group flex-shrink-0"
+            className="inline-flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium transition-colors duration-200 group flex-shrink-0 px-3 py-2 rounded-lg hover:bg-white/[0.06]"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform duration-200" />
             <span className="hidden sm:inline">Skills</span>
           </button>
 
-          <div className="w-px h-4 bg-white/10 flex-shrink-0" />
+          <div className="w-px h-5 bg-white/10 flex-shrink-0" />
 
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <BookOpen className="w-4 h-4 text-blue-400 flex-shrink-0" />
-            <span className="text-white font-semibold text-sm truncate">{test.title}</span>
+          <div className="flex items-center gap-2.5 flex-1 min-w-0">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-blue-500/15 border border-blue-500/25 flex-shrink-0">
+              <BookOpen className="w-3.5 h-3.5 text-blue-400" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold text-blue-400/70 uppercase tracking-widest leading-none mb-0.5">Reading Test</p>
+              <span className="text-white font-semibold text-sm truncate block leading-tight">{test.title}</span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="flex items-center gap-4 flex-shrink-0">
             {/* Progress pills */}
-            <div className="hidden sm:flex items-center gap-1">
-              {Array.from({ length: total }).map((_, i) => {
-                const filled = userAnswers[i]?.trim().length > 0;
-                return (
-                  <div
-                    key={i}
-                    className={`h-1.5 w-5 rounded-full transition-all duration-300 ${
-                      submitted
-                        ? results[i] ? 'bg-emerald-400' : 'bg-red-400'
-                        : filled ? 'bg-blue-400' : 'bg-white/15'
-                    }`}
-                  />
-                );
-              })}
+            <div className="hidden sm:flex flex-col items-end gap-1">
+              <div className="flex items-center gap-1">
+                {Array.from({ length: total }).map((_, i) => {
+                  const filled = userAnswers[i]?.trim().length > 0;
+                  return (
+                    <div
+                      key={i}
+                      className={`h-1.5 w-5 rounded-full transition-all duration-300 ${
+                        submitted
+                          ? results[i] ? 'bg-emerald-400' : 'bg-red-400'
+                          : filled ? 'bg-blue-400' : 'bg-white/15'
+                      }`}
+                    />
+                  );
+                })}
+              </div>
+              <span className="text-[10px] font-semibold text-gray-500 leading-none">
+                {submitted ? `${score}/${total} correct` : `${filledCount}/${total} filled`}
+              </span>
             </div>
-            <span className="text-xs font-semibold text-gray-500">
-              {submitted ? `${score}/${total}` : `${filledCount}/${total}`}
-            </span>
-            <div className="flex items-center gap-1.5 text-xs text-gray-600">
-              <Clock className="w-3.5 h-3.5" />
-              <span>{test.timeLimit} min</span>
-            </div>
+
+            <div className="w-px h-5 bg-white/10 flex-shrink-0" />
+
+            <LiveTimer initialMinutes={test.timeLimit} />
           </div>
         </div>
       </div>
 
       {/* ── Main content ─────────────────────────────────────────────────── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-20">
         <div className="flex gap-6 lg:gap-8 items-start">
 
           {/* ── LEFT: passage ─────────────────────────────────────────── */}
@@ -401,7 +499,7 @@ export default function SkillReadingPage() {
           </div>
 
           {/* ── RIGHT: sticky sidebar ──────────────────────────────────── */}
-          <div className="hidden lg:flex flex-col gap-4 w-72 xl:w-80 flex-shrink-0 sticky top-16">
+          <div className="hidden lg:flex flex-col gap-4 w-72 xl:w-80 flex-shrink-0 sticky top-[92px]">
 
             {/* Score card (after submit) */}
             {submitted && (
