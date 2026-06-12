@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { AlertTriangle, LogOut, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { ButtonSpinner } from '../common/Loader';
 
 export default function ConfirmModal({
   open,
@@ -101,7 +102,7 @@ export default function ConfirmModal({
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
-                  <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <ButtonSpinner />
                   {t('confirmModal.waiting')}
                 </span>
               ) : confirmLabel}

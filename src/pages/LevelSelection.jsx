@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { getDocs, collection } from 'firebase/firestore'
 import { db } from '../firebase'
 import { useTranslation } from 'react-i18next'
-import { Sprout, BookOpen, TrendingUp, ChartBar as BarChart2, Trophy as Award, Star, Loader2 } from 'lucide-react'
+import { Sprout, BookOpen, TrendingUp, ChartBar as BarChart2, Trophy as Award, Star } from 'lucide-react'
+import { Spinner } from '../components/common/Loader'
 
 const QUESTION_COUNT = 50
 
@@ -175,7 +176,7 @@ export default function LevelSelection() {
                   className="flex-1 py-3.5 rounded-2xl bg-white text-slate-900 font-bold hover:bg-white/90 transition-colors shadow-lg disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {fetching
-                    ? <><Loader2 className="w-4 h-4 animate-spin" /> {t('levels.loading')}</>
+                    ? <><Spinner size="xs" /> {t('levels.loading')}</>
                     : t('levels.start')}
                 </button>
               </div>

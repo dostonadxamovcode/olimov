@@ -1,35 +1,53 @@
 import { memo } from 'react'
 
-/**
- * Dual-ring spinner — blue outer ring, purple inner ring (counter-rotating).
- * Three sizes: sm | md | lg
- * Optional label below the spinner.
- */
-export const Loader = memo(function Loader({ size = 'md', text, className = '' }) {
-  const ring = {
-    sm: 'w-6 h-6 border-[2px]',
-    md: 'w-10 h-10 border-[3px]',
-    lg: 'w-14 h-14 border-[3px]',
-  }
-  const inner = {
-    sm: 'inset-[3px]',
-    md: 'inset-[4px]',
-    lg: 'inset-[5px]',
-  }
+// ── Core arc spinner ────────────────────────────────────────────────────────
+// Built with conic-gradient + radial-gradient mask — pure CSS, zero SVG IDs,
+// 100% GPU composited (only `transform` animates via Tailwind's animate-spin).
+//
+// Sizes:  xs=16  sm=22  md=36  lg=52  (px)
+// Themes: default=brand (sky→violet), light=white (for dark buttons)
+
+const DIMS = {
+  xs: { dim: 16, thick: 1.5, dur: '0.7s'  },
+  sm: { dim: 22, thick: 2,   dur: '0.75s' },
+  md: { dim: 36, thick: 3,   dur: '0.8s'  },
+  lg: { dim: 52, thick: 3.5, dur: '0.85s' },
+}
+
+export const Spinner = memo(function Spinner({ size = 'md', light = false, className = '' }) {
+  const { dim, thick, dur } = DIMS[size] ?? DIMS.md
+
+  const gradient = light
+    ? 'conic-gradient(from 180deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.32) 55%, transparent 72%)'
+    : 'conic-gradient(from 180deg, #0ea5e9 0%, #8b5cf6 55%, transparent 72%)'
+
+  const maskVal = `radial-gradient(farthest-side, transparent calc(100% - ${thick}px - 0.5px), #000 calc(100% - ${thick}px))`
 
   return (
+    <span
+      role="status"
+      aria-label="Loading"
+      className={`inline-block shrink-0 animate-spin ${className}`}
+      style={{
+        width: dim,
+        height: dim,
+        borderRadius: '50%',
+        background: gradient,
+        WebkitMask: maskVal,
+        mask: maskVal,
+        animationDuration: dur,
+        animationTimingFunction: 'linear',
+      }}
+    />
+  )
+})
+
+// ── Loader — spinner + optional label ───────────────────────────────────────
+// Backwards-compatible with the old dual-ring Loader API.
+export const Loader = memo(function Loader({ size = 'md', text, className = '' }) {
+  return (
     <div className={`flex flex-col items-center justify-center gap-3 ${className}`}>
-      <div className="relative">
-        {/* Outer ring — blue, clockwise */}
-        <div
-          className={`${ring[size]} rounded-full border-white/10 border-t-blue-500 animate-spin`}
-        />
-        {/* Inner ring — purple, counter-clockwise */}
-        <div
-          className={`absolute ${inner[size]} rounded-full border-[2px] border-white/5 border-b-purple-500 animate-spin`}
-          style={{ animationDirection: 'reverse', animationDuration: '0.55s' }}
-        />
-      </div>
+      <Spinner size={size} />
       {text && (
         <p className="text-slate-400 text-sm font-medium tracking-wide select-none">
           {text}
@@ -39,22 +57,19 @@ export const Loader = memo(function Loader({ size = 'md', text, className = '' }
   )
 })
 
-/**
- * Full-screen loader — fully opaque, covers everything (Header, Footer, content).
- * Used for initial auth gate and route-transition overlays.
- */
+// ── PageLoader — full-screen, anti-flicker 150ms delay ──────────────────────
+// Covers Header + Footer during auth init and lazy-chunk route transitions.
+// The `loader-enter` class holds opacity:0 for 150ms — fast loads (< 150ms)
+// unmount the component before it ever becomes visible, preventing flicker.
 export const PageLoader = memo(function PageLoader() {
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#080c14]">
-      <Loader size="lg" />
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#030712] loader-enter">
+      <Spinner size="lg" />
     </div>
   )
 })
 
-/**
- * Section-centered loader — use inside cards or content areas.
- * min-h keeps layout stable during loading.
- */
+// ── SectionLoader — centered inside a card or content area ──────────────────
 export const SectionLoader = memo(function SectionLoader({ text, minH = '200px' }) {
   return (
     <div className="flex items-center justify-center w-full" style={{ minHeight: minH }}>
@@ -63,11 +78,9 @@ export const SectionLoader = memo(function SectionLoader({ text, minH = '200px' 
   )
 })
 
-/**
- * Tiny white spinner for inside buttons (Submit / Save states).
- */
-export const ButtonSpinner = memo(function ButtonSpinner() {
-  return (
-    <span className="inline-block w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-  )
+// ── ButtonSpinner — inline inside submit / action buttons ───────────────────
+// light=true  → white arc  (for primary gradient / dark buttons)
+// light=false → brand arc  (for secondary / outline buttons)
+export const ButtonSpinner = memo(function ButtonSpinner({ light = true }) {
+  return <Spinner size="sm" light={light} />
 })

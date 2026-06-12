@@ -6,10 +6,11 @@ import { useTranslation } from 'react-i18next'
 import {
   Moon, Sun, LogOut, User, Settings,
   ShieldCheck as Shield, Bell, LayoutDashboard,
-  Camera, Trash2, Loader2,
+  Camera, Trash2,
 } from 'lucide-react'
 import { toastSuccess, toastError } from '../utils/errorHandler'
 import { LoadingSpinner } from '../components/ui/SkeletonLoader'
+import { Spinner } from '../components/common/Loader'
 import ConfirmModal from '../components/ui/ConfirmModal'
 
 // Compress image to ~256x256 JPEG and return base64 data URL (~15-40 KB)
@@ -279,7 +280,7 @@ export default function Profile() {
               </div>
               {uploading && (
                 <div className="absolute inset-0 rounded-2xl bg-black/60 flex items-center justify-center">
-                  <Loader2 className="w-5 h-5 text-white animate-spin" />
+                  <Spinner size="sm" light />
                 </div>
               )}
               <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 border-2 border-[#0a0a1a] flex items-center justify-center">
@@ -363,7 +364,7 @@ export default function Profile() {
                   }
                   {(uploading || removing) && (
                     <div className="absolute inset-0 rounded-full bg-black/60 flex items-center justify-center">
-                      <Loader2 className="w-4 h-4 text-white animate-spin" />
+                      <Spinner size="xs" light />
                     </div>
                   )}
                 </div>
@@ -380,7 +381,7 @@ export default function Profile() {
                     disabled={uploading || removing}
                     className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition"
                   >
-                    {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
+                    {uploading ? <Spinner size="xs" light /> : <Camera className="w-3.5 h-3.5" />}
                     {uploading ? t('profile.uploading') : t('profile.uploadPhoto')}
                   </button>
                   {avatar && (
@@ -389,7 +390,7 @@ export default function Profile() {
                       disabled={uploading || removing}
                       className="flex items-center gap-2 px-4 py-2 rounded-lg border border-red-500/25 bg-red-500/10 hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-red-400 text-sm font-medium transition"
                     >
-                      {removing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                      {removing ? <Spinner size="xs" light /> : <Trash2 className="w-3.5 h-3.5" />}
                       {removing ? t('profile.deleting') : t('profile.deletePhoto')}
                     </button>
                   )}
@@ -456,7 +457,7 @@ export default function Profile() {
                 disabled={saving || uploading}
                 className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium text-sm transition"
               >
-                {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+                {saving && <Spinner size="xs" light />}
                 {saving ? t('profile.saving') : t('profile.save')}
               </button>
               {!profileLoaded && (

@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { getDocs, collection } from 'firebase/firestore'
 import { db } from '../firebase'
 import { useTranslation } from 'react-i18next'
-import { Sprout, BookOpen, TrendingUp, BarChart2, Trophy, Star, Loader2, AlertCircle, Play, ArrowLeft } from 'lucide-react'
+import { Sprout, BookOpen, TrendingUp, BarChart2, Trophy, Star, AlertCircle, Play, ArrowLeft } from 'lucide-react'
+import { ButtonSpinner } from '../components/common/Loader'
 
 const LEVELS = [
   { key: 'a1', col: 'a1Tests', label: 'A1', name: 'Beginner',         icon: Sprout,      gradient: 'from-emerald-500 to-teal-400',  glow: 'shadow-emerald-500/30', border: 'hover:border-emerald-500/50', badge: 'bg-emerald-500/20 text-emerald-300' },
@@ -159,7 +160,7 @@ export default function MockTestsPage() {
                     }`}
                 >
                   {starting === level.key
-                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Loading...</>
+                    ? <><ButtonSpinner /> Loading...</>
                     : <><Play className="w-4 h-4" /> Start Exam</>
                   }
                 </button>

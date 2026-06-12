@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, BookOpen, Pencil, Save } from 'lucide-react';
-import { ButtonSpinner } from '../components/common/Loader';
+import { ButtonSpinner, SectionLoader } from '../components/common/Loader';
 import { toastError, toastSuccess } from '../utils/errorHandler';
 
 const LEVELS = ['A2', 'B1', 'B1+', 'B2', 'B2+', 'C1'];
@@ -160,10 +160,7 @@ export default function AdminSkillTestFormPage() {
   if (loading) {
     return (
       <div className="min-h-screen site-bg flex items-center justify-center">
-        <div className="flex items-center gap-3 text-slate-500">
-          <span className="w-5 h-5 rounded-full border-2 border-slate-600 border-t-blue-500 animate-spin" />
-          <span className="text-sm">Loading test…</span>
-        </div>
+        <SectionLoader text="Loading test…" />
       </div>
     );
   }
