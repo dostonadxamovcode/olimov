@@ -2,18 +2,6 @@ import { useState, useEffect } from 'react'
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore'
 import { db } from '../firebase'
 
-// ── STATIC DATA FALLBACKS ──────────────────────────────────────────────────────
-// Static data fallbacks for when Firebase is unavailable
-import {
-  navLinks,
-  stats,
-  features,
-  services,
-  listeningParts,
-  vocabularyWords,
-  grammarTopics
-} from '../data/siteData'
-
 // Additional static data that was hardcoded in components
 
 
@@ -211,58 +199,31 @@ export const STATIC_DATA_COLLECTIONS = {
 }
 
 // ── INITIAL DATA STRUCTURES ─────────────────────────────────────────────────────
-export const initialNavigationData = {
-  navLinks: navLinks, // Using static data as initial value
-  updatedAt: new Date().toISOString(),
-}
-
-export const initialLevelsData = {
-  levels: LEVELS, // Using static data as initial value
-  updatedAt: new Date().toISOString(),
-}
-
-export const initialSiteContentData = {
-  stats: stats, // Using static data as initial value
-  features: features, // Using static data as initial value
-  services: services.map((service, index) => ({
-    ...service,
-    icon: ['Headphones', 'BookOpenService', 'FilePenLine', 'Mic', 'Trophy', 'BarChart3'][index]
-  })), // Add icons to services
-  serviceStyles: {
-    gradientColors: GRADIENT_COLORS,
-    bulletColors: BULLET_COLORS
-  },
-  listeningParts: listeningParts, // Using static data as initial value
-  vocabularyWords: vocabularyWords, // Using static data as initial value
-  grammarTopics: grammarTopics, // Using static data as initial value
-  updatedAt: new Date().toISOString(),
-}
-
 export const initialContactInfoData = {
-  contactInfo: CONTACT_INFO, // Using static data as initial value
-  aboutPageContacts: ABOUT_PAGE_CONTACTS, // Using static data as initial value
+  contactInfo: CONTACT_INFO,
+  aboutPageContacts: ABOUT_PAGE_CONTACTS,
   updatedAt: new Date().toISOString(),
 }
 
 export const initialAboutData = {
-  milestones: MILESTONES, // Using static data as initial value
-  values: VALUES, // Using static data as initial value
+  milestones: MILESTONES,
+  values: VALUES,
   updatedAt: new Date().toISOString(),
 }
 
 export const initialLearningToolsData = {
-  tabs: LEARNING_TABS, // Using static data as initial value
-  materials: MATERIALS, // Using static data as initial value
+  tabs: LEARNING_TABS,
+  materials: MATERIALS,
   updatedAt: new Date().toISOString(),
 }
 
 export const initialAdminNavigationData = {
-  navItems: ADMIN_NAV_ITEMS, // Using static data as initial value
+  navItems: ADMIN_NAV_ITEMS,
   updatedAt: new Date().toISOString(),
 }
 
 export const initialProfileTabsData = {
-  tabs: PROFILE_TABS, // Using static data as initial value
+  tabs: PROFILE_TABS,
   updatedAt: new Date().toISOString(),
 }
 
@@ -322,18 +283,15 @@ export const subscribeToStaticData = (collectionName, docId = 'config', callback
   return unsubscribe
 }
 
-// Initialize all static data collections
+// Initialize remaining static data collections (contact, about, learning tools, admin nav)
 export const initializeAllStaticData = async () => {
   const collections = [
-    { name: STATIC_DATA_COLLECTIONS.NAVIGATION, data: initialNavigationData },
-    { name: STATIC_DATA_COLLECTIONS.LEVELS, data: initialLevelsData },
-    { name: STATIC_DATA_COLLECTIONS.SITE_CONTENT, data: initialSiteContentData },
-    { name: STATIC_DATA_COLLECTIONS.CONTACT_INFO, data: initialContactInfoData },
-    { name: STATIC_DATA_COLLECTIONS.ABOUT_DATA, data: initialAboutData },
-    { name: STATIC_DATA_COLLECTIONS.LEARNING_TOOLS, data: initialLearningToolsData },
+    { name: STATIC_DATA_COLLECTIONS.CONTACT_INFO,     data: initialContactInfoData },
+    { name: STATIC_DATA_COLLECTIONS.ABOUT_DATA,       data: initialAboutData },
+    { name: STATIC_DATA_COLLECTIONS.LEARNING_TOOLS,   data: initialLearningToolsData },
     { name: STATIC_DATA_COLLECTIONS.ADMIN_NAVIGATION, data: initialAdminNavigationData },
-    { name: STATIC_DATA_COLLECTIONS.PROFILE_TABS, data: initialProfileTabsData },
-    { name: STATIC_DATA_COLLECTIONS.HERO_DATA, data: initialHeroData },
+    { name: STATIC_DATA_COLLECTIONS.PROFILE_TABS,     data: initialProfileTabsData },
+    { name: STATIC_DATA_COLLECTIONS.HERO_DATA,        data: initialHeroData },
   ]
   
   const results = []

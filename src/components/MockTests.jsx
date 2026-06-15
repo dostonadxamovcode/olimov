@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { ChevronRight, Trophy } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { mockTestQuestions } from '../data/siteData'
 import { getMockTestQuestions } from '../services/questions'
 import { LoadingSpinner } from './ui/SkeletonLoader'
 
 export default function MockTests() {
   const { t } = useTranslation()
-  const [questions, setQuestions] = useState(mockTestQuestions)
+  const [questions, setQuestions] = useState([])
   const [current, setCurrent] = useState(0)
   const [selected, setSelected] = useState({})
   const [submitted, setSubmitted] = useState(false)

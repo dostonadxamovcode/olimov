@@ -1,8 +1,8 @@
 import { memo } from 'react';
 import { Timer, Zap, ChartBar as BarChart2, TrendingUp, Globe, ShieldCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { features } from '../data/siteData';
 import { useInView } from '../hooks/useInView';
+import { useSiteContent } from '../services/siteContentService';
 
 const iconMap = { Timer, Zap, BarChart2, TrendingUp, Globe, ShieldCheck };
 
@@ -35,6 +35,7 @@ const FeatureCard = memo(function FeatureCard({ feat, index, visible }) {
 export default function Features() {
   const { t } = useTranslation();
   const [ref, inView] = useInView(0.07);
+  const features = useSiteContent('features');
 
   return (
     <section id="features" className="section-panel py-14" ref={ref}>
@@ -57,7 +58,7 @@ export default function Features() {
               <span className="h-1.5 w-1.5 rounded-full bg-[#f59e0b]" />
               <span>{t('features.badge')}</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 leading-tight">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4 leading-tight">
               {t('features.title')}{' '}
               <span className="gradient-text">{t('features.highlight')}</span>
             </h2>
@@ -78,7 +79,7 @@ export default function Features() {
           </div>
 
           {/* Right — staggered card reveal */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {features.map((feat, i) => (
               <FeatureCard key={feat.id ?? i} feat={feat} index={i} visible={inView} />
             ))}

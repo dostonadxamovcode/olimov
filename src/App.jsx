@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import './utils/readingDataMigration' // exposes window.migrateData() for admin use
 import { isSuperAdmin } from './utils/roles'
 import ProtectedRoute from './components/ProtectedRoute'
 import RoleProtectedRoute from './components/RoleProtectedRoute'
@@ -32,7 +33,8 @@ const AdminPage    = lazy(() => import('./pages/AdminPage'))
 const AdminSkillTestFormPage = lazy(() => import('./pages/AdminSkillTestFormPage'))
 const Profile        = lazy(() => import('./pages/Profile'))
 const SkillTestsPage  = lazy(() => import('./pages/SkillTestsPage'))
-const SkillReadingPage= lazy(() => import('./pages/SkillReadingPage'))
+const SkillReadingPage    = lazy(() => import('./pages/SkillReadingPage'))
+const SkillReadingPart2Page = lazy(() => import('./pages/SkillReadingPart2Page'))
 
 function SuperadminOnlyRoute({ children }) {
   const { userRole } = useAuth()
@@ -108,7 +110,8 @@ const router = createBrowserRouter([
       { path: '*',      element: <LazyPage><NotFound /></LazyPage> },
     ],
   },
-  { path: '/skill-tests/reading',  element: <LazyPage><SkillReadingPage /></LazyPage> },
+  { path: '/skill-tests/reading',       element: <LazyPage><SkillReadingPage /></LazyPage> },
+  { path: '/skill-tests/reading-part2', element: <LazyPage><SkillReadingPart2Page /></LazyPage> },
   { path: '/tests/:testId',        element: <LazyPage><ExamPage /></LazyPage> },
   { path: '/exam/:level/:testId',  element: <LazyPage><ExamPage /></LazyPage> },
   { path: '/test-result',          element: <LazyPage><TestResultPage /></LazyPage> },

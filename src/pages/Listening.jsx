@@ -1,5 +1,5 @@
 import { ArrowRight, Clock as Clock3, Headphones, Search, Signal, Sparkles } from 'lucide-react'
-import { listeningPage } from '../data/siteData'
+import { useSiteContent } from '../services/siteContentService'
 
 const statIcons = {
   Headphones,
@@ -8,6 +8,7 @@ const statIcons = {
 }
 
 export default function Listening() {
+  const listeningPage = useSiteContent('listeningPage');
   return (
     <section className="listening-page relative min-h-screen overflow-hidden bg-[#eef3f8] px-4 pb-24 pt-32 text-slate-950 dark:bg-[#040717] dark:text-white sm:px-6 lg:px-8">
       <div className="pointer-events-none absolute inset-0">

@@ -2,14 +2,14 @@ import { memo, useEffect, useState } from 'react';
 import { Play, ArrowRight, Trophy } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { stats } from '../data/siteData';
+import { useSiteContent } from '../services/siteContentService';
 
 const HeroStatCard = memo(function HeroStatCard({ stat, index }) {
   const { t } = useTranslation();
   return (
-    <div className="premium-card premium-card-hover min-w-0 p-2 text-center animate-fade-in-up sm:p-5 sm:text-left" style={{ animationDelay: `${index * 100}ms` }}>
-      <div className={`truncate text-xl font-bold sm:text-3xl ${index === 0 ? 'text-[#0ea5e9]' : index === 1 ? 'text-[#8b5cf6]' : 'text-[#f43f5e]'}`}>{stat.value}</div>
-      <div className="truncate text-[10px] leading-4 text-gray-400 sm:text-sm">{t('stats.' + stat.id)}</div>
+    <div className="premium-card min-w-0 p-2 text-center animate-fade-in-up sm:p-4 sm:text-left" style={{ animationDelay: `${index * 100}ms` }}>
+      <div className={`truncate text-base font-bold leading-tight sm:text-2xl lg:text-3xl ${index === 0 ? 'text-[#0ea5e9]' : index === 1 ? 'text-[#8b5cf6]' : 'text-[#f43f5e]'}`}>{stat.value}</div>
+      <div className="mt-0.5 text-[9px] leading-tight text-gray-400 sm:text-xs sm:leading-4 line-clamp-2">{t('stats.' + stat.id)}</div>
     </div>
   )
 })
@@ -18,6 +18,7 @@ export default function Hero() {
   const { t } = useTranslation();
   const words = t('hero.words', { returnObjects: true });
   const [wordIndex, setWordIndex] = useState(0);
+  const stats = useSiteContent('stats');
 
   useEffect(() => {
     const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -31,7 +32,7 @@ export default function Hero() {
   }, [words.length]);
 
   return (
-    <section id="top" className="relative flex min-h-screen items-center justify-center overflow-hidden pt-24 sm:pt-28 animate-hero-fade">
+    <section id="top" className="relative flex min-h-[100svh] items-center justify-center overflow-hidden pt-20 pb-10 sm:pt-24 sm:pb-12 lg:pt-28 lg:pb-16 animate-hero-fade">
 
       {/* BACKGROUND */}
       <div className="absolute inset-0" style={{ background: '#080c14' }} />
@@ -52,16 +53,19 @@ export default function Hero() {
 
       {/* CONTENT */}
       <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid items-center gap-8 lg:grid-cols-[1fr_0.9fr]">
-        <div className="max-w-3xl space-y-6">
+        <div className="grid items-center gap-6 sm:gap-8 lg:grid-cols-[1fr_0.9fr]">
+        <div className="w-full min-w-0 space-y-5 sm:space-y-6">
 
-          {/* TITLE */}
-          <h1 className="text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
+          {/* TITLE — clamp() ensures no overflow on any screen width */}
+          <h1
+            className="font-bold tracking-tight leading-[1.1]"
+            style={{ fontSize: 'clamp(1.65rem, 5.5vw, 3.75rem)' }}
+          >
             {t('hero.title')}{' '}
-            <span className="inline-block">
+            <span className="inline">
               {t('hero.with')}{' '}
-              <span className="relative inline-block">
-                <span className="gradient-text">
+              <span className="relative inline-block max-w-full">
+                <span className="gradient-text break-words">
                   {Array.isArray(words) ? words[wordIndex] : ''}
                 </span>
 
@@ -83,24 +87,24 @@ export default function Hero() {
           </h1>
 
           {/* TEXT */}
-          <p className="max-w-2xl text-base leading-7 text-gray-400">
+          <p className="max-w-2xl text-sm leading-6 text-gray-400 sm:text-base sm:leading-7">
             {t('hero.subtitle')}
           </p>
 
           {/* BUTTONS */}
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <button className="btn-primary group px-6 py-3">
+          <div className="flex flex-col gap-2.5 sm:flex-row sm:gap-3">
+            <button className="btn-primary group px-5 py-2.5 sm:px-6 sm:py-3 text-sm">
               {t('hero.startFree')}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
 
-            <Link to="/result" className="btn-secondary px-6 py-3 flex items-center justify-center gap-2">
-              <Trophy className="w-4 h-4" />
+            <Link to="/result" className="btn-secondary px-5 py-2.5 sm:px-6 sm:py-3 flex items-center justify-center gap-2 text-sm">
+              <Trophy className="w-4 h-4 flex-shrink-0" />
               {t('hero.myResults')}
             </Link>
 
-            <button className="btn-secondary px-6 py-3">
-              <Play className="w-4 h-4" />
+            <button className="btn-secondary px-5 py-2.5 sm:px-6 sm:py-3 text-sm">
+              <Play className="w-4 h-4 flex-shrink-0" />
               {t('hero.watchDemo')}
             </button>
           </div>
@@ -115,8 +119,9 @@ export default function Hero() {
         </div>
 
         <div className="relative mx-auto w-full max-w-[400px] animate-fade-in-up" style={{ animationDelay: '300ms' }}>
-          <div className="absolute -left-4 top-10 h-24 w-24 rounded-full bg-[#0ea5e9]/30 blur-2xl animate-pulse-glow" />
-          <div className="absolute -right-5 bottom-16 h-28 w-28 rounded-full bg-[#8b5cf6]/25 blur-2xl animate-pulse-glow" style={{ animationDelay: '0.5s' }} />
+          {/* Decorative blobs — kept inside container so they don't cause overflow */}
+          <div className="absolute left-0 top-10 h-20 w-20 rounded-full bg-[#0ea5e9]/30 blur-2xl animate-pulse-glow" />
+          <div className="absolute right-0 bottom-16 h-24 w-24 rounded-full bg-[#8b5cf6]/25 blur-2xl animate-pulse-glow" style={{ animationDelay: '0.5s' }} />
 
           <div className="relative overflow-hidden rounded-[1.6rem] border border-white/10 bg-gradient-to-br from-[#0ea5e9]/20 via-[#8b5cf6]/15 to-[#f43f5e]/10 p-1.5 shadow-2xl">
             <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-[#0ea5e9]/50 to-transparent" />
@@ -126,7 +131,7 @@ export default function Hero() {
                 alt="CEFRPro mentor"
                 loading="eager"
                 decoding="async"
-                className="h-[300px] w-full object-cover object-[55%_54%] sm:h-[370px] lg:h-[430px]"
+                className="h-[240px] w-full object-cover object-[55%_54%] sm:h-[320px] lg:h-[400px] xl:h-[430px]"
               />
               <div className="absolute inset-0 bg-gradient-to-tr from-[#0ea5e9]/30 via-transparent to-[#8b5cf6]/25" />
               <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#030712] via-[#030712]/50 to-transparent" />

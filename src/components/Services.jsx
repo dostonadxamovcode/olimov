@@ -2,8 +2,8 @@ import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { ChartBar as BarChart3, BookOpen, Dot, FilePenLine, Headphones, Mic, Trophy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { services } from '../data/siteData';
 import { useInView } from '../hooks/useInView';
+import { useSiteContent } from '../services/siteContentService';
 
 const icons = [Headphones, BookOpen, FilePenLine, Mic, Trophy, BarChart3];
 
@@ -38,31 +38,31 @@ const ServiceCard = memo(function ServiceCard({ s, index, visible }) {
       }}
     >
       {/* Inner: hover lift — separate div so inline style doesn't clash with CSS hover */}
-      <div className="group relative flex h-full min-w-0 flex-col rounded-2xl border border-indigo-500/20 bg-[#0b1023] p-3 sm:rounded-3xl sm:p-5 hover:-translate-y-1.5 hover:border-indigo-500/40 transition-[transform,border-color] duration-300">
+      <div className="group relative flex h-full min-w-0 flex-col rounded-2xl border border-indigo-500/20 bg-[#0b1023] p-4 sm:rounded-3xl sm:p-5 hover:-translate-y-1.5 hover:border-indigo-500/40 transition-[transform,border-color] duration-300">
 
-        <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} text-white group-hover:scale-110 transition-transform duration-200 sm:mb-6 sm:h-14 sm:w-14`}>
+        <div className={`mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} text-white group-hover:scale-110 transition-transform duration-200 sm:mb-5 sm:h-14 sm:w-14`}>
           <Icon className="h-5 w-5 sm:h-7 sm:w-7" />
         </div>
 
-        <h3 className="mb-1.5 text-xs font-bold leading-tight text-white sm:mb-2 sm:text-base">
+        <h3 className="mb-1.5 text-sm font-bold leading-snug text-white sm:mb-2 sm:text-base">
           {t(`services.${s.id}.title`)}
         </h3>
-        <p className="mb-2 text-[10px] leading-4 text-gray-400 sm:mb-4 sm:text-xs sm:leading-relaxed">
+        <p className="mb-3 text-xs leading-relaxed text-gray-400 sm:mb-4">
           {t(`services.${s.id}.description`)}
         </p>
 
-        <ul className="mb-6 hidden space-y-3 sm:block">
+        <ul className="mb-5 hidden space-y-2 sm:block">
           {Array.isArray(sFeatures) && sFeatures.map((feature, idx) => (
-            <li key={idx} className="flex items-start gap-3">
+            <li key={idx} className="flex items-start gap-2">
               <span className={`w-1.5 h-1.5 rounded-full ${bulletColor} mt-2 flex-shrink-0`} />
-              <span className="text-gray-300 text-sm flex align-center"><Dot />{feature}</span>
+              <span className="text-gray-300 text-sm">{feature}</span>
             </li>
           ))}
         </ul>
 
         <Link
           to={`/services/${s.slug}`}
-          className={`mt-auto block w-full rounded-xl bg-gradient-to-r ${gradient} px-3 py-2 text-center text-xs font-semibold text-white hover:opacity-90 transition-opacity duration-200 sm:px-4 sm:py-2.5 sm:text-sm`}
+          className={`mt-auto block w-full rounded-xl bg-gradient-to-r ${gradient} px-4 py-2.5 text-center text-sm font-semibold text-white hover:opacity-90 transition-opacity duration-200`}
         >
           {t('services.getStarted')}
         </Link>
@@ -74,6 +74,7 @@ const ServiceCard = memo(function ServiceCard({ s, index, visible }) {
 export default function Services() {
   const { t } = useTranslation();
   const [ref, inView] = useInView(0.05);
+  const services = useSiteContent('services');
 
   return (
     <section id="services" className="relative overflow-hidden bg-[#050816] py-10 sm:py-16" ref={ref}>
@@ -106,7 +107,7 @@ export default function Services() {
           <p className="mx-auto max-w-2xl text-xs text-gray-400 sm:text-sm">{t('services.subtitle')}</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">
           {services.map((s, i) => (
             <ServiceCard key={s.id} s={s} index={i} visible={inView} />
           ))}

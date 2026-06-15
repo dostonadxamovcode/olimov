@@ -4,7 +4,7 @@ import {
   ArrowLeft, BookOpen, Clock, CheckCircle2, XCircle, Trophy,
   RotateCcw, ChevronRight, ShieldAlert,
 } from 'lucide-react';
-import { getReadingTestByPart } from '../data/readingTests';
+import { SectionLoader } from '../components/common/Loader';
 import { useAntiCheatGuard } from '../hooks/useAntiCheatGuard';
 
 // ── Live countdown timer — isolated component to avoid re-rendering the page ─
@@ -263,53 +263,59 @@ export default function SkillReadingPage() {
   const [searchParams] = useSearchParams();
   const partParam      = searchParams.get('part') ?? '1';
 
-  const [test, setTest]           = useState(() => getReadingTestByPart(partParam));
-  const [userAnswers, setUserAnswers] = useState(() => Array(test.answers.length).fill(''));
+  const [test,        setTest]        = useState(null);
+  const [loadError,   setLoadError]   = useState(false);
+  const [userAnswers, setUserAnswers] = useState([]);
   const [submitted,   setSubmitted]   = useState(false);
   const [results,     setResults]     = useState([]);
   const [violated,    setViolated]    = useState(false);
 
-  const total = test.answers.length;
+  const total = test?.answers?.length ?? 0;
 
   // Reset answers whenever the test object changes
   useEffect(() => {
+    if (!test) return;
     setUserAnswers(Array(test.answers.length).fill(''));
     setSubmitted(false);
     setResults([]);
-  }, [test.id]);
+  }, [test?.id]);
 
-  // On part change: fetch ALL tests for this part from Firestore, pick one randomly.
-  // Falls back to static data only if Firestore returns nothing.
+  // Fetch from Firestore. Pick one random test for the requested part.
   useEffect(() => {
-    const tryFirestore = async () => {
+    let cancelled = false;
+    setTest(null);
+    setLoadError(false);
+
+    const load = async () => {
       try {
         const { collection, getDocs, query, where } = await import('firebase/firestore');
         const { db } = await import('../firebase');
         const snap = await getDocs(
           query(collection(db, 'skillReadingTests'), where('part', '==', Number(partParam)))
         );
+        if (cancelled) return;
         if (!snap.empty) {
           const all = snap.docs.map(d => {
             const data = d.data();
-            // Firestore stores paragraphs as [{segs:[...]}, ...] to avoid nested
-            // arrays (Firestore limitation). Unwrap .segs back to plain arrays so
-            // the Passage renderer receives the same format as static data.
+            // Firestore stores paragraphs as [{segs:[...]}, ...] — unwrap back to arrays.
             const paragraphs = (data.paragraphs ?? []).map(p =>
               Array.isArray(p) ? p : (p.segs ?? [])
             );
             return { id: d.id, ...data, paragraphs };
           });
-          const picked = all[Math.floor(Math.random() * all.length)];
-          setTest(picked);
+          setTest(all[Math.floor(Math.random() * all.length)]);
         } else {
-          setTest(getReadingTestByPart(partParam));
+          setLoadError(true);
         }
       } catch (e) {
-        console.error('Firestore reading test load:', e);
-        setTest(getReadingTestByPart(partParam));
+        if (!cancelled) {
+          console.error('Firestore reading test load:', e);
+          setLoadError(true);
+        }
       }
     };
-    tryFirestore();
+    load();
+    return () => { cancelled = true; };
   }, [partParam]);
   const passageRef = useRef(null);
 
@@ -318,26 +324,27 @@ export default function SkillReadingPage() {
   };
 
   const handleCheck = useCallback(() => {
+    if (!test) return;
     const res = test.answers.map((ans, i) =>
       (userAnswers[i] ?? '').trim().toLowerCase() === ans.toLowerCase()
     );
     setResults(res);
     setSubmitted(true);
     setTimeout(() => passageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
-  }, [test.answers, userAnswers]);
+  }, [test, userAnswers]);
 
   // Fired by useAntiCheatGuard when a tab/window switch is detected.
   const handleViolation = useCallback(() => {
+    if (!test) return;
     setViolated(true);
-    // Auto-submit with whatever answers are filled so the user sees results.
     setResults(test.answers.map((ans, i) =>
       (userAnswers[i] ?? '').trim().toLowerCase() === ans.toLowerCase()
     ));
     setSubmitted(true);
-  }, [test.answers, userAnswers]);
+  }, [test, userAnswers]);
 
-  // Guard is active only while the test is in progress (not yet submitted).
-  useAntiCheatGuard({ active: !submitted, onViolation: handleViolation });
+  // Guard is active only while the test is loaded and in progress.
+  useAntiCheatGuard({ active: !!test && !submitted, onViolation: handleViolation });
 
   const handleReset = () => {
     setUserAnswers(Array(total).fill(''));
@@ -349,6 +356,36 @@ export default function SkillReadingPage() {
   const score       = results.filter(Boolean).length;
   const allFilled   = userAnswers.every(a => a.trim().length > 0);
   const filledCount = userAnswers.filter(a => a.trim().length > 0).length;
+
+  // ── Loading / Error states ──────────────────────────────────────────────────
+  if (!test) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: 'linear-gradient(160deg, #020812 0%, #060e1c 45%, #020812 100%)' }}
+      >
+        {loadError ? (
+          <div className="text-center px-6">
+            <div className="w-16 h-16 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mx-auto mb-5">
+              <BookOpen className="w-7 h-7 text-blue-400" />
+            </div>
+            <p className="text-white font-semibold mb-2">Test topilmadi</p>
+            <p className="text-slate-400 text-sm mb-6">
+              Part {partParam} uchun test hali qo'shilmagan. Admin paneldan test qo'shing.
+            </p>
+            <button
+              onClick={() => navigate('/skill-tests')}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/[0.06] border border-white/10 text-slate-300 hover:bg-white/10 transition-all text-sm font-medium"
+            >
+              <ArrowLeft className="w-4 h-4" /> Orqaga
+            </button>
+          </div>
+        ) : (
+          <SectionLoader text="Test yuklanmoqda…" />
+        )}
+      </div>
+    );
+  }
 
   return (
     <div

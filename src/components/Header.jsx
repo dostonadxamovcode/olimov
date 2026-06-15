@@ -1,36 +1,125 @@
 import { memo, useState, useEffect, useRef, useCallback } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, LogOut, User, ChevronDown, LayoutDashboard } from 'lucide-react';
+import {
+  Menu, X, LogOut, User, ChevronDown, LayoutDashboard, ChevronRight,
+  Home, Layers, FileText, Trophy, Mail, Info, GraduationCap
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { navLinks } from '../data/siteData';
+import { useSiteContent } from '../services/siteContentService';
 import { useAuth } from '../context/AuthContext';
 import { toastSuccess } from '../utils/errorHandler';
 import ConfirmModal from './ui/ConfirmModal';
 import LanguageSwitcher from './LanguageSwitcher';
 import { scrollToSection } from '../utils/scrollToSection';
 
-const NavItem = memo(function NavItem({ link, className, onClick }) {
-  const { t } = useTranslation();
+const NAV_META = {
+  'nav.home':      { Icon: Home,          color: '#0ea5e9' },
+  'nav.services':  { Icon: Layers,        color: '#8b5cf6' },
+  'nav.mockTests': { Icon: FileText,      color: '#f59e0b' },
+  'nav.results':   { Icon: Trophy,        color: '#10b981' },
+  'nav.contact':   { Icon: Mail,          color: '#f43f5e' },
+  'nav.about':     { Icon: Info,          color: '#6366f1' },
+  'nav.levels':    { Icon: GraduationCap, color: '#a855f7' },
+};
+
+const CARD_BASE        = 'flex items-center gap-2 px-2.5 py-2 min-h-[40px] rounded-xl border w-full text-left transition-all duration-150';
+const CARD_HOVER       = 'hover:bg-white/[0.06] hover:border-white/[0.12] active:scale-[0.98]';
+const CARD_ACTIVE_ONLY = 'active:scale-[0.98]';
+
+function cardStyle(active, color) {
+  return active
+    ? { background: `${color}0d`, borderColor: `${color}38` }
+    : { background: 'rgba(255,255,255,0.025)', borderColor: 'rgba(255,255,255,0.06)' };
+}
+
+function MobileCardContent({ label, Icon, color, isActive }) {
+  return (
+    <>
+      {Icon && (
+        <div
+          className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 border transition-colors duration-150"
+          style={{
+            background:  isActive ? `${color}1c` : 'rgba(255,255,255,0.04)',
+            borderColor: isActive ? `${color}42` : 'rgba(255,255,255,0.07)',
+          }}
+        >
+          <Icon className="w-3 h-3 transition-colors duration-150" style={{ color: isActive ? color : '#64748b' }} />
+        </div>
+      )}
+      <span className={`text-xs font-medium flex-1 truncate transition-colors duration-150 ${isActive ? 'text-white' : 'text-slate-400'}`}>
+        {label}
+      </span>
+      {isActive && (
+        <div className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: color }} />
+      )}
+    </>
+  );
+}
+
+const NavItem = memo(function NavItem({ link, className, onClick, isMobile }) {
+  const { t }    = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
 
+  const { Icon, color = '#0ea5e9' } = NAV_META[link.label] ?? {};
+  const label = t(link.label);
+
+  const isHashLink = link.href.includes('#');
+  const [pathPart, hashPart] = link.href.split('#');
+  const targetPath    = pathPart || '/';
+  const targetHashRaw = hashPart  || '';
+  const targetHash    = targetHashRaw ? `#${targetHashRaw}` : '';
+
+  const isHashActive = isHashLink && (
+    location.pathname === targetPath &&
+    (location.hash === targetHash ||
+      (targetHashRaw === 'top' && !location.hash))
+  );
+
   const handleHashLink = useCallback((e) => {
     e.preventDefault();
-    const [path, hash] = link.href.split('#');
-    const targetPath  = path || '/';
-    const targetHash  = `#${hash}`;
+    onClick?.();
     if (location.pathname === targetPath && location.hash === targetHash) {
-      scrollToSection(hash);
+      scrollToSection(targetHashRaw);
     } else {
       navigate(`${targetPath}${targetHash}`);
     }
-    onClick?.();
-  }, [link.href, location.pathname, location.hash, navigate, onClick]);
+  }, [targetPath, targetHash, targetHashRaw, location.pathname, location.hash, navigate, onClick]);
 
-  if (link.href.includes('#')) {
+  // ── MOBILE CARD ─────────────────────────────────────────────────────────────
+  if (isMobile) {
+    if (isHashLink) {
+      return (
+        <Link
+          to={link.href}
+          onClick={handleHashLink}
+          className={`${CARD_BASE} ${isHashActive ? CARD_ACTIVE_ONLY : CARD_HOVER}`}
+          style={cardStyle(isHashActive, color)}
+        >
+          <MobileCardContent label={label} Icon={Icon} color={color} isActive={isHashActive} />
+        </Link>
+      );
+    }
+
+    return (
+      <NavLink
+        to={link.href}
+        onClick={onClick}
+        className={({ isActive }) => `${CARD_BASE} ${isActive ? CARD_ACTIVE_ONLY : CARD_HOVER}`}
+        style={({ isActive }) => cardStyle(isActive, color)}
+      >
+        {({ isActive }) => (
+          <MobileCardContent label={label} Icon={Icon} color={color} isActive={isActive} />
+        )}
+      </NavLink>
+    );
+  }
+
+  // ── DESKTOP ──────────────────────────────────────────────────────────────────
+  if (isHashLink) {
     return (
       <Link to={link.href} onClick={handleHashLink} className={className}>
-        {t(link.label)}
+        {label}
       </Link>
     );
   }
@@ -41,23 +130,23 @@ const NavItem = memo(function NavItem({ link, className, onClick }) {
       onClick={onClick}
       className={({ isActive }) => `${className}${isActive ? ' text-white bg-white/10' : ''}`}
     >
-      {t(link.label)}
+      {label}
     </NavLink>
   );
 });
 
 export default function Header() {
-  const { t } = useTranslation();
+  const { t }    = useTranslation();
+  const navLinks = useSiteContent('navLinks');
   const [isOpen,          setIsOpen]          = useState(false);
   const [scrolled,        setScrolled]        = useState(false);
   const [isProfileOpen,   setIsProfileOpen]   = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { currentUser, user, userRole, isSuperadmin, logout, loading } = useAuth();
-  const navigate    = useNavigate();
-  const location    = useLocation();
-  const profileRef  = useRef(null);
+  const navigate   = useNavigate();
+  const location   = useLocation();
+  const profileRef = useRef(null);
 
-  // Ref-mirror keeps the scroll handler always up-to-date without re-registering it
   const isProfileOpenRef = useRef(false);
   isProfileOpenRef.current = isProfileOpen;
 
@@ -74,9 +163,7 @@ export default function Header() {
     }
   }, [logout, t, navigate]);
 
-  // ── Single consolidated scroll listener ──────────────────────────────────
-  // One rAF-throttled handler covers: header bg, profile close.
-  // Previously there were 3 separate useEffects adding scroll listeners.
+  // Single rAF-throttled scroll listener — covers header bg + profile close
   useEffect(() => {
     let ticking = false;
     let last = window.scrollY > 20;
@@ -94,26 +181,27 @@ export default function Header() {
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, []); // runs once — ref keeps it current
+  }, []);
 
-  // Close mobile menu on any scroll (once)
+  // iOS-safe body scroll lock when mobile menu is open
   useEffect(() => {
     if (!isOpen) return;
-    const close = () => setIsOpen(false);
-    window.addEventListener('scroll',    close, { passive: true, once: true });
-    window.addEventListener('wheel',     close, { passive: true, once: true });
-    window.addEventListener('touchmove', close, { passive: true, once: true });
+    const scrollY = window.scrollY;
+    document.body.style.overflow  = 'hidden';
+    document.body.style.position  = 'fixed';
+    document.body.style.top       = `-${scrollY}px`;
+    document.body.style.width     = '100%';
     return () => {
-      window.removeEventListener('scroll',    close);
-      window.removeEventListener('wheel',     close);
-      window.removeEventListener('touchmove', close);
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.top      = '';
+      document.body.style.width    = '';
+      window.scrollTo(0, scrollY);
     };
   }, [isOpen]);
 
-  // Close profile dropdown on route change
   useEffect(() => { setIsProfileOpen(false); }, [location.pathname]);
 
-  // Outside-click / Escape for profile dropdown
   useEffect(() => {
     if (!isProfileOpen) return;
     const onClick = (e) => {
@@ -257,7 +345,7 @@ export default function Header() {
 
           {/* Hamburger */}
           <button
-            className="md:hidden ml-auto w-10 h-10 rounded-xl border border-white/10 bg-white/4 hover:bg-white/9 flex items-center justify-center transition-[background-color] duration-200 text-slate-200"
+            className="md:hidden ml-auto w-10 h-10 rounded-xl border border-white/[0.12] bg-white/[0.04] hover:bg-white/[0.09] hover:border-white/[0.2] flex items-center justify-center transition-all duration-200 text-slate-200 active:scale-95"
             onClick={toggleMenu}
             aria-expanded={isOpen}
             aria-controls="mobile-menu"
@@ -269,108 +357,124 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile backdrop — no backdrop-blur since bg-black/65 is sufficient */}
+      {/* Full-screen backdrop with blur */}
       <div
         onClick={closeMobileMenu}
         aria-hidden="true"
-        className={`md:hidden fixed inset-0 top-14 sm:top-16 z-[70] bg-black/65 transition-opacity duration-300 ${
+        className={`md:hidden fixed inset-0 top-14 sm:top-16 z-[70] bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${
           isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
       />
 
-      {/* Mobile menu
-          - transition-[opacity,transform] instead of transition-all avoids
-            animating max-height which triggers expensive layout reflow
-          - backdrop-blur removed: bg-[#060912]/97 is 97% opaque, blurring behind
-            a nearly-solid panel is wasted GPU work */}
+      {/* Mobile menu — premium glassmorphism panel */}
       <div
         id="mobile-menu"
-        className={`md:hidden fixed left-4 right-4 sm:left-6 sm:right-6 top-[66px] sm:top-[76px] z-[90] rounded-2xl border border-white/9 bg-[#060912]/97 shadow-2xl max-h-[82vh] overflow-y-auto transition-[opacity,transform] duration-300 ${
+        className={`md:hidden fixed left-3 right-3 sm:left-5 sm:right-5 top-[68px] sm:top-[76px] z-[90] rounded-[1.5rem] border border-white/[0.1] bg-[#07091c]/95 backdrop-blur-xl shadow-2xl shadow-black/70 max-h-[88svh] overflow-y-auto overflow-x-hidden transition-[opacity,transform] duration-300 origin-top ${
           isOpen
             ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto'
-            : 'opacity-0 -translate-y-3.5 scale-95 pointer-events-none'
+            : 'opacity-0 -translate-y-2 scale-[0.97] pointer-events-none'
         }`}
       >
-        <div className="sticky top-0 h-px z-2 bg-gradient-to-r from-transparent via-white/12 to-transparent" />
+        {/* Top accent shimmer line */}
+        <div className="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent pointer-events-none" />
 
-        <div className="p-4 sm:p-5 space-y-2">
-          <div className="pb-1">
+        <div className="p-2">
+
+          {/* Language switcher */}
+          <div className="mb-2">
             <LanguageSwitcher className="w-full" />
           </div>
 
-          <div className="border-t border-white/6 pt-2" />
+          <div className="h-px bg-white/[0.06] mb-2" />
 
-          {navLinks.map((link) => (
-            <NavItem
-              key={link.label}
-              link={link}
-              onClick={closeMobileMenu}
-              className="flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-sm font-medium text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-[color,background-color] duration-150 w-full text-left whitespace-nowrap"
-            />
-          ))}
+          {/* Navigation cards — 2-column grid */}
+          <div className="grid grid-cols-2 gap-1">
+            {navLinks.map((link) => (
+              <NavItem
+                key={link.label}
+                link={link}
+                onClick={closeMobileMenu}
+                isMobile
+              />
+            ))}
+          </div>
 
-          <div className="border-t border-white/6 pt-4 sm:pt-5 mt-4 sm:mt-5 space-y-2">
+          {/* Auth section */}
+          <div className="mt-2 pt-2 border-t border-white/[0.06] space-y-1.5">
             {loading ? (
-              <div className="space-y-2">
-                {[20, 24, 16, 18].map((w, i) => (
-                  <div key={i} className="flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3">
-                    <div className="h-4 w-4 rounded bg-white/10 animate-pulse" />
-                    <div className={`h-4 w-${w} rounded bg-white/10 animate-pulse`} />
-                  </div>
+              <div className="flex gap-1">
+                {[1, 2].map((i) => (
+                  <div key={i} className="flex-1 h-[36px] rounded-xl bg-white/[0.03] border border-white/[0.06] animate-pulse" />
                 ))}
               </div>
             ) : currentUser ? (
               <>
-                {(isSuperadmin || userRole === 'admin') && (
-                  <Link
-                    to="/admin"
-                    onClick={closeMobileMenu}
-                    className="flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-[color,background-color] duration-200 w-full"
-                  >
-                    <LayoutDashboard className="w-4 h-4 text-violet-400 flex-shrink-0" />
-                    {t('header.adminPanel')}
-                  </Link>
-                )}
-                <Link
-                  to="/profile"
-                  onClick={closeMobileMenu}
-                  className="flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-[color,background-color] duration-200 w-full"
-                >
-                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-[#3b82f6] to-[#8b5cf6] flex items-center justify-center text-[9px] font-bold text-white overflow-hidden flex-shrink-0">
+                {/* User info + actions row */}
+                <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white/[0.025] border border-white/[0.06]">
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#3b82f6] to-[#8b5cf6] flex items-center justify-center text-[9px] font-bold text-white flex-shrink-0 overflow-hidden">
                     {user?.avatar
                       ? <img src={user.avatar} alt="avatar" className="w-full h-full object-cover" />
-                      : (currentUser?.email?.[0]?.toUpperCase() || <User className="w-3 h-3" />)
+                      : (currentUser.email?.[0]?.toUpperCase() || <User className="w-3 h-3" />)
                     }
                   </div>
-                  {t('header.profile')}
-                </Link>
-                <button
-                  onClick={() => setShowLogoutModal(true)}
-                  className="flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-sm font-medium text-red-400 hover:text-red-300 hover:bg-white/5 transition-[color,background-color] duration-200 w-full"
-                >
-                  <LogOut className="w-4 h-4" />
-                  {t('header.logout')}
-                </button>
+                  <span className="text-xs font-medium text-white truncate flex-1 min-w-0">
+                    {currentUser.displayName || currentUser.email?.split('@')[0] || 'User'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-1">
+                  {(isSuperadmin || userRole === 'admin') && (
+                    <Link
+                      to="/admin"
+                      onClick={closeMobileMenu}
+                      className="flex items-center gap-2 px-2.5 py-2 min-h-[36px] rounded-xl border transition-all duration-150 hover:border-violet-500/[0.28] hover:bg-violet-500/[0.07] active:scale-[0.98]"
+                      style={{ background: 'rgba(139,92,246,0.05)', borderColor: 'rgba(139,92,246,0.18)' }}
+                    >
+                      <LayoutDashboard className="w-3.5 h-3.5 text-violet-400 flex-shrink-0" />
+                      <span className="text-xs font-medium text-slate-300 truncate">{t('header.adminPanel')}</span>
+                    </Link>
+                  )}
+                  <Link
+                    to="/profile"
+                    onClick={closeMobileMenu}
+                    className="flex items-center gap-2 px-2.5 py-2 min-h-[36px] rounded-xl border transition-all duration-150 hover:border-blue-500/[0.28] hover:bg-blue-500/[0.07] active:scale-[0.98]"
+                    style={{ background: 'rgba(59,130,246,0.05)', borderColor: 'rgba(59,130,246,0.18)' }}
+                  >
+                    <User className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+                    <span className="text-xs font-medium text-slate-300 truncate">{t('header.profile')}</span>
+                  </Link>
+                  <button
+                    onClick={() => setShowLogoutModal(true)}
+                    className="flex items-center gap-2 px-2.5 py-2 min-h-[36px] rounded-xl border transition-all duration-150 hover:border-red-500/[0.3] hover:bg-red-500/[0.08] active:scale-[0.98] col-span-2"
+                    style={{ background: 'rgba(244,63,94,0.04)', borderColor: 'rgba(244,63,94,0.15)' }}
+                  >
+                    <LogOut className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
+                    <span className="text-xs font-medium text-red-400">{t('header.logout')}</span>
+                  </button>
+                </div>
               </>
             ) : (
-              <>
+              <div className="grid grid-cols-2 gap-1">
                 <Link
                   to="/login"
                   onClick={closeMobileMenu}
-                  className="block w-full px-5 py-3 text-center text-sm font-medium text-slate-400 rounded-xl hover:text-white hover:bg-white/5 transition-[color,background-color] duration-200"
+                  className="block px-3 py-2.5 text-center text-xs font-medium text-slate-400 rounded-xl border border-white/[0.1] bg-white/[0.03] hover:text-white hover:border-white/[0.18] hover:bg-white/[0.06] transition-all duration-200"
                 >
                   {t('header.login')}
                 </Link>
                 <Link
                   to="/register"
                   onClick={closeMobileMenu}
-                  className="block w-full px-5 py-3 text-center text-sm font-medium text-white bg-gradient-to-br from-[#3b82f6] to-[#7c3aed] rounded-xl shadow-lg shadow-indigo-500/40 hover:shadow-xl hover:shadow-indigo-500/65 transition-[box-shadow] duration-200"
+                  className="block px-3 py-2.5 text-center text-xs font-semibold text-white bg-gradient-to-br from-[#3b82f6] to-[#7c3aed] rounded-xl shadow-md shadow-indigo-500/35 hover:shadow-lg hover:shadow-indigo-500/55 transition-[box-shadow] duration-200"
                 >
                   {t('header.signUp')}
                 </Link>
-              </>
+              </div>
             )}
           </div>
+
+          {/* Safe-area padding for notched phones */}
+          <div className="h-[max(8px,env(safe-area-inset-bottom,0px))]" />
         </div>
       </div>
 

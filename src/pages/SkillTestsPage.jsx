@@ -6,8 +6,6 @@ import {
   ArrowRight, Clock, Layers, Focus, TrendingUp, Award, Brain, CheckCircle2, X, ChevronRight,
 } from 'lucide-react';
 
-import { readingTests } from '../data/readingTests';
-
 // ── Intersection observer hook ────────────────────────────────────────────────
 function useInView(threshold = 0.1) {
   const ref = useRef(null);
@@ -211,15 +209,29 @@ const LEVEL_COLORS = {
   'C1':  'bg-red-500/15    text-red-300    border-red-500/25',
 };
 
+// ── Reading Part 2 static config (matching task, not stored in Firestore) ─────
+const PART2_CONFIG = { part: 2, type: 'matching', level: 'B1', questions: 8, timeLimit: 20 };
+
+// Parts 3–6 are placeholders — active them here as new tests are added.
+const PART_SLOTS = [
+  { part: 1, source: 'firestore' },  // fill-in-blanks, loaded from Firestore
+  { part: 2, source: 'static'    },  // matching, always shown
+  { part: 3, source: 'soon'      },
+  { part: 4, source: 'soon'      },
+  { part: 5, source: 'soon'      },
+  { part: 6, source: 'soon'      },
+];
+
 // ── Part-selector confirmation modal ─────────────────────────────────────────
 function StartModal({ skill, onClose, onConfirm }) {
+  // selected = null | { part: number, type: 'fill' | 'matching' }
   const [selected,       setSelected]       = useState(null);
   const [firestoreTests, setFirestoreTests] = useState([]);
   const [loadingTests,   setLoadingTests]   = useState(true);
 
   const Icon = skill?.icon;
 
-  // Load Firestore tests when modal opens
+  // Load Firestore fill-in-blanks tests when modal opens
   useEffect(() => {
     if (!skill) return;
     setLoadingTests(true);
@@ -235,7 +247,7 @@ function StartModal({ skill, onClose, onConfirm }) {
         const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
         // Deduplicate by part — keep one representative per part number,
-        // but track total count so the card can show it.
+        // but track total count so the card can show variant count.
         const partMap = {};
         all.forEach(t => {
           if (!partMap[t.part]) partMap[t.part] = { rep: t, count: 0 };
@@ -256,6 +268,11 @@ function StartModal({ skill, onClose, onConfirm }) {
   }, [skill?.title]);
 
   if (!skill) return null;
+
+  const handleStart = () => {
+    if (!selected) return;
+    onConfirm(selected);
+  };
 
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center px-4 py-6" aria-modal="true" role="dialog">
@@ -291,7 +308,7 @@ function StartModal({ skill, onClose, onConfirm }) {
               </div>
               <div>
                 <h2 className="text-sm font-bold text-slate-100 leading-none">Choose a Part</h2>
-                <p className="text-xs text-slate-500 mt-0.5">{skill.title} · Fill in the Blanks</p>
+                <p className="text-xs text-slate-500 mt-0.5">{skill.title} · Select your test</p>
               </div>
             </div>
             <button
@@ -302,27 +319,119 @@ function StartModal({ skill, onClose, onConfirm }) {
             </button>
           </div>
 
-          {/* Part grid */}
-          {loadingTests ? (
-            <div className="py-8 mb-5">
-              <Loader size="sm" text="Loading tests…" />
-            </div>
-          ) : firestoreTests.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-2 py-10 mb-5 rounded-xl border border-dashed border-white/[0.08] bg-white/[0.01]">
-              <BookOpen className="w-8 h-8 text-slate-700" />
-              <p className="text-sm font-semibold text-slate-600">No tests added yet</p>
-              <p className="text-xs text-slate-700">Add tests from the Admin → Skill Tests panel</p>
-            </div>
-          ) : (
+          {/* Part grid — 2 columns × 3 rows = 6 slots */}
           <div className="grid grid-cols-2 gap-2.5 mb-5">
-            {firestoreTests.map((test) => {
-              const isSelected = selected === test.part;
-              const levelColor = LEVEL_COLORS[test.level] ?? 'bg-slate-500/15 text-slate-300 border-slate-500/25';
+            {PART_SLOTS.map(slot => {
+              // ── Coming-soon slots ─────────────────────────────────────────
+              if (slot.source === 'soon') {
+                return (
+                  <div
+                    key={slot.part}
+                    className="relative flex flex-col justify-between gap-3 rounded-xl p-4 border border-white/[0.05] bg-white/[0.02] opacity-50"
+                    style={{ minHeight: 96 }}
+                  >
+                    <p className="text-[11px] font-black uppercase tracking-[0.12em] leading-none text-slate-600">
+                      Part {slot.part}
+                    </p>
+                    <span className="self-start text-[10px] font-bold px-2 py-0.5 rounded-md border bg-slate-500/10 text-slate-600 border-slate-500/15">
+                      Coming Soon
+                    </span>
+                    <p className="text-[11px] font-medium text-slate-700">—</p>
+                  </div>
+                );
+              }
+
+              // ── Part 2: static matching card ──────────────────────────────
+              if (slot.source === 'static') {
+                const isSelected = selected?.part === 2;
+                const levelColor = LEVEL_COLORS[PART2_CONFIG.level] ?? 'bg-slate-500/15 text-slate-300 border-slate-500/25';
+                return (
+                  <button
+                    key={slot.part}
+                    type="button"
+                    onClick={() => setSelected({ part: 2, type: 'matching' })}
+                    className={`group relative flex flex-col justify-between gap-3 rounded-xl p-4 text-left border transition-[background-color,border-color,box-shadow] duration-200 ${
+                      isSelected
+                        ? 'bg-blue-500/[0.08] border-blue-400/50 shadow-[0_0_0_1px_rgba(96,165,250,0.2)]'
+                        : 'bg-white/[0.03] border-white/[0.07] hover:bg-white/[0.06] hover:border-white/[0.14]'
+                    }`}
+                    style={{ minHeight: 96 }}
+                  >
+                    {isSelected && (
+                      <span className="absolute top-2.5 right-2.5 w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center">
+                        <CheckCircle2 className="w-2.5 h-2.5 text-white" />
+                      </span>
+                    )}
+
+                    <div className="flex items-center justify-between pr-5">
+                      <p className={`text-[11px] font-black uppercase tracking-[0.12em] leading-none ${
+                        isSelected ? 'text-blue-300' : 'text-slate-500'
+                      }`}>
+                        Part 2
+                      </p>
+                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border ${
+                        isSelected
+                          ? 'bg-blue-500/15 text-blue-400 border-blue-500/25'
+                          : 'bg-white/[0.05] text-slate-600 border-white/[0.08]'
+                      }`}>
+                        Matching
+                      </span>
+                    </div>
+
+                    <span className={`self-start text-[11px] font-bold px-2 py-0.5 rounded-md border ${levelColor}`}>
+                      {PART2_CONFIG.level}
+                    </span>
+
+                    <p className={`text-[11px] font-medium ${isSelected ? 'text-slate-400' : 'text-slate-600'}`}>
+                      {PART2_CONFIG.questions} Questions · {PART2_CONFIG.timeLimit} min
+                    </p>
+                  </button>
+                );
+              }
+
+              // ── Part 1 (and any future fill-in-blanks parts): Firestore ──
+              if (loadingTests) {
+                return (
+                  <div
+                    key={slot.part}
+                    className="flex flex-col justify-between gap-3 rounded-xl p-4 border border-white/[0.07] bg-white/[0.03] animate-pulse"
+                    style={{ minHeight: 96 }}
+                  >
+                    <div className="h-2.5 w-12 rounded bg-white/10" />
+                    <div className="h-4 w-8 rounded bg-white/10" />
+                    <div className="h-2.5 w-24 rounded bg-white/10" />
+                  </div>
+                );
+              }
+
+              const test = firestoreTests.find(t => t.part === slot.part);
+
+              if (!test) {
+                return (
+                  <div
+                    key={slot.part}
+                    className="relative flex flex-col justify-between gap-3 rounded-xl p-4 border border-white/[0.05] bg-white/[0.02] opacity-40"
+                    style={{ minHeight: 96 }}
+                  >
+                    <p className="text-[11px] font-black uppercase tracking-[0.12em] leading-none text-slate-600">
+                      Part {slot.part}
+                    </p>
+                    <span className="self-start text-[10px] font-bold px-2 py-0.5 rounded-md border bg-slate-500/10 text-slate-600 border-slate-500/15">
+                      Not added yet
+                    </span>
+                    <p className="text-[11px] font-medium text-slate-700">Admin panel →</p>
+                  </div>
+                );
+              }
+
+              const isSelected  = selected?.part === slot.part && selected?.type === 'fill';
+              const levelColor  = LEVEL_COLORS[test.level] ?? 'bg-slate-500/15 text-slate-300 border-slate-500/25';
+
               return (
                 <button
-                  key={test.part}
+                  key={slot.part}
                   type="button"
-                  onClick={() => setSelected(test.part)}
+                  onClick={() => setSelected({ part: test.part, type: 'fill' })}
                   className={`group relative flex flex-col justify-between gap-3 rounded-xl p-4 text-left border transition-[background-color,border-color,box-shadow] duration-200 ${
                     isSelected
                       ? 'bg-blue-500/[0.08] border-blue-400/50 shadow-[0_0_0_1px_rgba(96,165,250,0.2)]'
@@ -330,14 +439,12 @@ function StartModal({ skill, onClose, onConfirm }) {
                   }`}
                   style={{ minHeight: 96 }}
                 >
-                  {/* Selected tick */}
                   {isSelected && (
                     <span className="absolute top-2.5 right-2.5 w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center">
                       <CheckCircle2 className="w-2.5 h-2.5 text-white" />
                     </span>
                   )}
 
-                  {/* Part number + random badge */}
                   <div className="flex items-center justify-between pr-5">
                     <p className={`text-[11px] font-black uppercase tracking-[0.12em] leading-none ${
                       isSelected ? 'text-blue-300' : 'text-slate-500'
@@ -355,12 +462,10 @@ function StartModal({ skill, onClose, onConfirm }) {
                     )}
                   </div>
 
-                  {/* Level badge */}
                   <span className={`self-start text-[11px] font-bold px-2 py-0.5 rounded-md border ${levelColor}`}>
                     {test.level}
                   </span>
 
-                  {/* Blanks · time */}
                   <p className={`text-[11px] font-medium ${isSelected ? 'text-slate-400' : 'text-slate-600'}`}>
                     {test.answers.length} Blanks · {test.timeLimit} min
                   </p>
@@ -368,7 +473,6 @@ function StartModal({ skill, onClose, onConfirm }) {
               );
             })}
           </div>
-          )}
 
           {/* Actions */}
           <div className="flex gap-2.5">
@@ -379,7 +483,7 @@ function StartModal({ skill, onClose, onConfirm }) {
               Cancel
             </button>
             <button
-              onClick={() => selected && onConfirm(selected)}
+              onClick={handleStart}
               disabled={!selected}
               className={`flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r ${skill.btnGrad} shadow-lg transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0`}
             >
@@ -408,8 +512,12 @@ export default function SkillTestsPage() {
     }
   };
 
-  const handleConfirm = (part) => {
-    navigate(`/skill-tests/reading?part=${part}`);
+  const handleConfirm = (selection) => {
+    if (selection.type === 'matching') {
+      navigate('/skill-tests/reading-part2');
+    } else {
+      navigate(`/skill-tests/reading?part=${selection.part}`);
+    }
     setConfirmSkill(null);
   };
 
