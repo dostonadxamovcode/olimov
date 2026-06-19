@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+
+# Private / user-specific pages — no crawling value
+Disallow: /admin
+Disallow: /admin/
+Disallow: /profile
+Disallow: /login
+Disallow: /register
+Disallow: /auth
+Disallow: /exam/
+Disallow: /tests/
+Disallow: /test-result
+Disallow: /exam-terminated
+Disallow: /skill-tests/reading
+Disallow: /skill-tests/reading-part2
+
+Sitemap: https://olimov.vercel.app/sitemap.xml

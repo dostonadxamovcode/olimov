@@ -38,20 +38,20 @@ const ServiceCard = memo(function ServiceCard({ s, index, visible }) {
       }}
     >
       {/* Inner: hover lift — separate div so inline style doesn't clash with CSS hover */}
-      <div className="group relative flex h-full min-w-0 flex-col rounded-2xl border border-indigo-500/20 bg-[#0b1023] p-4 sm:rounded-3xl sm:p-5 hover:-translate-y-1.5 hover:border-indigo-500/40 transition-[transform,border-color] duration-300">
+      <div className="group relative flex h-full min-w-0 flex-col rounded-2xl border border-indigo-500/20 bg-[#0b1023] p-3 sm:rounded-3xl sm:p-5 hover:-translate-y-1.5 hover:border-indigo-500/40 transition-[transform,border-color] duration-300">
 
-        <div className={`mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} text-white group-hover:scale-110 transition-transform duration-200 sm:mb-5 sm:h-14 sm:w-14`}>
-          <Icon className="h-5 w-5 sm:h-7 sm:w-7" />
+        <div className={`mb-2.5 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} text-white group-hover:scale-110 transition-transform duration-200 sm:mb-5 sm:h-14 sm:w-14`}>
+          <Icon className="h-4 w-4 sm:h-7 sm:w-7" />
         </div>
 
-        <h3 className="mb-1.5 text-sm font-bold leading-snug text-white sm:mb-2 sm:text-base">
+        <h3 className="mb-1 text-xs font-bold leading-snug text-white sm:mb-2 sm:text-base">
           {t(`services.${s.id}.title`)}
         </h3>
-        <p className="mb-3 text-xs leading-relaxed text-gray-400 sm:mb-4">
+        <p className="mb-2.5 text-[10px] leading-relaxed text-gray-400 sm:text-xs sm:mb-4">
           {t(`services.${s.id}.description`)}
         </p>
 
-        <ul className="mb-5 hidden space-y-2 sm:block">
+        <ul className="mb-4 hidden space-y-2 sm:block">
           {Array.isArray(sFeatures) && sFeatures.map((feature, idx) => (
             <li key={idx} className="flex items-start gap-2">
               <span className={`w-1.5 h-1.5 rounded-full ${bulletColor} mt-2 flex-shrink-0`} />
@@ -62,7 +62,7 @@ const ServiceCard = memo(function ServiceCard({ s, index, visible }) {
 
         <Link
           to={`/services/${s.slug}`}
-          className={`mt-auto block w-full rounded-xl bg-gradient-to-r ${gradient} px-4 py-2.5 text-center text-sm font-semibold text-white hover:opacity-90 transition-opacity duration-200`}
+          className={`mt-auto block w-full rounded-lg sm:rounded-xl bg-gradient-to-r ${gradient} px-2 py-2 sm:px-4 sm:py-2.5 text-center text-[10px] sm:text-sm font-semibold text-white hover:opacity-90 transition-opacity duration-200`}
         >
           {t('services.getStarted')}
         </Link>
@@ -107,7 +107,7 @@ export default function Services() {
           <p className="mx-auto max-w-2xl text-xs text-gray-400 sm:text-sm">{t('services.subtitle')}</p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 lg:gap-6">
           {services.map((s, i) => (
             <ServiceCard key={s.id} s={s} index={i} visible={inView} />
           ))}

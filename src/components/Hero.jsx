@@ -7,7 +7,7 @@ import { useSiteContent } from '../services/siteContentService';
 const HeroStatCard = memo(function HeroStatCard({ stat, index }) {
   const { t } = useTranslation();
   return (
-    <div className="premium-card min-w-0 p-2 text-center animate-fade-in-up sm:p-4 sm:text-left" style={{ animationDelay: `${index * 100}ms` }}>
+    <div className="premium-card min-w-0 p-2 text-center sm:p-4 sm:text-left">
       <div className={`truncate text-base font-bold leading-tight sm:text-2xl lg:text-3xl ${index === 0 ? 'text-[#0ea5e9]' : index === 1 ? 'text-[#8b5cf6]' : 'text-[#f43f5e]'}`}>{stat.value}</div>
       <div className="mt-0.5 text-[9px] leading-tight text-gray-400 sm:text-xs sm:leading-4 line-clamp-2">{t('stats.' + stat.id)}</div>
     </div>
@@ -32,7 +32,7 @@ export default function Hero() {
   }, [words.length]);
 
   return (
-    <section id="top" className="relative flex min-h-[100svh] items-center justify-center overflow-hidden pt-20 pb-10 sm:pt-24 sm:pb-12 lg:pt-28 lg:pb-16 animate-hero-fade">
+    <section id="top" className="relative flex min-h-[100svh] items-center justify-center overflow-hidden pt-20 pb-10 sm:pt-24 sm:pb-12 lg:pt-28 lg:pb-16">
 
       {/* BACKGROUND */}
       <div className="absolute inset-0" style={{ background: '#080c14' }} />
@@ -118,7 +118,7 @@ export default function Hero() {
 
         </div>
 
-        <div className="relative mx-auto w-full max-w-[400px] animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+        <div className="relative mx-auto w-full max-w-[400px]">
           {/* Decorative blobs — kept inside container so they don't cause overflow */}
           <div className="absolute left-0 top-10 h-20 w-20 rounded-full bg-[#0ea5e9]/30 blur-2xl animate-pulse-glow" />
           <div className="absolute right-0 bottom-16 h-24 w-24 rounded-full bg-[#8b5cf6]/25 blur-2xl animate-pulse-glow" style={{ animationDelay: '0.5s' }} />
@@ -131,7 +131,7 @@ export default function Hero() {
                 alt="CEFRPro mentor"
                 loading="eager"
                 decoding="async"
-                className="h-[240px] w-full object-cover object-[55%_54%] sm:h-[320px] lg:h-[400px] xl:h-[430px]"
+                className="h-[240px] w-full object-cover object-[55%_8%] sm:object-[55%_54%] sm:h-[320px] lg:h-[400px] xl:h-[430px]"
               />
               <div className="absolute inset-0 bg-gradient-to-tr from-[#0ea5e9]/30 via-transparent to-[#8b5cf6]/25" />
               <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#030712] via-[#030712]/50 to-transparent" />

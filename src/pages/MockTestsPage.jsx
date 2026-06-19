@@ -5,6 +5,23 @@ import { db } from '../firebase'
 import { useTranslation } from 'react-i18next'
 import { Sprout, BookOpen, TrendingUp, BarChart2, Trophy, Star, AlertCircle, Play, ArrowLeft } from 'lucide-react'
 import { ButtonSpinner } from '../components/common/Loader'
+import SEO from '../components/SEO'
+
+const MOCK_SCHEMA = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Course",
+  "name": "CEFR Full Mock Tests",
+  "description": "Take full-length CEFR mock exams with instant scoring, detailed performance reports, and progress tracking across all skills.",
+  "url": "https://olimov.vercel.app/services/mock-tests",
+  "provider": {
+    "@type": "EducationalOrganization",
+    "@id": "https://olimov.vercel.app/#organization",
+    "name": "Olimov CEFR"
+  },
+  "educationalLevel": "A1-C2",
+  "teaches": "CEFR Exam Preparation",
+  "inLanguage": "en"
+})
 
 const LEVELS = [
   { key: 'a1', col: 'a1Tests', label: 'A1', name: 'Beginner',         icon: Sprout,      gradient: 'from-emerald-500 to-teal-400',  glow: 'shadow-emerald-500/30', border: 'hover:border-emerald-500/50', badge: 'bg-emerald-500/20 text-emerald-300' },
@@ -74,6 +91,13 @@ export default function MockTestsPage() {
   }
 
   return (
+    <>
+      <SEO
+        title="Mock Tests"
+        description="Take full-length CEFR mock exams with instant scoring, detailed performance reports, and progress tracking across all skills."
+        canonical="https://olimov.vercel.app/services/mock-tests"
+        schema={MOCK_SCHEMA}
+      />
     <div className="relative min-h-screen site-bg overflow-hidden flex flex-col items-center px-4 py-16 mt-[80px]">
       {/* bg glows */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -170,5 +194,6 @@ export default function MockTestsPage() {
         </div>
       </div>
     </div>
+    </>
   )
 }

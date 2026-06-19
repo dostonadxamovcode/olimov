@@ -5,6 +5,7 @@ import { db } from '../firebase'
 import { useTranslation } from 'react-i18next'
 import { Sprout, BookOpen, TrendingUp, ChartBar as BarChart2, Trophy as Award, Star } from 'lucide-react'
 import { Spinner } from '../components/common/Loader'
+import SEO from '../components/SEO'
 
 const QUESTION_COUNT = 50
 
@@ -72,6 +73,12 @@ export default function LevelSelection() {
   const handleCancel = () => { if (fetching) return; setSelected(null); setFetchError('') }
 
   return (
+    <>
+      <SEO
+        title="Choose Your CEFR Level"
+        description="Select your English proficiency level — A1 to C2 — and start practicing with CEFR-aligned tests designed for your exact skill level."
+        canonical="https://olimov.vercel.app/level"
+      />
     <div className="level-selection-page relative min-h-screen site-bg overflow-hidden flex flex-col items-center px-4 py-16 mt-[80px]">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -left-40 w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-full bg-violet-700/20 blur-[60px] md:blur-[120px]" />
@@ -185,5 +192,6 @@ export default function LevelSelection() {
         </div>
       )}
     </div>
+    </>
   )
 }

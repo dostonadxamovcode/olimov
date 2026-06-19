@@ -1,12 +1,19 @@
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Wrench } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import SEO from '../components/SEO'
 
 export default function Tools() {
   const navigate = useNavigate()
   const { t } = useTranslation()
 
   return (
+    <>
+      <SEO
+        title="Learning Tools"
+        description="Free CEFR learning tools — vocabulary drills, grammar exercises, and practice sets to boost your English proficiency score."
+        canonical="https://olimov.vercel.app/tools"
+      />
     <div className="min-h-screen site-bg py-8 px-4 sm:px-6 lg:px-8 mt-[60px]">
       <div className="max-w-4xl mx-auto">
         <div className="text-center animate-fadeIn">
@@ -25,5 +32,6 @@ export default function Tools() {
         </div>
       </div>
     </div>
+    </>
   )
 }

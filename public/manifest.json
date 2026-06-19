@@ -1,0 +1,43 @@
+{
+  "name": "Olimov CEFR",
+  "short_name": "OlimovCEFR",
+  "description": "CEFR preparation platform with mock tests, expert feedback, and real-time progress tracking.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#030712",
+  "theme_color": "#0ea5e9",
+  "lang": "en",
+  "categories": ["education"],
+  "icons": [
+    {
+      "src": "/IMG_0723.JPG",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/IMG_0723.JPG",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Take a Mock Test",
+      "short_name": "Mock Test",
+      "description": "Start a full-length CEFR mock exam",
+      "url": "/services/mock-tests",
+      "icons": [{ "src": "/IMG_0723.JPG", "sizes": "512x512" }]
+    },
+    {
+      "name": "Choose Level",
+      "short_name": "My Level",
+      "description": "Select your CEFR proficiency level",
+      "url": "/level",
+      "icons": [{ "src": "/IMG_0723.JPG", "sizes": "512x512" }]
+    }
+  ]
+}

@@ -1,13 +1,19 @@
-
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, BookOpen } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import SEO from '../components/SEO'
 
 export default function Courses() {
   const navigate = useNavigate()
   const { t } = useTranslation()
 
   return (
+    <>
+      <SEO
+        title="English Courses"
+        description="Explore CEFR-aligned English courses from A1 Beginner to C2 Proficient. Structured lessons, mock tests, and progress tracking for every level."
+        canonical="https://olimov.vercel.app/courses"
+      />
     <div className="min-h-screen site-bg py-8 px-4 sm:px-6 lg:px-8 mt-[60px]">
       <div className="max-w-4xl mx-auto">
         <div
@@ -30,5 +36,6 @@ export default function Courses() {
         </div>
       </div>
     </div>
+    </>
   )
 }

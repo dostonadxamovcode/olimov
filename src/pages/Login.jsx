@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Lock, Mail, ArrowLeft, LogIn } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
+import SEO from '../components/SEO'
 
 import { toastError, toastSuccess, getErrorMessage } from '../utils/errorHandler'
 import { ButtonSpinner } from '../components/common/Loader'
@@ -53,7 +54,9 @@ export default function Login() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden" style={{ background: '#080c14' }}>
+        <>
+          <SEO title="Login" description="Log in to your Olimov CEFR account." noindex />
+        <div className="h-[100svh] overflow-hidden flex items-center justify-center px-4 relative" style={{ background: '#080c14' }}>
 
             {/* Animated background blobs */}
             <div className="absolute inset-0 pointer-events-none">
@@ -73,7 +76,7 @@ export default function Login() {
                 className="w-full max-w-md relative z-10 animate-fadeIn"
             >
                 {/* Card */}
-                <div className="relative rounded-3xl p-8 overflow-hidden"
+                <div className="relative rounded-3xl p-5 sm:p-8 overflow-hidden"
                     style={{
                         background: 'linear-gradient(145deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 100%)',
                         border: '1px solid rgba(255,255,255,0.1)',
@@ -88,7 +91,7 @@ export default function Login() {
                     {/* Back button */}
                     <button
                         onClick={() => navigate('/')}
-                        className="flex items-center gap-2 mb-7 group hover:translate-x-[-2px] transition-transform"
+                        className="flex items-center gap-2 mb-3 sm:mb-6 group hover:translate-x-[-2px] transition-transform"
                         style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                     >
                         <div className="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
@@ -99,7 +102,7 @@ export default function Login() {
                     </button>
 
                     {/* Logo */}
-                    <div className="flex items-center gap-3 mb-8">
+                    <div className="flex items-center gap-3 mb-3 sm:mb-7">
                         <div className="w-11 h-11 rounded-2xl flex items-center justify-center relative overflow-hidden"
                             style={{ background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', boxShadow: '0 8px 24px rgba(99,102,241,0.4)' }}>
                             <span className="text-white font-black text-base relative z-10">C</span>
@@ -115,12 +118,12 @@ export default function Login() {
                     </div>
 
                     {/* Heading */}
-                    <div className="mb-7">
-                        <h1 className="text-2xl font-bold mb-1.5 tracking-tight" style={{ color: '#f1f5f9' }}>{t('login.welcomeBack')}</h1>
+                    <div className="mb-3 sm:mb-6">
+                        <h1 className="text-xl sm:text-2xl font-bold mb-1 tracking-tight" style={{ color: '#f1f5f9' }}>{t('login.welcomeBack')}</h1>
                         <p className="text-sm" style={{ color: '#475569' }}>{t('login.credentials')}</p>
                     </div>
 
-                    <form onSubmit={submit} className="space-y-4">
+                    <form onSubmit={submit} className="space-y-2.5 sm:space-y-4">
 
                         <Field icon={<Mail size={15} />} label={t('login.email')} type="email" placeholder="your@email.com" value={form.email} onChange={set('email')} />
                         <Field icon={<Lock size={15} />} label={t('login.password')} type="password" placeholder="••••••••" value={form.password} onChange={set('password')} />
@@ -138,7 +141,7 @@ export default function Login() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-3.5 rounded-2xl font-semibold text-white flex items-center justify-center gap-2.5 relative overflow-hidden transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.98]"
+                            className="w-full py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl font-semibold text-white flex items-center justify-center gap-2.5 relative overflow-hidden transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.98]"
                             style={{ background: 'linear-gradient(135deg, #2563eb, #7c3aed)', boxShadow: '0 8px 24px rgba(99,102,241,0.35)' }}
                         >
                             <div className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity"
@@ -167,7 +170,7 @@ export default function Login() {
                         <button
                             type="button"
                             onClick={handleGoogle}
-                            className="w-full py-3.5 rounded-2xl font-semibold flex items-center justify-center gap-2.5 transition-all hover:scale-[1.01] active:scale-[0.98]"
+                            className="w-full py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl font-semibold flex items-center justify-center gap-2.5 transition-all hover:scale-[1.01] active:scale-[0.98]"
                             style={{
                                 background: 'rgba(255,255,255,0.05)',
                                 border: '1px solid rgba(255,255,255,0.1)',
@@ -193,6 +196,7 @@ export default function Login() {
                 </div>
             </div>
         </div>
+        </>
     )
 }
 
@@ -206,7 +210,7 @@ function Field({ icon, label, ...props }) {
                 </span>
                 <input
                     {...props}
-                    className="w-full pl-10 pr-4 py-3 rounded-xl text-sm outline-none transition-all"
+                    className="w-full pl-10 pr-4 py-2 sm:py-3 rounded-xl text-sm outline-none transition-all"
                     style={{
                         background: 'rgba(255,255,255,0.04)',
                         border: '1px solid rgba(255,255,255,0.08)',

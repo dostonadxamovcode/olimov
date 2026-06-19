@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Loader } from '../components/common/Loader';
 import { useNavigate } from 'react-router-dom';
+import SEO from '../components/SEO';
 import {
   Mic, BookOpen, PenLine, Headphones,
   ArrowRight, Clock, Layers, Focus, TrendingUp, Award, Brain, CheckCircle2, X, ChevronRight,
@@ -522,6 +523,12 @@ export default function SkillTestsPage() {
   };
 
   return (
+    <>
+      <SEO
+        title="Skill Tests"
+        description="Targeted CEFR skill tests for listening, reading, writing, and speaking. Identify weak areas and track improvement over time."
+        canonical="https://olimov.vercel.app/skill-tests"
+      />
     <div className="relative min-h-screen overflow-hidden" style={{ background: 'linear-gradient(180deg, #030712 0%, #0a0f1c 50%, #030712 100%)' }}>
 
       {/* Ambient glows */}
@@ -618,5 +625,6 @@ export default function SkillTestsPage() {
         onConfirm={handleConfirm}
       />
     </div>
+    </>
   );
 }

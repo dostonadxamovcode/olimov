@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, GraduationCap, Mail, MessageCircle, Phone } from 'lucide-react';
+import SEO from '../components/SEO';
 
 const contacts = [
   { icon: Phone, label: '+998900406728', href: 'tel:+998900406728' },
@@ -9,6 +10,12 @@ const contacts = [
 
 export default function AboutPage() {
   return (
+    <>
+      <SEO
+        title="About Us"
+        description="Meet the team behind Olimov CEFR — certified CEFR instructors and education technologists making world-class English preparation accessible in Uzbekistan."
+        canonical="https://olimov.vercel.app/about"
+      />
     <div
       style={{ fontFamily: "'Poppins', sans-serif" }}
       className="relative min-h-screen overflow-hidden  text-white pt-[60px]"
@@ -164,5 +171,6 @@ export default function AboutPage() {
         </div>
       </section>
     </div>
+    </>
   );
 }

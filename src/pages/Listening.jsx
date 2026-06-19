@@ -1,5 +1,22 @@
 import { ArrowRight, Clock as Clock3, Headphones, Search, Signal, Sparkles } from 'lucide-react'
 import { useSiteContent } from '../services/siteContentService'
+import SEO from '../components/SEO'
+
+const LISTENING_SCHEMA = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Course",
+  "name": "CEFR Listening Practice",
+  "description": "Sharpen CEFR listening skills with realistic audio exercises, full transcripts, speed control, and timed section-wise practice sessions.",
+  "url": "https://olimov.vercel.app/services/listening",
+  "provider": {
+    "@type": "EducationalOrganization",
+    "@id": "https://olimov.vercel.app/#organization",
+    "name": "Olimov CEFR"
+  },
+  "educationalLevel": "A1-C2",
+  "teaches": "CEFR Listening Comprehension",
+  "inLanguage": "en"
+})
 
 const statIcons = {
   Headphones,
@@ -10,6 +27,13 @@ const statIcons = {
 export default function Listening() {
   const listeningPage = useSiteContent('listeningPage');
   return (
+    <>
+      <SEO
+        title="Listening Practice"
+        description="Sharpen CEFR listening skills with realistic audio exercises, full transcripts, speed control, and timed section-wise practice sessions."
+        canonical="https://olimov.vercel.app/services/listening"
+        schema={LISTENING_SCHEMA}
+      />
     <section className="listening-page relative min-h-screen overflow-hidden bg-[#eef3f8] px-4 pb-24 pt-32 text-slate-950 dark:bg-[#040717] dark:text-white sm:px-6 lg:px-8">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute left-1/2 top-0 h-[440px] w-[440px] -translate-x-1/2 rounded-full bg-violet-300/18 blur-[82px] dark:h-[540px] dark:w-[540px] dark:bg-violet-600/25 dark:blur-[120px]" />
@@ -123,5 +147,6 @@ export default function Listening() {
         </div>
       </div>
     </section>
+    </>
   )
 }

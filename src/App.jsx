@@ -7,8 +7,9 @@ import ProtectedRoute from './components/ProtectedRoute'
 import RoleProtectedRoute from './components/RoleProtectedRoute'
 import MainLayout from './layouts/MainLayout'
 import { PageLoader } from './components/common/Loader'
+// Home is the landing page — eager import so it renders immediately without Suspense delay
+import Home from './pages/Home'
 
-const Home         = lazy(() => import('./pages/Home'))
 const AboutPage    = lazy(() => import('./pages/AboutPage'))
 const Courses      = lazy(() => import('./pages/Courses'))
 const Tools        = lazy(() => import('./pages/Tools'))
@@ -43,7 +44,9 @@ function SuperadminOnlyRoute({ children }) {
 }
 
 function LoginGate({ children }) {
-  const { currentUser, userRole } = useAuth()
+  const { currentUser, userRole, loading } = useAuth()
+  // Wait for auth so logged-in users aren't shown the login form before redirect
+  if (loading) return <PageLoader />
   if (currentUser) {
     const hasAdminAccess =
       userRole === 'superadmin' ||
@@ -86,7 +89,7 @@ const router = createBrowserRouter([
     path: '/',
     element: <MainLayout />,
     children: [
-      { index: true,                    element: <LazyPage><Home /></LazyPage> },
+      { index: true,                    element: <Home /> },
       { path: 'about',                  element: <LazyPage><AboutPage /></LazyPage> },
       { path: 'tools',                  element: <LazyPage><Tools /></LazyPage> },
       { path: 'courses',                element: <LazyPage><Courses /></LazyPage> },
@@ -118,20 +121,10 @@ const router = createBrowserRouter([
   { path: '/exam-terminated',      element: <LazyPage><ExamTerminated /></LazyPage> },
 ])
 
-// Blocks the entire app until Firebase auth check completes (avoids Header/Footer
-// flashing before the page content is ready on first load).
-function AppReadyGate({ children }) {
-  const { loading } = useAuth()
-  if (loading) return <PageLoader />
-  return children
-}
-
 export default function App() {
   return (
     <AuthProvider>
-      <AppReadyGate>
-        <RouterProvider router={router} />
-      </AppReadyGate>
+      <RouterProvider router={router} />
     </AuthProvider>
   )
 }
