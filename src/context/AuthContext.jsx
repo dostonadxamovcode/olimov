@@ -114,7 +114,10 @@ export function AuthProvider({ children }) {
                 setUserAvatar(data.photoBase64 || data.photoURL || user.photoURL || null)
                 setLoading(false)
               },
-              () => {
+              (snapshotError) => {
+                console.error('[Firestore] users onSnapshot error:')
+                console.error('code:', snapshotError?.code)
+                console.error('message:', snapshotError?.message)
                 const role = user.email.toLowerCase() === 'superadmin@gmail.com' ? 'superadmin' : 'user'
                 setUserRole(role)
                 setUserAvatar(user.photoURL || null)
@@ -124,12 +127,16 @@ export function AuthProvider({ children }) {
           },
           // Auth error callback — fires on network failures during token refresh
           (error) => {
-            console.warn('Firebase Auth error:', error?.code ?? error)
+            console.error('[Firebase Auth] onAuthStateChanged error:')
+            console.error('code:', error?.code)
+            console.error('message:', error?.message)
             failSafe()
           }
         )
       } catch (error) {
-        console.warn('Firebase Auth init error:', error?.message ?? error)
+        console.error('[Firebase Auth] Init failed:')
+        console.error('code:', error?.code)
+        console.error('message:', error?.message)
         failSafe()
       }
     }
@@ -146,28 +153,49 @@ export function AuthProvider({ children }) {
   }, [])
 
   const login = async (email, password) => {
-    const { auth, signInWithEmailAndPassword, setPersistence, browserLocalPersistence } = await loadAuthClient()
-    await setPersistence(auth, browserLocalPersistence)
-    return signInWithEmailAndPassword(auth, email, password)
+    try {
+      const { auth, signInWithEmailAndPassword, setPersistence, browserLocalPersistence } = await loadAuthClient()
+      await setPersistence(auth, browserLocalPersistence)
+      return await signInWithEmailAndPassword(auth, email, password)
+    } catch (error) {
+      console.error('[Firebase Auth] signInWithEmailAndPassword failed:')
+      console.error('code:', error?.code)
+      console.error('message:', error?.message)
+      throw error
+    }
   }
 
   const register = async (email, password) => {
-    const { auth, db, createUserWithEmailAndPassword, setPersistence, browserLocalPersistence, doc, setDoc, serverTimestamp } = await loadAuthClient()
-    await setPersistence(auth, browserLocalPersistence)
-    const cred = await createUserWithEmailAndPassword(auth, email, password)
-    const role = email.toLowerCase() === 'superadmin@gmail.com' ? 'superadmin' : 'user'
-    await setDoc(doc(db, 'users', cred.user.uid), { email, role, createdAt: serverTimestamp() })
-    return cred
+    try {
+      const { auth, db, createUserWithEmailAndPassword, setPersistence, browserLocalPersistence, doc, setDoc, serverTimestamp } = await loadAuthClient()
+      await setPersistence(auth, browserLocalPersistence)
+      const cred = await createUserWithEmailAndPassword(auth, email, password)
+      const role = email.toLowerCase() === 'superadmin@gmail.com' ? 'superadmin' : 'user'
+      await setDoc(doc(db, 'users', cred.user.uid), { email, role, createdAt: serverTimestamp() })
+      return cred
+    } catch (error) {
+      console.error('[Firebase Auth] createUserWithEmailAndPassword failed:')
+      console.error('code:', error?.code)
+      console.error('message:', error?.message)
+      throw error
+    }
   }
 
   const googleLogin = async () => {
-    const { auth, db, GoogleAuthProvider, signInWithPopup, doc, setDoc, serverTimestamp } = await loadAuthClient()
-    const provider = new GoogleAuthProvider()
-    const result = await signInWithPopup(auth, provider)
-    const u = result.user
-    const role = u.email.toLowerCase() === 'superadmin@gmail.com' ? 'superadmin' : 'user'
-    await setDoc(doc(db, 'users', u.uid), { email: u.email, role, createdAt: serverTimestamp() }, { merge: true })
-    return result
+    try {
+      const { auth, db, GoogleAuthProvider, signInWithPopup, doc, setDoc, serverTimestamp } = await loadAuthClient()
+      const provider = new GoogleAuthProvider()
+      const result = await signInWithPopup(auth, provider)
+      const u = result.user
+      const role = u.email.toLowerCase() === 'superadmin@gmail.com' ? 'superadmin' : 'user'
+      await setDoc(doc(db, 'users', u.uid), { email: u.email, role, createdAt: serverTimestamp() }, { merge: true })
+      return result
+    } catch (error) {
+      console.error('[Firebase Auth] signInWithPopup (Google) failed:')
+      console.error('code:', error?.code)
+      console.error('message:', error?.message)
+      throw error
+    }
   }
 
   const logout = async () => {

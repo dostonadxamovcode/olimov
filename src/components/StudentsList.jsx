@@ -210,6 +210,8 @@ export default function StudentsList() {
                       <img
                         src={student.photoBase64 || student.photoURL}
                         alt=""
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover"
                         onError={e => { e.currentTarget.style.display = 'none' }}
                       />

@@ -82,6 +82,8 @@ export default function AboutPage() {
             <img
               src="/IMG_0723.JPG"
               alt="Asadbek Olimov"
+              loading="lazy"
+              decoding="async"
               className="h-full w-full object-cover"
               style={{ objectPosition: '55% 48%' }}
             />

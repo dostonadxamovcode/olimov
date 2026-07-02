@@ -121,7 +121,6 @@ export const initializeDashboardData = async () => {
   try {
     const docRef = doc(db, DASHBOARD_COLLECTION, 'config')
     await setDoc(docRef, INITIAL_DASHBOARD_DATA)
-    console.log('Dashboard data initialized successfully')
     return INITIAL_DASHBOARD_DATA
   } catch (error) {
     console.error('Error initializing dashboard data:', error)
@@ -139,7 +138,6 @@ export const updateStats = async (stats) => {
       stats,
       updatedAt: serverTimestamp()
     })
-    console.log('Stats updated successfully')
   } catch (error) {
     console.error('Error updating stats:', error)
     throw error
@@ -162,7 +160,6 @@ export const updateStatItem = async (statId, updates) => {
       stats: updatedStats,
       updatedAt: serverTimestamp()
     })
-    console.log(`Stat ${statId} updated successfully`)
   } catch (error) {
     console.error('Error updating stat item:', error)
     throw error
@@ -179,7 +176,6 @@ export const updateTrendData = async (trendData) => {
       trendData,
       updatedAt: serverTimestamp()
     })
-    console.log('Trend data updated successfully')
   } catch (error) {
     console.error('Error updating trend data:', error)
     throw error
@@ -196,7 +192,6 @@ export const updateStatusData = async (statusData) => {
       statusData,
       updatedAt: serverTimestamp()
     })
-    console.log('Status data updated successfully')
   } catch (error) {
     console.error('Error updating status data:', error)
     throw error
@@ -213,7 +208,6 @@ export const updateUniData = async (uniData) => {
       uniData,
       updatedAt: serverTimestamp()
     })
-    console.log('University data updated successfully')
   } catch (error) {
     console.error('Error updating university data:', error)
     throw error
@@ -242,7 +236,6 @@ export const addActivity = async (activity) => {
       recentActivity: updatedRecentActivity,
       updatedAt: serverTimestamp()
     })
-    console.log('Activity added successfully')
   } catch (error) {
     console.error('Error adding activity:', error)
     throw error
@@ -259,7 +252,6 @@ export const clearActivities = async () => {
       recentActivity: [],
       updatedAt: serverTimestamp()
     })
-    console.log('Activities cleared successfully')
   } catch (error) {
     console.error('Error clearing activities:', error)
     throw error
@@ -299,7 +291,6 @@ export const subscribeToDashboard = (callback) => {
 export const resetDashboardData = async () => {
   try {
     await initializeDashboardData()
-    console.log('Dashboard data reset to defaults')
   } catch (error) {
     console.error('Error resetting dashboard data:', error)
     throw error

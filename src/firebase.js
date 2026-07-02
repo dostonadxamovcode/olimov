@@ -1,50 +1,51 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth, GoogleAuthProvider } from 'firebase/auth'
-import { initializeFirestore } from 'firebase/firestore'
+import { initializeFirestore, memoryLocalCache } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 
-// Firebase configuration with validation
-const getFirebaseConfig = () => {
-  const config = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyDu4uPEzawNOHD7u27NEeTy9vypT5G1rg8',
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'olimov-a5528.firebaseapp.com',
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'olimov-a5528',
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'olimov-a5528.firebasestorage.app',
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '224698298994',
-    appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:224698298994:web:1cbc46884f4d34f87248eb',
-  }
-
-  // Validate required fields
-  if (!config.projectId || config.projectId === 'fallback') {
-    console.error('CRITICAL: Firebase projectId is missing or invalid!')
-    console.error('Current projectId:', config.projectId)
-    console.error('Please check VITE_FIREBASE_PROJECT_ID environment variable')
-  }
-
-  if (!config.apiKey || config.apiKey === 'fallback') {
-    console.error('CRITICAL: Firebase apiKey is missing or invalid!')
-    console.error('Please check VITE_FIREBASE_API_KEY environment variable')
-  }
-
-  return config
+// ── Firebase config — values come from .env.local (never hardcode in source) ──
+const firebaseConfig = {
+  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId:             import.meta.env.VITE_FIREBASE_APP_ID,
 }
 
-const firebaseConfig = getFirebaseConfig()
+// ── Startup validation ────────────────────────────────────────────────────────
+const REQUIRED = ['apiKey', 'authDomain', 'projectId', 'appId']
+REQUIRED.forEach((key) => {
+  if (!firebaseConfig[key]) {
+    console.error(`[Firebase] Missing required config key: ${key}`)
+    console.error(`[Firebase] Add VITE_FIREBASE_${key.replace(/([A-Z])/g, '_$1').toUpperCase()} to .env.local`)
+  }
+})
 
+// ── App init ──────────────────────────────────────────────────────────────────
 let app
 try {
   app = initializeApp(firebaseConfig)
 } catch (error) {
-  console.error('FIREBASE APP INITIALIZATION FAILED:', error)
+  console.error('[Firebase] initializeApp failed:')
+  console.error('code:', error?.code)
+  console.error('message:', error?.message)
   throw error
 }
 
-export const auth = getAuth(app)
+// ── Auth ──────────────────────────────────────────────────────────────────────
+export const auth           = getAuth(app)
 export const googleProvider = new GoogleAuthProvider()
 
+// ── Firestore ─────────────────────────────────────────────────────────────────
+// memoryLocalCache: keeps fetched docs in memory so the app doesn't hang on
+// ERR_INTERNET_DISCONNECTED — cached data is served while offline.
+// experimentalForceLongPolling: avoids WebSocket issues behind strict firewalls.
 export const db = initializeFirestore(app, {
+  localCache:                  memoryLocalCache(),
   experimentalForceLongPolling: true,
-  ignoreUndefinedProperties: true,
+  ignoreUndefinedProperties:    true,
 })
 
+// ── Storage ───────────────────────────────────────────────────────────────────
 export const storage = getStorage(app)

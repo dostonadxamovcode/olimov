@@ -257,6 +257,9 @@ function ScoreCard({ score, total }) {
   );
 }
 
+// ── Per-part localStorage key ─────────────────────────────────────────────────
+const storageKey = (part) => `skillReading_testId_p${part}`;
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function SkillReadingPage() {
   const navigate       = useNavigate();
@@ -280,7 +283,7 @@ export default function SkillReadingPage() {
     setResults([]);
   }, [test?.id]);
 
-  // Fetch from Firestore. Pick one random test for the requested part.
+  // Fetch from Firestore — reuse the saved test ID on refresh, pick random otherwise.
   useEffect(() => {
     let cancelled = false;
     setTest(null);
@@ -288,22 +291,42 @@ export default function SkillReadingPage() {
 
     const load = async () => {
       try {
-        const { collection, getDocs, query, where } = await import('firebase/firestore');
+        const { collection, getDocs, query, where, doc, getDoc } = await import('firebase/firestore');
         const { db } = await import('../firebase');
-        const snap = await getDocs(
+
+        const savedId = localStorage.getItem(storageKey(partParam));
+
+        if (savedId) {
+          // Try to restore the exact test that was in progress
+          const snap = await getDoc(doc(db, 'skillReadingTests', savedId));
+          if (!cancelled && snap.exists()) {
+            const data = snap.data();
+            const paragraphs = (data.paragraphs ?? []).map(p =>
+              Array.isArray(p) ? p : (p.segs ?? [])
+            );
+            setTest({ id: snap.id, ...data, paragraphs });
+            return;
+          }
+          // Saved test no longer exists — fall through to random
+          localStorage.removeItem(storageKey(partParam));
+        }
+
+        // Pick a random test and persist its ID
+        const colSnap = await getDocs(
           query(collection(db, 'skillReadingTests'), where('part', '==', Number(partParam)))
         );
         if (cancelled) return;
-        if (!snap.empty) {
-          const all = snap.docs.map(d => {
+        if (!colSnap.empty) {
+          const all = colSnap.docs.map(d => {
             const data = d.data();
-            // Firestore stores paragraphs as [{segs:[...]}, ...] — unwrap back to arrays.
             const paragraphs = (data.paragraphs ?? []).map(p =>
               Array.isArray(p) ? p : (p.segs ?? [])
             );
             return { id: d.id, ...data, paragraphs };
           });
-          setTest(all[Math.floor(Math.random() * all.length)]);
+          const chosen = all[Math.floor(Math.random() * all.length)];
+          localStorage.setItem(storageKey(partParam), chosen.id);
+          setTest(chosen);
         } else {
           setLoadError(true);
         }
@@ -346,6 +369,13 @@ export default function SkillReadingPage() {
   // Guard is active only while the test is loaded and in progress.
   useAntiCheatGuard({ active: !!test && !submitted, onViolation: handleViolation });
 
+  // Clear the saved test ID and go back — new random test next visit
+  const handleExit = () => {
+    localStorage.removeItem(storageKey(partParam));
+    navigate('/skill-tests');
+  };
+
+  // Retry keeps the same test (no localStorage clear)
   const handleReset = () => {
     setUserAnswers(Array(total).fill(''));
     setSubmitted(false);
@@ -374,7 +404,7 @@ export default function SkillReadingPage() {
               Part {partParam} uchun test hali qo'shilmagan. Admin paneldan test qo'shing.
             </p>
             <button
-              onClick={() => navigate('/skill-tests')}
+              onClick={handleExit}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/[0.06] border border-white/10 text-slate-300 hover:bg-white/10 transition-all text-sm font-medium"
             >
               <ArrowLeft className="w-4 h-4" /> Orqaga
@@ -407,7 +437,7 @@ export default function SkillReadingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[76px] flex items-center gap-5">
           <button
             type="button"
-            onClick={() => navigate('/skill-tests')}
+            onClick={handleExit}
             className="inline-flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium transition-colors duration-200 group flex-shrink-0 px-3 py-2 rounded-lg hover:bg-white/[0.06]"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform duration-200" />
@@ -525,7 +555,7 @@ export default function SkillReadingPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => navigate('/skill-tests')}
+                    onClick={handleExit}
                     className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg transition-all"
                   >
                     More Tests <ChevronRight className="w-4 h-4" />
@@ -599,7 +629,7 @@ export default function SkillReadingPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => navigate('/skill-tests')}
+                    onClick={handleExit}
                     className="w-full inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-cyan-500 shadow-lg shadow-blue-500/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
                   >
                     More Skill Tests <ChevronRight className="w-4 h-4" />

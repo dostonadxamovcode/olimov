@@ -31,11 +31,17 @@ const ResultsPage  = lazy(() => import('./pages/ResultsPage'))
 const TestResultPage=lazy(() => import('./pages/TestResultPage'))
 const ExamTerminated=lazy(() => import('./pages/ExamTerminated'))
 const AdminPage    = lazy(() => import('./pages/AdminPage'))
-const AdminSkillTestFormPage = lazy(() => import('./pages/AdminSkillTestFormPage'))
-const Profile        = lazy(() => import('./pages/Profile'))
-const SkillTestsPage  = lazy(() => import('./pages/SkillTestsPage'))
-const SkillReadingPage    = lazy(() => import('./pages/SkillReadingPage'))
-const SkillReadingPart2Page = lazy(() => import('./pages/SkillReadingPart2Page'))
+const AdminSkillTestFormPage    = lazy(() => import('./pages/AdminSkillTestFormPage'))
+const AdminListeningFormPage    = lazy(() => import('./pages/AdminListeningFormPage'))
+const AdminWritingFormPage      = lazy(() => import('./pages/AdminWritingFormPage'))
+const AdminSpeakingFormPage     = lazy(() => import('./pages/AdminSpeakingFormPage'))
+const Profile                   = lazy(() => import('./pages/Profile'))
+const SkillTestsPage            = lazy(() => import('./pages/SkillTestsPage'))
+const SkillReadingPage          = lazy(() => import('./pages/SkillReadingPage'))
+const SkillReadingPart2Page     = lazy(() => import('./pages/SkillReadingPart2Page'))
+const SkillListeningPage        = lazy(() => import('./pages/SkillListeningPage'))
+const SkillWritingPage          = lazy(() => import('./pages/SkillWritingPage'))
+const SkillSpeakingPage         = lazy(() => import('./pages/SkillSpeakingPage'))
 
 function SuperadminOnlyRoute({ children }) {
   const { userRole } = useAuth()
@@ -79,8 +85,14 @@ const router = createBrowserRouter([
       { path: 'add-test',               element: <LazyPage><AddTestPage /></LazyPage> },
       { path: 'tests',                  element: <LazyPage><AdminPage /></LazyPage> },
       { path: 'skill-tests',            element: <LazyPage><AdminPage /></LazyPage> },
-      { path: 'skill-tests/add',        element: <LazyPage><AdminSkillTestFormPage /></LazyPage> },
-      { path: 'skill-tests/edit/:id',   element: <LazyPage><AdminSkillTestFormPage /></LazyPage> },
+      { path: 'skill-tests/add',                   element: <LazyPage><AdminSkillTestFormPage /></LazyPage>  },
+      { path: 'skill-tests/edit/:id',             element: <LazyPage><AdminSkillTestFormPage /></LazyPage>  },
+      { path: 'skill-tests/listening/add',        element: <LazyPage><AdminListeningFormPage /></LazyPage> },
+      { path: 'skill-tests/listening/edit/:id',   element: <LazyPage><AdminListeningFormPage /></LazyPage> },
+      { path: 'skill-tests/writing/add',          element: <LazyPage><AdminWritingFormPage /></LazyPage>   },
+      { path: 'skill-tests/writing/edit/:id',     element: <LazyPage><AdminWritingFormPage /></LazyPage>   },
+      { path: 'skill-tests/speaking/add',         element: <LazyPage><AdminSpeakingFormPage /></LazyPage>  },
+      { path: 'skill-tests/speaking/edit/:id',    element: <LazyPage><AdminSpeakingFormPage /></LazyPage>  },
       { path: 'students',               element: <SuperadminOnlyRoute><LazyPage><AdminPage /></LazyPage></SuperadminOnlyRoute> },
       { path: 'edit-test/:id',          element: <LazyPage><EditTestPage /></LazyPage> },
     ],
@@ -113,8 +125,11 @@ const router = createBrowserRouter([
       { path: '*',      element: <LazyPage><NotFound /></LazyPage> },
     ],
   },
-  { path: '/skill-tests/reading',       element: <LazyPage><SkillReadingPage /></LazyPage> },
-  { path: '/skill-tests/reading-part2', element: <LazyPage><SkillReadingPart2Page /></LazyPage> },
+  { path: '/skill-tests/reading',        element: <LazyPage><SkillReadingPage /></LazyPage>      },
+  { path: '/skill-tests/reading-part2', element: <LazyPage><SkillReadingPart2Page /></LazyPage>  },
+  { path: '/skill-tests/listening',     element: <LazyPage><SkillListeningPage /></LazyPage>    },
+  { path: '/skill-tests/writing',       element: <LazyPage><SkillWritingPage /></LazyPage>      },
+  { path: '/skill-tests/speaking',      element: <LazyPage><SkillSpeakingPage /></LazyPage>     },
   { path: '/tests/:testId',        element: <LazyPage><ExamPage /></LazyPage> },
   { path: '/exam/:level/:testId',  element: <LazyPage><ExamPage /></LazyPage> },
   { path: '/test-result',          element: <LazyPage><TestResultPage /></LazyPage> },

@@ -64,7 +64,6 @@ export const getDocumentsWithCache = async (q, cacheKey) => {
     // Try to get from local cache first
     const cached = getCachedData(cacheKey)
     if (cached) {
-      console.log(`Cache hit for ${cacheKey}`)
       return cached
     }
 
@@ -76,10 +75,9 @@ export const getDocumentsWithCache = async (q, cacheKey) => {
       // Store in local cache
       setCachedData(cacheKey, data)
 
-      console.log(`Firestore cache hit for ${cacheKey}`)
       return data
-    } catch (cacheError) {
-      console.log(`Firestore cache miss for ${cacheKey}, fetching from server`)
+    } catch {
+      // Cache miss — fall through to server fetch
     }
 
     // Fetch from server
@@ -114,8 +112,6 @@ export const getDocumentsNetworkFirst = async (q, cacheKey) => {
 
     return data
   } catch (error) {
-    console.log(`Network failed for ${cacheKey}, trying cache`)
-
     // Fall back to cache
     const cached = getCachedData(cacheKey)
     if (cached) {
