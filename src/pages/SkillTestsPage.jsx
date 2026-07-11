@@ -5,6 +5,7 @@ import {
   ArrowRight, Clock, Layers, Focus, TrendingUp, Award, Brain, CheckCircle2, X, ChevronRight,
 } from 'lucide-react';
 import SEO from '../components/SEO';
+import { toastInfo } from '../utils/errorHandler';
 
 // ── Intersection observer hook ────────────────────────────────────────────────
 function useInView(threshold = 0.1) {
@@ -28,6 +29,7 @@ const SKILLS = [
   {
     icon: Mic,
     title: 'Speaking',
+    isAvailable: false,
     description: 'Develop fluency and confidence with structured speaking tasks, pronunciation drills, and timed responses that mirror the real exam format.',
     stats: [
       { icon: Clock,        label: '10–15 min', sub: 'Per session'  },
@@ -44,6 +46,7 @@ const SKILLS = [
   {
     icon: BookOpen,
     title: 'Reading',
+    isAvailable: true,
     description: 'Master comprehension strategies, speed-reading techniques, and all question types across academic and general training passages.',
     stats: [
       { icon: Clock,        label: '60 min',      sub: 'Full test'  },
@@ -60,6 +63,7 @@ const SKILLS = [
   {
     icon: PenLine,
     title: 'Writing',
+    isAvailable: false,
     description: 'Refine your essays and reports with guided templates, band-score criteria, and task-specific strategies for Task 1 and Task 2.',
     stats: [
       { icon: Clock,        label: '60 min',     sub: 'Full test'    },
@@ -76,6 +80,7 @@ const SKILLS = [
   {
     icon: Headphones,
     title: 'Listening',
+    isAvailable: false,
     description: 'Train your ear with authentic audio clips, improve note-taking speed, and tackle all question types under timed exam conditions.',
     stats: [
       { icon: Clock,        label: '30 min',      sub: 'Full test' },
@@ -101,28 +106,46 @@ const BENEFITS = [
 // ── Skill card — memo prevents re-render when modal state changes ─────────────
 const SkillCard = memo(function SkillCard({ skill, visible, onCardClick }) {
   const Icon = skill.icon;
+  
+  const cardClasses = skill.isAvailable
+    ? `premium-card group h-full flex flex-col p-4 sm:p-6 lg:p-7 relative overflow-hidden ${skill.border} transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 sm:hover:-translate-y-2 cursor-pointer`
+    : `premium-card h-full flex flex-col p-4 sm:p-6 lg:p-7 relative overflow-hidden border-white/[0.06] bg-white/[0.02] cursor-not-allowed filter grayscale transition-opacity duration-300`;
+
+  const cardStyle = skill.isAvailable
+    ? { boxShadow: `0 0 40px ${skill.glow}, var(--shadow-lg)` }
+    : {};
+
   return (
     <div
       className="h-full"
       style={{
-        opacity:         visible ? 1 : 0,
+        opacity:         visible ? (skill.isAvailable ? 1 : 0.5) : 0,
         transform:       visible ? 'translateY(0)' : 'translateY(32px)',
         transition:      'opacity 0.7s ease, transform 0.7s ease',
         transitionDelay: visible ? `${skill.delay + 150}ms` : '0ms',
       }}
     >
       <div
-        className={`premium-card group h-full flex flex-col p-4 sm:p-6 lg:p-7 ${skill.border} transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 sm:hover:-translate-y-2 cursor-pointer`}
-        style={{ boxShadow: `0 0 40px ${skill.glow}, var(--shadow-lg)` }}
+        className={cardClasses}
+        style={cardStyle}
         onClick={() => onCardClick(skill)}
         role="button"
         tabIndex={0}
         onKeyDown={e => e.key === 'Enter' && onCardClick(skill)}
-        aria-label={`Start ${skill.title} practice`}
+        aria-label={skill.isAvailable ? `Start ${skill.title} practice` : `${skill.title} practice (Coming Soon)`}
       >
+        {/* Coming Soon Badge */}
+        {!skill.isAvailable && (
+          <span className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-[9px] font-black bg-amber-500/20 text-amber-400 border border-amber-500/35 uppercase tracking-widest z-10">
+            Coming Soon
+          </span>
+        )}
+
         {/* Icon */}
         <div
-          className="w-10 h-10 sm:w-13 sm:h-13 lg:w-14 lg:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center mb-3 sm:mb-4 flex-shrink-0 group-hover:scale-110 transition-transform duration-300"
+          className={`w-10 h-10 sm:w-13 sm:h-13 lg:w-14 lg:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center mb-3 sm:mb-4 flex-shrink-0 ${
+            skill.isAvailable ? 'group-hover:scale-110' : ''
+          } transition-transform duration-300`}
           style={{ background: `linear-gradient(135deg, ${skill.from}28, ${skill.to}18)`, border: `1px solid ${skill.from}35` }}
         >
           <Icon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7" style={{ color: skill.iconColor }} />
@@ -155,11 +178,16 @@ const SkillCard = memo(function SkillCard({ skill, visible, onCardClick }) {
         {/* CTA */}
         <button
           type="button"
+          disabled={!skill.isAvailable}
           onClick={e => { e.stopPropagation(); onCardClick(skill); }}
-          className={`w-full inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-lg sm:rounded-xl px-3 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r ${skill.btnGrad} shadow-md sm:shadow-lg transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-xl`}
+          className={`w-full inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-lg sm:rounded-xl px-3 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-white transition-[transform,box-shadow] duration-300 ${
+            skill.isAvailable
+              ? `bg-gradient-to-r ${skill.btnGrad} shadow-md sm:shadow-lg hover:-translate-y-0.5 hover:shadow-xl cursor-pointer`
+              : 'bg-white/[0.05] text-slate-500 border border-white/[0.08] cursor-not-allowed'
+          }`}
         >
-          <span className="hidden sm:inline">Start Practicing</span>
-          <span className="sm:hidden">Practice</span>
+          <span className="hidden sm:inline">{skill.isAvailable ? 'Start Practicing' : 'Coming Soon'}</span>
+          <span className="sm:hidden">{skill.isAvailable ? 'Practice' : 'Soon'}</span>
           <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
         </button>
       </div>
@@ -470,6 +498,10 @@ export default function SkillTestsPage() {
   // ALL skills now open the part-selector modal
   // useCallback gives SkillCard a stable prop reference → memo works correctly
   const handleCardClick = useCallback((skill) => {
+    if (!skill.isAvailable) {
+      toastInfo("Ushbu bo'lim hozirda ishlab chiqilmoqda.");
+      return;
+    }
     setConfirmSkill(skill);
   }, []);
 

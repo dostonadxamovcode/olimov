@@ -1360,17 +1360,29 @@ body {
 }
 
 /* ===== Custom Toast System ===== */
-@keyframes toastSlideIn {
-  from { transform: translateX(100%) scale(0.95); opacity: 0; }
-  to { transform: translateX(0) scale(1); opacity: 1; }
-}
-@keyframes toastSlideOut {
-  from { transform: translateX(0) scale(1); opacity: 1; }
-  to { transform: translateX(100%) scale(0.95); opacity: 0; }
-}
 @keyframes toastProgress {
   from { width: 100%; }
   to { width: 0%; }
+}
+
+/* Keyframes for sliding from/to left (Desktop) */
+@keyframes toastSlideInLeft {
+  from { transform: translateX(-100%) scale(0.9); opacity: 0; }
+  to { transform: translateX(0) scale(1); opacity: 1; }
+}
+@keyframes toastSlideOutLeft {
+  from { transform: translateX(0) scale(1); opacity: 1; }
+  to { transform: translateX(-100%) scale(0.9); opacity: 0; }
+}
+
+/* Keyframes for sliding from/to top (Mobile) */
+@keyframes toastSlideInTop {
+  from { transform: translateY(-100%) scale(0.9); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes toastSlideOutTop {
+  from { transform: translateY(0) scale(1); opacity: 1; }
+  to { transform: translateY(-100%) scale(0.9); opacity: 0; }
 }
 
 /* Toast container */
@@ -1378,12 +1390,43 @@ body {
   z-index: 99999 !important;
 }
 
-/* Base toast style */
-div[data-hot-toast] > div {
-  animation: toastSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+/* Desktop: Bottom-left aligned toasts */
+@media (min-width: 768px) {
+  div[style*="position: fixed"] > div[style*="left: 0"] {
+    bottom: 24px !important;
+    left: 24px !important;
+    top: auto !important;
+    transform: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
 }
-div[data-hot-toast][data-exit] > div {
-  animation: toastSlideOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+/* Mobile: Proper status bar spacing for top-centered toasts */
+@media (max-width: 767.98px) {
+  div[style*="position: fixed"] > div[style*="justify-content: center"],
+  div[style*="position: fixed"] > div[style*="top: 0"][style*="right: 0"] {
+    top: 24px !important;
+  }
+}
+
+/* Base toast style animation binds */
+@media (min-width: 768px) {
+  div[data-hot-toast] > div {
+    animation: toastSlideInLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+  div[data-hot-toast][data-exit] > div {
+    animation: toastSlideOutLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+}
+@media (max-width: 767.98px) {
+  div[data-hot-toast] > div {
+    animation: toastSlideInTop 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+  div[data-hot-toast][data-exit] > div {
+    animation: toastSlideOutTop 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
 }
 
 .custom-toast {
@@ -1400,10 +1443,28 @@ div[data-hot-toast][data-exit] > div {
   max-width: 420px;
   position: relative;
   overflow: hidden;
-  animation: toastSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-.custom-toast.toast-exit {
-  animation: toastSlideOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+@media (min-width: 768px) {
+  .custom-toast {
+    animation: toastSlideInLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+  .custom-toast.toast-exit {
+    animation: toastSlideOutLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .custom-toast {
+    animation: toastSlideInTop 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    min-width: unset !important;
+    max-width: calc(100vw - 32px) !important;
+    width: calc(100vw - 32px) !important;
+    margin: 0 16px !important;
+  }
+  .custom-toast.toast-exit {
+    animation: toastSlideOutTop 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
 }
 
 .custom-toast .toast-icon {
@@ -1454,15 +1515,6 @@ div[data-hot-toast][data-exit] > div {
 }
 [data-theme='light'] .custom-toast .toast-message {
   color: #1e293b;
-}
-
-/* Mobile responsive */
-@media (max-width: 480px) {
-  .custom-toast {
-    min-width: unset;
-    max-width: calc(100vw - 32px);
-    margin: 0 16px;
-  }
 }
 
 /* ===== Admin Tour / Onboarding ===== */

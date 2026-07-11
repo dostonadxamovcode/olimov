@@ -1,9 +1,14 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft, Mic, Clock, ChevronRight, CheckCircle2, RotateCcw, Play, Pause,
+  Sparkles, BookOpen, Brain, Zap, Mic2, TrendingUp, MessageSquare,
+  XCircle, ArrowRight, Star, Loader2,
 } from 'lucide-react';
 import { SectionLoader } from '../components/common/Loader';
+import { analyzeIELTSSpeaking } from '../services/geminiAI';
+
+const SpeechRecognition = typeof window !== 'undefined' ? (window.SpeechRecognition || window.webkitSpeechRecognition) : null;
 
 const storageKey = (part) => `skillSpeaking_testId_p${part}`;
 
@@ -37,11 +42,79 @@ function TimerDisplay({ seconds, isLow }) {
 }
 
 // ── Part 2: Cue card view with prepare → speak flow ──────────────────────────
-function Part2View({ test, onDone }) {
+function Part2View({ test, onDone, onFinish }) {
   const [phase, setPhase] = useState('prepare'); // 'prepare' | 'speak' | 'done'
   const prepSecs  = test.preparationTime ?? 60;
   const speakSecs = (test.timeLimit ?? 2) * 60;
   const timer = useTimer(prepSecs);
+
+  const [localTranscript, setLocalTranscript] = useState("");
+  const localTranscriptRef = useRef("");
+  const recognitionRef = useRef(null);
+
+  useEffect(() => {
+    localTranscriptRef.current = localTranscript;
+  }, [localTranscript]);
+
+  const startListening = useCallback(() => {
+    console.log("MIC STARTING");
+    if (!SpeechRecognition) {
+      console.warn("SpeechRecognition is not supported in this browser.");
+      return;
+    }
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = () => {
+        console.log("MIC STARTED");
+      };
+
+      recognition.onresult = (event) => {
+        let text = "";
+        for (let i = 0; i < event.results.length; i++) {
+          text += event.results[i][0].transcript;
+        }
+        setLocalTranscript(text);
+        console.log("TRANSCRIPT:", text);
+      };
+
+      recognition.onend = () => {
+        console.log("MIC STOPPED");
+      };
+
+      recognition.onerror = (event) => {
+        console.error("SpeechRecognition error:", event.error);
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
+    } catch (e) {
+      console.error("Failed to start SpeechRecognition:", e);
+    }
+  }, []);
+
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (e) {
+        console.error("Error stopping recognition:", e);
+      }
+      recognitionRef.current = null;
+    }
+  }, []);
+
+  const startPrepare = () => timer.start();
+  const startSpeak   = useCallback(() => {
+    console.log("START BUTTON CLICKED");
+    setLocalTranscript("");
+    setPhase('speak');
+    timer.reset(speakSecs);
+    timer.start();
+  }, [speakSecs, timer]);
 
   useEffect(() => {
     if (phase === 'prepare' && timer.seconds === 0) {
@@ -49,12 +122,49 @@ function Part2View({ test, onDone }) {
       timer.reset(speakSecs);
     }
     if (phase === 'speak' && timer.seconds === 0) {
+      stopListening();
+      console.log("FINISH TEST");
       setPhase('done');
+      onFinish?.(localTranscriptRef.current);
     }
-  }, [timer.seconds, phase]);
+  }, [timer.seconds, phase, speakSecs, stopListening, onFinish]);
 
-  const startPrepare = () => timer.start();
-  const startSpeak   = () => { setPhase('speak'); timer.reset(speakSecs); timer.start(); };
+  const isSpeakingAndRunning = phase === 'speak' && timer.running;
+
+  useEffect(() => {
+    if (isSpeakingAndRunning) {
+      startListening();
+    } else {
+      stopListening();
+    }
+    return () => {
+      stopListening();
+    };
+  }, [isSpeakingAndRunning, startListening, stopListening]);
+
+  useEffect(() => {
+    window.startSpeakingRecording = () => {
+      console.log("window.startSpeakingRecording called");
+      if (phase === 'prepare') {
+        startSpeak();
+      } else if (phase === 'speak' && !timer.running) {
+        timer.start();
+      }
+    };
+    window.stopSpeakingRecording = () => {
+      console.log("window.stopSpeakingRecording called");
+      if (phase === 'speak') {
+        stopListening();
+        console.log("FINISH TEST");
+        setPhase('done');
+        onFinish?.(localTranscriptRef.current);
+      }
+    };
+    return () => {
+      delete window.startSpeakingRecording;
+      delete window.stopSpeakingRecording;
+    };
+  }, [phase, timer, startSpeak, stopListening, onFinish]);
 
   return (
     <div className="space-y-4">
@@ -75,7 +185,7 @@ function Part2View({ test, onDone }) {
               <button type="button" onClick={() => { setPhase('prepare'); timer.reset(prepSecs); }} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-300 border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] transition-all">
                 <RotateCcw className="w-4 h-4" /> Retry
               </button>
-              <button type="button" onClick={onDone} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-purple-500 to-violet-600 shadow-lg hover:-translate-y-0.5 transition-all">
+              <button type="button" onClick={() => { onFinish?.(localTranscript); onDone(); }} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-purple-500 to-violet-600 shadow-lg hover:-translate-y-0.5 transition-all">
                 More Tests <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -119,7 +229,7 @@ function Part2View({ test, onDone }) {
 }
 
 // ── Parts 1 & 3: Questions list with per-question timer ───────────────────────
-function QuestionsView({ test, onDone }) {
+function QuestionsView({ test, onDone, onFinish }) {
   const [currentIdx, setCurrentIdx]   = useState(0);
   const [answering,  setAnswering]    = useState(false);
   const [done,       setDone]         = useState(false);
@@ -128,20 +238,141 @@ function QuestionsView({ test, onDone }) {
 
   const questions = test.questions ?? [];
 
+  const [localTranscript, setLocalTranscript] = useState("");
+  const [accumulatedTranscript, setAccumulatedTranscript] = useState("");
+  const localTranscriptRef = useRef("");
+  const accumulatedTranscriptRef = useRef("");
+  const recognitionRef = useRef(null);
+
+  useEffect(() => {
+    localTranscriptRef.current = localTranscript;
+  }, [localTranscript]);
+
+  useEffect(() => {
+    accumulatedTranscriptRef.current = accumulatedTranscript;
+  }, [accumulatedTranscript]);
+
+  const startListening = useCallback(() => {
+    console.log("MIC STARTING");
+    if (!SpeechRecognition) {
+      console.warn("SpeechRecognition is not supported in this browser.");
+      return;
+    }
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = () => {
+        console.log("MIC STARTED");
+      };
+
+      recognition.onresult = (event) => {
+        let text = "";
+        for (let i = 0; i < event.results.length; i++) {
+          text += event.results[i][0].transcript;
+        }
+        setLocalTranscript(text);
+        console.log("TRANSCRIPT:", text);
+      };
+
+      recognition.onend = () => {
+        console.log("MIC STOPPED");
+      };
+
+      recognition.onerror = (event) => {
+        console.error("SpeechRecognition error:", event.error);
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
+    } catch (e) {
+      console.error("Failed to start SpeechRecognition:", e);
+    }
+  }, []);
+
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (e) {
+        console.error("Error stopping recognition:", e);
+      }
+      recognitionRef.current = null;
+    }
+  }, []);
+
+  const handleStart = useCallback(() => {
+    console.log("START BUTTON CLICKED");
+    setLocalTranscript("");
+    setAnswering(true);
+    timer.start();
+  }, [timer]);
+
+  const handleNext = useCallback(() => {
+    stopListening();
+    
+    const updatedAccumulated = (accumulatedTranscriptRef.current + " " + localTranscriptRef.current).trim();
+    setAccumulatedTranscript(updatedAccumulated);
+    setLocalTranscript("");
+
+    setAnswering(false);
+    timer.reset(perQuestionSecs);
+
+    if (currentIdx >= questions.length - 1) {
+      console.log("FINISH TEST");
+      setDone(true);
+      onFinish?.(updatedAccumulated);
+    } else {
+      console.log("NEXT QUESTION");
+      setCurrentIdx(i => i + 1);
+    }
+  }, [currentIdx, questions.length, stopListening, timer, perQuestionSecs, onFinish]);
+
+  // Synchronize microphone with answering state
+  useEffect(() => {
+    if (answering) {
+      startListening();
+    } else {
+      stopListening();
+    }
+    return () => {
+      stopListening();
+    };
+  }, [answering, startListening, stopListening]);
+
+  // Synchronize window methods for tests
+  useEffect(() => {
+    window.startSpeakingRecording = () => {
+      console.log("window.startSpeakingRecording called");
+      if (!answering && !done) {
+        handleStart();
+      }
+    };
+    window.stopSpeakingRecording = () => {
+      console.log("window.stopSpeakingRecording called");
+      if (answering && !done) {
+        handleNext();
+      }
+    };
+    return () => {
+      delete window.startSpeakingRecording;
+      delete window.stopSpeakingRecording;
+    };
+  }, [answering, done, handleStart, handleNext]);
+
+  // Timer expiration effect
   useEffect(() => {
     if (answering && timer.seconds === 0) {
+      stopListening();
+      const updatedAccumulated = (accumulatedTranscriptRef.current + " " + localTranscriptRef.current).trim();
+      setAccumulatedTranscript(updatedAccumulated);
+      setLocalTranscript("");
       setAnswering(false);
       timer.reset(perQuestionSecs);
     }
-  }, [timer.seconds, answering]);
-
-  const handleStart = () => { setAnswering(true); timer.start(); };
-  const handleNext  = () => {
-    setAnswering(false);
-    timer.reset(perQuestionSecs);
-    if (currentIdx >= questions.length - 1) { setDone(true); }
-    else { setCurrentIdx(i => i + 1); }
-  };
+  }, [timer.seconds, answering, perQuestionSecs, stopListening]);
 
   if (done) {
     return (
@@ -153,7 +384,7 @@ function QuestionsView({ test, onDone }) {
           <button type="button" onClick={() => { setCurrentIdx(0); setDone(false); timer.reset(perQuestionSecs); }} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-300 border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] transition-all">
             <RotateCcw className="w-4 h-4" /> Retry
           </button>
-          <button type="button" onClick={onDone} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-purple-500 to-violet-600 shadow-lg hover:-translate-y-0.5 transition-all">
+          <button type="button" onClick={() => { onFinish?.(accumulatedTranscript); onDone(); }} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-purple-500 to-violet-600 shadow-lg hover:-translate-y-0.5 transition-all">
             More Tests <ChevronRight className="w-4 h-4" />
           </button>
         </div>
@@ -206,6 +437,144 @@ function QuestionsView({ test, onDone }) {
   );
 }
 
+// ── Analysis Results Component ────────────────────────────────────────────────
+function AnalysisResults({ analysis, analyzing }) {
+  if (analyzing) {
+    return (
+      <div className="rounded-2xl border border-purple-500/20 p-8 text-center" style={{ background: 'rgba(168,85,247,0.06)', backdropFilter: 'blur(12px)' }}>
+        <Loader2 className="w-8 h-8 text-purple-400 animate-spin mx-auto mb-4" />
+        <p className="text-white font-semibold mb-1">Analyzing your speech...</p>
+        <p className="text-slate-400 text-sm">This may take a few seconds</p>
+      </div>
+    );
+  }
+
+  if (!analysis) return null;
+
+  const getScoreColor = (score) => {
+    if (score >= 7) return 'text-emerald-400';
+    if (score >= 5) return 'text-yellow-400';
+    return 'text-red-400';
+  };
+
+  const getScoreBg = (score) => {
+    if (score >= 7) return 'bg-emerald-500/10 border-emerald-500/20';
+    if (score >= 5) return 'bg-yellow-500/10 border-yellow-500/20';
+    return 'bg-red-500/10 border-red-500/20';
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Score Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {/* CEFR Level */}
+        <div className="rounded-xl border border-purple-500/20 p-4" style={{ background: 'rgba(168,85,247,0.06)' }}>
+          <p className="text-[10px] font-bold text-purple-400/70 uppercase tracking-widest mb-2">CEFR Level</p>
+          <p className="text-2xl font-black text-white">{analysis.cefrLevel}</p>
+        </div>
+
+        {/* IELTS Band */}
+        <div className="rounded-xl border border-purple-500/20 p-4" style={{ background: 'rgba(168,85,247,0.06)' }}>
+          <p className="text-[10px] font-bold text-purple-400/70 uppercase tracking-widest mb-2">IELTS Band</p>
+          <p className={`text-2xl font-black ${getScoreColor(analysis.ieltsBand)}`}>{analysis.ieltsBand}</p>
+        </div>
+
+        {/* Word Count */}
+        <div className="rounded-xl border border-white/[0.08] p-4" style={{ background: 'rgba(10,16,35,0.7)' }}>
+          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Word Count</p>
+          <p className="text-2xl font-black text-white">{analysis.wordCount}</p>
+        </div>
+
+        {/* Grammar Score */}
+        <div className={`rounded-xl border p-4 ${getScoreBg(analysis.grammarScore)}`}>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Grammar</p>
+          <p className={`text-2xl font-black ${getScoreColor(analysis.grammarScore)}`}>{analysis.grammarScore}/9</p>
+        </div>
+
+        {/* Vocabulary Score */}
+        <div className={`rounded-xl border p-4 ${getScoreBg(analysis.vocabularyScore)}`}>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Vocabulary</p>
+          <p className={`text-2xl font-black ${getScoreColor(analysis.vocabularyScore)}`}>{analysis.vocabularyScore}/9</p>
+        </div>
+
+        {/* Fluency Score */}
+        <div className={`rounded-xl border p-4 ${getScoreBg(analysis.fluencyScore)}`}>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Fluency</p>
+          <p className={`text-2xl font-black ${getScoreColor(analysis.fluencyScore)}`}>{analysis.fluencyScore}/9</p>
+        </div>
+
+        {/* Pronunciation Score */}
+        <div className={`rounded-xl border p-4 ${getScoreBg(analysis.pronunciationScore)}`}>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Pronunciation</p>
+          <p className={`text-2xl font-black ${getScoreColor(analysis.pronunciationScore)}`}>{analysis.pronunciationScore}/9</p>
+        </div>
+
+        {/* Grammar Mistakes */}
+        <div className="rounded-xl border border-white/[0.08] p-4" style={{ background: 'rgba(10,16,35,0.7)' }}>
+          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Mistakes</p>
+          <p className="text-2xl font-black text-white">{analysis.grammarMistakes}</p>
+        </div>
+      </div>
+
+      {/* Overall Feedback */}
+      <div className="rounded-2xl border border-purple-500/20 p-5" style={{ background: 'rgba(168,85,247,0.06)', backdropFilter: 'blur(12px)' }}>
+        <div className="flex items-center gap-2 mb-3">
+          <Sparkles className="w-4 h-4 text-purple-400" />
+          <p className="text-xs font-bold text-purple-400 uppercase tracking-widest">Overall Feedback</p>
+        </div>
+        <p className="text-[#c8d6e8] text-sm leading-relaxed">{analysis.overallFeedback}</p>
+      </div>
+
+      {/* Grammar Mistakes */}
+      {analysis.mistakes && analysis.mistakes.length > 0 && (
+        <div className="rounded-2xl border border-red-500/20 p-5" style={{ background: 'rgba(239,68,68,0.04)', backdropFilter: 'blur(12px)' }}>
+          <div className="flex items-center gap-2 mb-3">
+            <XCircle className="w-4 h-4 text-red-400" />
+            <p className="text-xs font-bold text-red-400 uppercase tracking-widest">Grammar Mistakes</p>
+          </div>
+          <ul className="space-y-2">
+            {analysis.mistakes.map((mistake, idx) => (
+              <li key={idx} className="flex items-start gap-2 text-sm text-red-300/80">
+                <span className="text-red-400 mt-1">•</span>
+                <span>{mistake}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Improvement Tips */}
+      {analysis.improvementTips && analysis.improvementTips.length > 0 && (
+        <div className="rounded-2xl border border-yellow-500/20 p-5" style={{ background: 'rgba(234,179,8,0.04)', backdropFilter: 'blur(12px)' }}>
+          <div className="flex items-center gap-2 mb-3">
+            <TrendingUp className="w-4 h-4 text-yellow-400" />
+            <p className="text-xs font-bold text-yellow-400 uppercase tracking-widest">Improvement Tips</p>
+          </div>
+          <ul className="space-y-2">
+            {analysis.improvementTips.map((tip, idx) => (
+              <li key={idx} className="flex items-start gap-2 text-sm text-yellow-300/80">
+                <Star className="w-3.5 h-3.5 text-yellow-400 mt-0.5 flex-shrink-0" />
+                <span>{tip}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Improved Answer */}
+      {analysis.improvedAnswer && (
+        <div className="rounded-2xl border border-emerald-500/20 p-5" style={{ background: 'rgba(16,185,129,0.04)', backdropFilter: 'blur(12px)' }}>
+          <div className="flex items-center gap-2 mb-3">
+            <BookOpen className="w-4 h-4 text-emerald-400" />
+            <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest">Improved Answer</p>
+          </div>
+          <p className="text-[#c8d6e8] text-sm leading-relaxed whitespace-pre-line">{analysis.improvedAnswer}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function SkillSpeakingPage() {
   const navigate       = useNavigate();
@@ -214,6 +583,9 @@ export default function SkillSpeakingPage() {
 
   const [test,      setTest]      = useState(null);
   const [loadError, setLoadError] = useState(false);
+  const [transcript, setTranscript] = useState("");
+  const [analysis, setAnalysis] = useState(null);
+  const [analyzing, setAnalyzing] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -256,6 +628,29 @@ export default function SkillSpeakingPage() {
     localStorage.removeItem(storageKey(partParam));
     navigate('/skill-tests');
   }, [partParam, navigate]);
+
+  const analyzeTranscript = useCallback(async (textToAnalyze) => {
+    const text = textToAnalyze !== undefined ? textToAnalyze : transcript;
+    if (!text || !text.trim()) {
+      console.log("No transcript to analyze.");
+      return;
+    }
+    
+    setAnalyzing(true);
+    try {
+      const result = await analyzeIELTSSpeaking(text);
+      setAnalysis(result);
+    } catch (error) {
+      console.error('Analysis error:', error);
+    } finally {
+      setAnalyzing(false);
+    }
+  }, [transcript]);
+
+  const handleFinish = useCallback((finalText) => {
+    setTranscript(finalText || "");
+    analyzeTranscript(finalText);
+  }, [analyzeTranscript]);
 
   if (!test) {
     return (
@@ -319,9 +714,14 @@ export default function SkillSpeakingPage() {
       {/* Content */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 pb-20">
         {isPart2
-          ? <Part2View test={test} onDone={handleExit} />
-          : <QuestionsView test={test} onDone={handleExit} />
+          ? <Part2View test={test} onDone={handleExit} onFinish={handleFinish} />
+          : <QuestionsView test={test} onDone={handleExit} onFinish={handleFinish} />
         }
+        
+        {/* Analysis Results */}
+        <div className="mt-8">
+          <AnalysisResults analysis={analysis} analyzing={analyzing} />
+        </div>
       </div>
     </div>
   );

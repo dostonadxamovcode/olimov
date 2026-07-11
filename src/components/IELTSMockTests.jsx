@@ -2,11 +2,13 @@ import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Clock, Target, Timer, ChartBar, Sparkles, Zap, ArrowRight } from 'lucide-react';
 import { useInView } from '../hooks/useInView';
+import { toastInfo } from '../utils/errorHandler';
 
 const TEST_CARDS = [
   {
     icon: FileText,
     title: 'Full CEFR Mock',
+    isAvailable: false,
     description: 'Complete 3-hour CEFR simulation covering all four skills with strict timing.',
     stats: [
       { label: 'Duration',  value: '3 hours' },
@@ -24,6 +26,7 @@ const TEST_CARDS = [
   {
     icon: Clock,
     title: 'Quick Practice',
+    isAvailable: false,
     description: 'Focused practice sessions on specific question types or mini-tests.',
     stats: [
       { label: 'Duration',  value: '45 mins'  },
@@ -41,6 +44,7 @@ const TEST_CARDS = [
   {
     icon: Target,
     title: 'Skill-Specific',
+    isAvailable: true,
     description: 'Target specific weaknesses. Individual tests for Reading, Listening, Writing, or Speaking.',
     stats: [
       { label: 'Duration',  value: '30–60 min' },
@@ -67,27 +71,57 @@ const FEATURE_CARDS = [
 // ── Memoized sub-components — stable between inView frames ───────────────────
 const TestCardItem = memo(function TestCardItem({ card, inView, onStart }) {
   const Icon = card.icon;
+
+  const handleClick = (e) => {
+    if (!card.isAvailable) {
+      toastInfo("Ushbu bo'lim hozirda ishlab chiqilmoqda.");
+      return;
+    }
+    onStart?.();
+  };
+
+  const cardClasses = card.isAvailable
+    ? `premium-card group h-full p-4 sm:p-6 flex flex-col relative overflow-hidden ${card.borderClass} ${card.hoverBorderClass} transition-[transform,border-color] duration-300 hover:-translate-y-1 cursor-pointer`
+    : `premium-card h-full p-4 sm:p-6 flex flex-col relative overflow-hidden border-white/[0.06] bg-white/[0.02] cursor-not-allowed filter grayscale`;
+
+  const cardStyle = card.isAvailable
+    ? { boxShadow: `0 0 50px ${card.glow}, var(--shadow-lg)` }
+    : {};
+
   return (
     <div
       style={{
-        opacity:         inView ? 1 : 0,
+        opacity:         inView ? (card.isAvailable ? 1 : 0.5) : 0,
         transform:       inView ? 'translateY(0)' : 'translateY(28px)',
         transition:      'opacity 0.7s ease, transform 0.7s ease',
         transitionDelay: inView ? `${card.delay + 200}ms` : '0ms',
       }}
     >
       <div
-        className={`premium-card group h-full p-4 sm:p-6 flex flex-col ${card.borderClass} ${card.hoverBorderClass} transition-[transform,border-color] duration-300 hover:-translate-y-1`}
-        style={{ boxShadow: `0 0 50px ${card.glow}, var(--shadow-lg)` }}
+        className={cardClasses}
+        style={cardStyle}
+        onClick={handleClick}
       >
+        {/* Coming Soon Badge */}
+        {!card.isAvailable && (
+          <span className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-[9px] font-black bg-amber-500/20 text-amber-400 border border-amber-500/35 uppercase tracking-widest z-10">
+            Coming Soon
+          </span>
+        )}
+
+        {/* Icon */}
         <div
-          className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center mb-3 sm:mb-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-300"
+          className={`w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center mb-3 sm:mb-5 flex-shrink-0 ${
+            card.isAvailable ? 'group-hover:scale-110' : ''
+          } transition-transform duration-300`}
           style={{ background: `linear-gradient(135deg, ${card.iconFrom}28, ${card.iconTo}18)`, border: `1px solid ${card.iconFrom}35` }}
         >
           <Icon className="w-4 h-4 sm:w-6 sm:h-6" style={{ color: card.iconColor }} />
         </div>
+
         <h3 className="text-sm sm:text-lg font-bold text-white mb-1.5 sm:mb-2 leading-snug">{card.title}</h3>
         <p className="text-gray-400 text-[11px] sm:text-sm leading-relaxed mb-3 sm:mb-5 flex-1 line-clamp-2 sm:line-clamp-none">{card.description}</p>
+        
         <div className="grid grid-cols-3 gap-1 sm:gap-2 mb-3 sm:mb-5 p-2 sm:p-3 rounded-lg sm:rounded-xl border border-white/[0.06] bg-white/[0.025]">
           {card.stats.map((stat, j) => (
             <div key={j} className="text-center">
@@ -96,13 +130,22 @@ const TestCardItem = memo(function TestCardItem({ card, inView, onStart }) {
             </div>
           ))}
         </div>
+
         <button
           type="button"
-          onClick={onStart}
-          className={`w-full inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-lg sm:rounded-xl px-3 sm:px-5 py-2 sm:py-2.5 text-[11px] sm:text-sm font-semibold text-white bg-gradient-to-r ${card.btnGrad} shadow-md sm:shadow-lg transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-xl`}
+          disabled={!card.isAvailable}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleClick(e);
+          }}
+          className={`w-full inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-lg sm:rounded-xl px-3 sm:px-5 py-2 sm:py-2.5 text-[11px] sm:text-sm font-semibold text-white transition-[transform,box-shadow] duration-300 ${
+            card.isAvailable
+              ? `bg-gradient-to-r ${card.btnGrad} shadow-md sm:shadow-lg hover:-translate-y-0.5 hover:shadow-xl cursor-pointer`
+              : 'bg-white/[0.05] text-slate-500 border border-white/[0.08] cursor-not-allowed'
+          }`}
         >
-          <span className="sm:hidden">Start</span>
-          <span className="hidden sm:inline">Start Test</span>
+          <span className="sm:hidden">{card.isAvailable ? 'Start' : 'Soon'}</span>
+          <span className="hidden sm:inline">{card.isAvailable ? 'Start Test' : 'Coming Soon'}</span>
           <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
         </button>
       </div>
