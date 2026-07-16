@@ -55,6 +55,7 @@ function SuperadminOnlyRoute({ children }) {
 function LoginGate({ children }) {
   const { currentUser, userRole, loading } = useAuth()
   // Wait for auth so logged-in users aren't shown the login form before redirect
+  // LoginGate is outside MainLayout, so it needs its own PageLoader
   if (loading) return <PageLoader />
   if (currentUser) {
     const hasAdminAccess =
