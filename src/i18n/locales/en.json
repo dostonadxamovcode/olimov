@@ -6,7 +6,8 @@
     "results": "Results",
     "contact": "Contact",
     "about": "About",
-    "levels": "Levels"
+    "levels": "Levels",
+    "unitTests": "Unit Tests"
   },
   "header": {
     "login": "Login",

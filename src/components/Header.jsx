@@ -2,7 +2,7 @@ import { memo, useState, useEffect, useRef, useCallback } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   Menu, X, LogOut, User, ChevronDown, LayoutDashboard, ChevronRight,
-  Home, Layers, FileText, Trophy, Mail, Info, GraduationCap
+  Home, Layers, FileText, Trophy, Mail, Info, GraduationCap, ClipboardCheck
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useSiteContent } from '../services/siteContentService';
@@ -20,6 +20,7 @@ const NAV_META = {
   'nav.contact':   { Icon: Mail,          color: '#f43f5e' },
   'nav.about':     { Icon: Info,          color: '#6366f1' },
   'nav.levels':    { Icon: GraduationCap, color: '#a855f7' },
+  'nav.unitTests': { Icon: ClipboardCheck, color: '#38bdf8' },
 };
 
 const CARD_BASE        = 'flex items-center gap-2 px-2.5 py-2 min-h-[40px] rounded-xl border w-full text-left transition-all duration-150';
@@ -137,7 +138,10 @@ const NavItem = memo(function NavItem({ link, className, onClick, isMobile }) {
 
 export default function Header() {
   const { t }    = useTranslation();
-  const navLinks = useSiteContent('navLinks');
+  const contentNavLinks = useSiteContent('navLinks');
+  const navLinks = contentNavLinks.some(link => link.href === '/unit-tests')
+    ? contentNavLinks
+    : [...contentNavLinks, { label: 'nav.unitTests', href: '/unit-tests' }];
   const [isOpen,          setIsOpen]          = useState(false);
   const [scrolled,        setScrolled]        = useState(false);
   const [isProfileOpen,   setIsProfileOpen]   = useState(false);

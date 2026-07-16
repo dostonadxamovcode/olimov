@@ -42,6 +42,7 @@ const SkillReadingPart2Page     = lazy(() => import('./pages/SkillReadingPart2Pa
 const SkillListeningPage        = lazy(() => import('./pages/SkillListeningPage'))
 const SkillWritingPage          = lazy(() => import('./pages/SkillWritingPage'))
 const SkillSpeakingPage         = lazy(() => import('./pages/SkillSpeakingPage'))
+const UnitTests                 = lazy(() => import('./pages/UnitTests'))
 
 function SuperadminOnlyRoute({ children }) {
   const { userRole } = useAuth()
@@ -114,6 +115,7 @@ const router = createBrowserRouter([
       { path: 'skill-tests',             element: <LazyPage><SkillTestsPage /></LazyPage> },
       { path: 'level',                  element: <LazyPage><LevelSelection /></LazyPage> },
       { path: 'result',                 element: <LazyPage><ResultsPage /></LazyPage> },
+      { path: 'unit-tests',             element: <LazyPage><UnitTests /></LazyPage> },
       {
         element: <ProtectedRoute />,
         children: [

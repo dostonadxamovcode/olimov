@@ -6,7 +6,8 @@
     "results": "Результаты",
     "contact": "Контакты",
     "about": "О нас",
-    "levels": "Уровни"
+    "levels": "Уровни",
+    "unitTests": "Юнит-тесты"
   },
   "header": {
     "login": "Войти",

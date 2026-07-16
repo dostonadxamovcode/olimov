@@ -6,7 +6,8 @@
     "results": "Natijalar",
     "contact": "Aloqa",
     "about": "Biz haqimizda",
-    "levels": "Darajalar"
+    "levels": "Darajalar",
+    "unitTests": "Unit Tests"
   },
   "header": {
     "login": "Kirish",
