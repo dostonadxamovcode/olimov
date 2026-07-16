@@ -22,27 +22,27 @@ export default function AboutPage() {
     >
       {/* Blob decorations */}
       <div
-        className="pointer-events-none absolute"
+        className="pointer-events-none absolute hidden sm:block"
         style={{
-          top: '-80px', left: '-80px', width: '320px', height: '320px',
+          top: '-80px', left: '-80px', width: 'min(320px, 100vw)', height: 'min(320px, 100vw)',
           background: '#004D98',
           borderRadius: '60% 40% 70% 30% / 50% 60% 40% 50%',
           opacity: 0.28, zIndex: 0,
         }}
       />
       <div
-        className="pointer-events-none absolute"
+        className="pointer-events-none absolute hidden sm:block"
         style={{
-          bottom: '-60px', right: '-60px', width: '260px', height: '260px',
+          bottom: '-60px', right: '-60px', width: 'min(260px, 100vw)', height: 'min(260px, 100vw)',
           background: '#A50044',
           borderRadius: '40% 60% 30% 70% / 60% 40% 60% 40%',
           opacity: 0.24, zIndex: 0,
         }}
       />
       <div
-        className="pointer-events-none absolute"
+        className="pointer-events-none absolute hidden sm:block"
         style={{
-          top: '40%', left: '35%', width: '180px', height: '180px',
+          top: '40%', left: '35%', width: 'min(180px, 100vw)', height: 'min(180px, 100vw)',
           background: '#EDBB00',
           borderRadius: '50% 50% 40% 60% / 40% 60% 40% 60%',
           opacity: 0.10, zIndex: 0,

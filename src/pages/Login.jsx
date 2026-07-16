@@ -60,12 +60,12 @@ export default function Login() {
 
             {/* Animated background blobs */}
             <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute w-[500px] h-[500px] rounded-full blur-[120px] opacity-20"
-                    style={{ background: 'radial-gradient(circle, #3b82f6, transparent)', top: '-10%', left: '20%' }} />
-                <div className="absolute w-[400px] h-[400px] rounded-full blur-[100px] opacity-15"
-                    style={{ background: 'radial-gradient(circle, #8b5cf6, transparent)', bottom: '0%', right: '10%' }} />
-                <div className="absolute w-[300px] h-[300px] rounded-full blur-[80px] opacity-10"
-                    style={{ background: 'radial-gradient(circle, #06b6d4, transparent)', bottom: '20%', left: '5%' }} />
+                <div className="absolute hidden sm:block rounded-full blur-[120px] opacity-20"
+                    style={{ background: 'radial-gradient(circle, #3b82f6, transparent)', top: '-10%', left: '20%', width: 'min(500px, 100vw)', height: 'min(500px, 100vw)' }} />
+                <div className="absolute hidden sm:block rounded-full blur-[100px] opacity-15"
+                    style={{ background: 'radial-gradient(circle, #8b5cf6, transparent)', bottom: '0%', right: '10%', width: 'min(400px, 100vw)', height: 'min(400px, 100vw)' }} />
+                <div className="absolute hidden sm:block rounded-full blur-[80px] opacity-10"
+                    style={{ background: 'radial-gradient(circle, #06b6d4, transparent)', bottom: '20%', left: '5%', width: 'min(300px, 100vw)', height: 'min(300px, 100vw)' }} />
             </div>
 
             {/* Grid pattern overlay */}

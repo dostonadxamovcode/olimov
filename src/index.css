@@ -37,6 +37,55 @@ main > div > section {
 @tailwind components;
 @tailwind utilities;
 
+/* daisyUI v5's hover-3d component, kept locally while this project remains on
+   DaisyUI v4. The first child is the card; the following eight empty elements
+   are its pointer zones. */
+@layer components {
+  .hover-3d {
+    display: inline-grid;
+    grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+    perspective: 1000px;
+  }
+
+  .hover-3d > :first-child {
+    grid-area: 1 / 1 / -1 / -1;
+    transition: transform 200ms ease-out;
+    transform-style: preserve-3d;
+  }
+
+  .hover-3d > :not(:first-child) {
+    z-index: 1;
+  }
+
+  .hover-3d > :nth-child(2) { grid-area: 1 / 1; }
+  .hover-3d > :nth-child(3) { grid-area: 1 / 2; }
+  .hover-3d > :nth-child(4) { grid-area: 1 / 3; }
+  .hover-3d > :nth-child(5) { grid-area: 2 / 1; }
+  .hover-3d > :nth-child(6) { grid-area: 2 / 3; }
+  .hover-3d > :nth-child(7) { grid-area: 3 / 1; }
+  .hover-3d > :nth-child(8) { grid-area: 3 / 2; }
+  .hover-3d > :nth-child(9) { grid-area: 3 / 3; }
+
+  .hover-3d:has(> :nth-child(2):hover) > :first-child { transform: rotateX(7deg) rotateY(-7deg); }
+  .hover-3d:has(> :nth-child(3):hover) > :first-child { transform: rotateX(7deg); }
+  .hover-3d:has(> :nth-child(4):hover) > :first-child { transform: rotateX(7deg) rotateY(7deg); }
+  .hover-3d:has(> :nth-child(5):hover) > :first-child { transform: rotateY(-7deg); }
+  .hover-3d:has(> :nth-child(6):hover) > :first-child { transform: rotateY(7deg); }
+  .hover-3d:has(> :nth-child(7):hover) > :first-child { transform: rotateX(-7deg) rotateY(-7deg); }
+  .hover-3d:has(> :nth-child(8):hover) > :first-child { transform: rotateX(-7deg); }
+  .hover-3d:has(> :nth-child(9):hover) > :first-child { transform: rotateX(-7deg) rotateY(7deg); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hover-3d > :first-child {
+      transition: none;
+    }
+
+    .hover-3d:has(> :not(:first-child):hover) > :first-child {
+      transform: none;
+    }
+  }
+}
+
 * {
   margin: 0;
   padding: 0;

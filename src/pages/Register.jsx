@@ -59,12 +59,12 @@ export default function Register() {
       <SEO title="Create Account" description="Create your free Olimov CEFR account and start preparing for your English proficiency exam today." noindex />
     <div className="h-[100svh] overflow-hidden flex items-center justify-center px-4 relative" style={{ background: '#080c14' }}>
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute w-[500px] h-[500px] rounded-full blur-[120px] opacity-20"
-          style={{ background: 'radial-gradient(circle, #8b5cf6, transparent)', top: '-10%', right: '10%' }} />
-        <div className="absolute w-[400px] h-[400px] rounded-full blur-[100px] opacity-15"
-          style={{ background: 'radial-gradient(circle, #3b82f6, transparent)', bottom: '5%', left: '5%' }} />
-        <div className="absolute w-[250px] h-[250px] rounded-full blur-[80px] opacity-10"
-          style={{ background: 'radial-gradient(circle, #06b6d4, transparent)', top: '40%', left: '30%' }} />
+        <div className="absolute hidden sm:block rounded-full blur-[120px] opacity-20"
+          style={{ background: 'radial-gradient(circle, #8b5cf6, transparent)', top: '-10%', right: '10%', width: 'min(500px, 100vw)', height: 'min(500px, 100vw)' }} />
+        <div className="absolute hidden sm:block rounded-full blur-[100px] opacity-15"
+          style={{ background: 'radial-gradient(circle, #3b82f6, transparent)', bottom: '5%', left: '5%', width: 'min(400px, 100vw)', height: 'min(400px, 100vw)' }} />
+        <div className="absolute hidden sm:block rounded-full blur-[80px] opacity-10"
+          style={{ background: 'radial-gradient(circle, #06b6d4, transparent)', top: '40%', left: '30%', width: 'min(250px, 100vw)', height: 'min(250px, 100vw)' }} />
       </div>
 
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none"

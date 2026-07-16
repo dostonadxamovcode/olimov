@@ -43,6 +43,9 @@ const SkillListeningPage        = lazy(() => import('./pages/SkillListeningPage'
 const SkillWritingPage          = lazy(() => import('./pages/SkillWritingPage'))
 const SkillSpeakingPage         = lazy(() => import('./pages/SkillSpeakingPage'))
 const UnitTests                 = lazy(() => import('./pages/UnitTests'))
+const PracticeSession           = lazy(() => import('./pages/PracticeSession'))
+const UnitTest                  = lazy(() => import('./pages/UnitTest'))
+const SeedFirestore             = lazy(() => import('./pages/SeedFirestore'))
 
 function SuperadminOnlyRoute({ children }) {
   const { userRole } = useAuth()
@@ -136,6 +139,9 @@ const router = createBrowserRouter([
   { path: '/exam/:level/:testId',  element: <LazyPage><ExamPage /></LazyPage> },
   { path: '/test-result',          element: <LazyPage><TestResultPage /></LazyPage> },
   { path: '/exam-terminated',      element: <LazyPage><ExamTerminated /></LazyPage> },
+  { path: '/practice-session',     element: <LazyPage><PracticeSession /></LazyPage> },
+  { path: '/unit-test/:unitId',    element: <LazyPage><UnitTest /></LazyPage> },
+  { path: '/seed-firestore',       element: <LazyPage><SeedFirestore /></LazyPage> },
 ])
 
 export default function App() {

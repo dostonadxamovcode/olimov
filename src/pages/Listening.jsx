@@ -36,9 +36,9 @@ export default function Listening() {
       />
     <section className="listening-page relative min-h-screen overflow-hidden bg-[#eef3f8] px-4 pb-24 pt-32 text-slate-950 dark:bg-[#040717] dark:text-white sm:px-6 lg:px-8">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/2 top-0 h-[440px] w-[440px] -translate-x-1/2 rounded-full bg-violet-300/18 blur-[82px] dark:h-[540px] dark:w-[540px] dark:bg-violet-600/25 dark:blur-[120px]" />
-        <div className="absolute left-[-140px] top-48 h-[340px] w-[340px] rounded-full bg-cyan-300/16 blur-[78px] dark:h-[420px] dark:w-[420px] dark:bg-cyan-500/20 dark:blur-[110px]" />
-        <div className="absolute bottom-10 right-[-160px] h-[380px] w-[380px] rounded-full bg-blue-300/14 blur-[82px] dark:h-[480px] dark:w-[480px] dark:bg-blue-600/20 dark:blur-[120px]" />
+        <div className="absolute left-1/2 top-0 hidden sm:block -translate-x-1/2 rounded-full bg-violet-300/18 blur-[82px] sm:h-[440px] sm:w-[440px] lg:h-[540px] lg:w-[540px] dark:bg-violet-600/25 dark:blur-[120px]" />
+        <div className="absolute left-[-140px] top-48 hidden sm:block rounded-full bg-cyan-300/16 blur-[78px] sm:h-[340px] sm:w-[340px] lg:h-[420px] lg:w-[420px] dark:bg-cyan-500/20 dark:blur-[110px]" />
+        <div className="absolute bottom-10 right-[-160px] hidden sm:block rounded-full bg-blue-300/14 blur-[82px] sm:h-[380px] sm:w-[380px] lg:h-[480px] lg:w-[480px] dark:bg-blue-600/20 dark:blur-[120px]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.10),transparent_34%),linear-gradient(180deg,rgba(238,243,248,0.45),#eef3f8_78%)] dark:bg-[radial-gradient(circle_at_top,rgba(129,140,248,0.12),transparent_34%),linear-gradient(180deg,rgba(4,7,23,0.25),#040717_78%)]" />
       </div>
 

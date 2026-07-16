@@ -408,7 +408,7 @@ export default function Header() {
             {loading ? (
               <div className="flex gap-1">
                 {[1, 2].map((i) => (
-                  <div key={i} className="flex-1 h-[36px] rounded-xl bg-white/[0.03] border border-white/[0.06] animate-pulse" />
+                  <div key={`skeleton-${i}`} className="flex-1 h-[36px] rounded-xl bg-white/[0.03] border border-white/[0.06] animate-pulse" />
                 ))}
               </div>
             ) : currentUser ? (

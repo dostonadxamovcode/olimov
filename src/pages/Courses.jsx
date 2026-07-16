@@ -16,11 +16,7 @@ export default function Courses() {
       />
     <div className="min-h-screen site-bg py-8 px-4 sm:px-6 lg:px-8 mt-[60px]">
       <div className="max-w-4xl mx-auto">
-        <div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center"
-        >
+        <div className="text-center">
           <button
             onClick={() => navigate('/')}
             className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-8 mx-auto"

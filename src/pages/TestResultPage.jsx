@@ -129,7 +129,7 @@ export default function TestResultPage() {
               {correctCount} {t('testResult.correctSlash')} / {incorrectCount} {t('testResult.incorrectSlash')}
             </p>
 
-            <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
               <div className="bg-white/5 rounded-xl p-4">
                 <div className="text-2xl font-bold text-white">{total}</div>
                 <div className="text-sm text-gray-400">{t('testResult.totalQuestions')}</div>
@@ -228,7 +228,7 @@ export default function TestResultPage() {
                           else                               optionClass += "border-slate-600 bg-slate-700/30"
 
                           return (
-                            <div key={optIndex} className={optionClass}>
+                            <div key={`${optIndex}-${option}`} className={optionClass}>
                               <div className="flex items-center gap-3">
                                 <span className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${
                                   isCorrectOption           ? 'bg-emerald-500 text-white'
