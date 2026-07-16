@@ -72,10 +72,10 @@ export default function PracticeSession() {
             <div className="text-center">
               <p className="text-red-400 mb-4">{error}</p>
               <button
-                onClick={() => navigate('/seed-firestore')}
+                onClick={() => navigate('/unit-tests')}
                 className="px-4 py-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors"
               >
-                Create Units
+                Back to Unit Tests
               </button>
             </div>
           </div>
