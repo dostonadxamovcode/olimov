@@ -12,8 +12,6 @@ const EXERCISE_INSTRUCTIONS = {
   fill_blank: 'Complete the sentence. Fill in the blank with the correct word or form.',
   multiple_choice: 'Choose the correct option. Select one answer from the choices below.',
   true_false: 'Decide if the statement is True or False.',
-  negative: 'Rewrite the sentence in the negative form.',
-  question: 'Rewrite the sentence as a question.',
 }
 
 function getExerciseInstruction(exercise) {
@@ -75,10 +73,14 @@ export default function UnitTest() {
   const handleSubmit = () => {
     if (!unit) return
 
+    const validExercises = unit.exercises.filter(exercise => 
+      ['fill_blank', 'multiple_choice', 'true_false'].includes(exercise.type)
+    )
+
     let correct = 0
     const detailedResults = []
 
-    unit.exercises.forEach((exercise, index) => {
+    validExercises.forEach((exercise, index) => {
       const userAnswer = answers[exercise.id]
       let isCorrect = false
       
@@ -102,9 +104,9 @@ export default function UnitTest() {
     })
 
     setResults({
-      total: unit.exercises.length,
+      total: validExercises.length,
       correct: correct,
-      percentage: Math.round((correct / unit.exercises.length) * 100),
+      percentage: validExercises.length > 0 ? Math.round((correct / validExercises.length) * 100) : 0,
       details: detailedResults
     })
     setSubmitted(true)
@@ -148,7 +150,10 @@ export default function UnitTest() {
     )
   }
 
-  const allAnswered = unit.exercises.every(ex => answers[ex.id])
+  const validExercises = unit.exercises.filter(exercise => 
+    ['fill_blank', 'multiple_choice', 'true_false'].includes(exercise.type)
+  )
+  const allAnswered = validExercises.every(ex => answers[ex.id])
 
   return (
     <>
@@ -247,12 +252,12 @@ export default function UnitTest() {
                 {unit.instructions && (
                   <p className="text-sm text-blue-300/90 mb-3 leading-relaxed">{unit.instructions}</p>
                 )}
-                <p className="text-slate-500 text-sm">{unit.exercises.length} exercises • Beginner</p>
+                <p className="text-slate-500 text-sm">{validExercises.length} exercises • Beginner</p>
               </div>
 
               <div className="space-y-4">
-                {unit.exercises.map((exercise, index) => {
-                  const prevType = index > 0 ? unit.exercises[index - 1].type : null
+                {validExercises.map((exercise, filteredIndex) => {
+                  const prevType = filteredIndex > 0 ? validExercises[filteredIndex - 1].type : null
                   const showTypeInstruction = exercise.type !== prevType
 
                   return (
@@ -263,7 +268,7 @@ export default function UnitTest() {
                       </p>
                     )}
                   <div className="flex items-start gap-3">
-                    <span className="text-slate-400 text-sm w-6 flex-shrink-0">{index + 1}.</span>
+                    <span className="text-slate-400 text-sm w-6 flex-shrink-0">{filteredIndex + 1}.</span>
                     <div className="flex-1 min-w-0">
 
                     {exercise.type === 'fill_blank' && (
@@ -354,32 +359,6 @@ export default function UnitTest() {
                             <span className="text-slate-300 text-sm">False</span>
                           </label>
                         </div>
-                      </>
-                    )}
-
-                    {exercise.type === 'negative' && (
-                      <>
-                        <p className="text-slate-300 text-base mb-3">{exercise.question}</p>
-                        <input
-                          type="text"
-                          value={answers[exercise.id] || ''}
-                          onChange={(e) => handleAnswerChange(exercise.id, e.target.value)}
-                          placeholder="Type the negative sentence..."
-                          className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all text-sm"
-                        />
-                      </>
-                    )}
-
-                    {exercise.type === 'question' && (
-                      <>
-                        <p className="text-slate-300 text-base mb-3">{exercise.question}</p>
-                        <input
-                          type="text"
-                          value={answers[exercise.id] || ''}
-                          onChange={(e) => handleAnswerChange(exercise.id, e.target.value)}
-                          placeholder="Type the question..."
-                          className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all text-sm"
-                        />
                       </>
                     )}
                     </div>

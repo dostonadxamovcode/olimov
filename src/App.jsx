@@ -35,6 +35,7 @@ const AdminSkillTestFormPage    = lazy(() => import('./pages/AdminSkillTestFormP
 const AdminListeningFormPage    = lazy(() => import('./pages/AdminListeningFormPage'))
 const AdminWritingFormPage      = lazy(() => import('./pages/AdminWritingFormPage'))
 const AdminSpeakingFormPage     = lazy(() => import('./pages/AdminSpeakingFormPage'))
+const AdminUnitTestFormPage     = lazy(() => import('./pages/AdminUnitTestFormPage'))
 const Profile                   = lazy(() => import('./pages/Profile'))
 const SkillTestsPage            = lazy(() => import('./pages/SkillTestsPage'))
 const SkillReadingPage          = lazy(() => import('./pages/SkillReadingPage'))
@@ -97,6 +98,9 @@ const router = createBrowserRouter([
       { path: 'skill-tests/writing/edit/:id',     element: <LazyPage><AdminWritingFormPage /></LazyPage>   },
       { path: 'skill-tests/speaking/add',         element: <LazyPage><AdminSpeakingFormPage /></LazyPage>  },
       { path: 'skill-tests/speaking/edit/:id',    element: <LazyPage><AdminSpeakingFormPage /></LazyPage>  },
+      { path: 'unit-tests',                     element: <LazyPage><AdminPage /></LazyPage> },
+      { path: 'unit-tests/add',                element: <LazyPage><AdminUnitTestFormPage /></LazyPage> },
+      { path: 'unit-tests/edit/:id',            element: <LazyPage><AdminUnitTestFormPage /></LazyPage> },
       { path: 'students',               element: <SuperadminOnlyRoute><LazyPage><AdminPage /></LazyPage></SuperadminOnlyRoute> },
       { path: 'edit-test/:id',          element: <LazyPage><EditTestPage /></LazyPage> },
     ],

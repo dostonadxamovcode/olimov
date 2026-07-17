@@ -19,6 +19,7 @@ import {
   Target,
   GraduationCap,
   DollarSign,
+  Library,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { fetchUsersCount } from '../services/usersAdmin'
@@ -29,11 +30,13 @@ import {
 import AdminTestsContent from '../components/AdminTestsContent'
 import StudentsList from '../components/StudentsList'
 import AdminSkillTestsContent from '../components/AdminSkillTestsContent'
+import AdminUnitTestsContent from '../components/AdminUnitTestsContent'
 
 const navItems = [
   { id: 'overview',    label: 'Dashboard',   icon: LayoutDashboard },
   { id: 'tests',       label: 'Tests',       icon: BookOpen },
   { id: 'skill-tests', label: 'Skill Tests', icon: Target },
+  { id: 'unit-tests',  label: 'Unit Tests',  icon: Library },
   { id: 'students',    label: 'Students',    icon: Users },
 ]
 
@@ -130,6 +133,8 @@ export default function AdminDashboard() {
       setActive('tests')
     } else if (location.pathname === '/admin/skill-tests') {
       setActive('skill-tests')
+    } else if (location.pathname === '/admin/unit-tests' || location.pathname.startsWith('/admin/unit-tests/')) {
+      setActive('unit-tests')
     } else if (location.pathname === '/admin/students') {
       setActive('students')
     } else {
@@ -228,6 +233,7 @@ export default function AdminDashboard() {
               onClick={() => {
                 if (id === 'tests') navigate('/admin/tests')
                 else if (id === 'skill-tests') navigate('/admin/skill-tests')
+                else if (id === 'unit-tests') navigate('/admin/unit-tests')
                 else if (id === 'students') navigate('/admin/students')
                 else setActive(id)
                 setSidebarOpen(false)
@@ -399,6 +405,8 @@ export default function AdminDashboard() {
             <AdminTestsContent />
           ) : active === 'skill-tests' ? (
             <AdminSkillTestsContent />
+          ) : active === 'unit-tests' ? (
+            <AdminUnitTestsContent />
           ) : active === 'students' && userRole === 'superadmin' ? (
             <StudentsList />
           ) : (

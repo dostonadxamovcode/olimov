@@ -65,7 +65,7 @@ export default function PracticeSession() {
           canonical="https://olimov.vercel.app/practice-session"
         />
         <div className="min-h-screen site-bg">
-          <SectionLoader text="Loading..." minH="100vh" />
+          <SectionLoader  minH="100vh" />
         </div>
       </>
     )
