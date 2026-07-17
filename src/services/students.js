@@ -1,7 +1,3 @@
-import { collection, getDocs } from 'firebase/firestore'
-import { db } from '../firebase'
+import { fetchAllUsers } from './usersAdmin'
 
-export const getStudents = async () => {
-  const snapshot = await getDocs(collection(db, 'users'))
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-}
+export const getStudents = () => fetchAllUsers()

@@ -76,8 +76,8 @@ function RoleBadge({ role }) {
 // ── Main component ────────────────────────────────────────────────────────────
 export default function StudentsList() {
   const { t } = useTranslation()
-  const { user: currentUser } = useAuth()
-  const isSuperadmin = currentUser?.role === 'superadmin'
+  const { user: currentUser, userRole, loading: authLoading } = useAuth()
+  const isSuperadmin = userRole === 'superadmin'
 
   const [students,    setStudents]    = useState([])
   const [loading,     setLoading]     = useState(true)
@@ -85,18 +85,26 @@ export default function StudentsList() {
   const [modal,       setModal]       = useState({ open: false, userId: null, userName: null, action: null })
   const [roleLoading, setRoleLoading] = useState(false)
 
-  useEffect(() => { fetchStudents() }, [])
-
   const fetchStudents = async () => {
     setLoading(true)
     try {
       setStudents(await getStudents())
     } catch (error) {
-      toastError(error.message)
+      console.error('Failed loading users collection', error)
+      toastError(error.message || 'Failed to load students')
     } finally {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (authLoading) return
+    if (userRole !== 'superadmin') {
+      setLoading(false)
+      return
+    }
+    fetchStudents()
+  }, [authLoading, userRole])
 
   const openModal = (student, action) => {
     const name = student.displayName || student.name || student.email?.split('@')[0] || 'this user'

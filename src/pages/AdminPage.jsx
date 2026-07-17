@@ -21,6 +21,7 @@ import {
   DollarSign,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
+import { fetchUsersCount } from '../services/usersAdmin'
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, BarChart, Bar
@@ -83,7 +84,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 export default function AdminDashboard() {
   const [active, setActive] = useState('overview')
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const { user, userRole } = useAuth()
+  const { user, userRole, loading: authLoading } = useAuth()
   const [avatarError, setAvatarError] = useState(false)
   const [usersCount, setUsersCount] = useState(0)
   const [usersCountLoading, setUsersCountLoading] = useState(true)
@@ -95,26 +96,33 @@ export default function AdminDashboard() {
   useEffect(() => { setAvatarError(false) }, [user?.avatar])
 
   useEffect(() => {
-    if (!user || !userRole) return
+    if (authLoading) return
 
-    const fetchUsersCount = async () => {
+    const isAdminUser = userRole === 'admin' || userRole === 'superadmin'
+    if (!user || !isAdminUser) {
+      setUsersCountLoading(false)
+      return
+    }
+
+    let cancelled = false
+
+    const loadCount = async () => {
       setUsersCountLoading(true)
       setUsersCountError(null)
       try {
-        const { getCountFromServer, collection } = await import('firebase/firestore')
-        const { db: firestoreDb } = await import('../firebase')
-        const snapshot = await getCountFromServer(collection(firestoreDb, 'users'))
-        setUsersCount(snapshot.data().count)
+        const count = await fetchUsersCount()
+        if (!cancelled) setUsersCount(count)
       } catch (e) {
-        console.error('fetchUsersCount:', e)
-        setUsersCountError(true)
+        console.error('Failed loading users collection', e)
+        if (!cancelled) setUsersCountError(true)
       } finally {
-        setUsersCountLoading(false)
+        if (!cancelled) setUsersCountLoading(false)
       }
     }
 
-    fetchUsersCount()
-  }, [user, userRole])
+    loadCount()
+    return () => { cancelled = true }
+  }, [authLoading, user, userRole])
 
   useEffect(() => {
     // Set active state based on current route

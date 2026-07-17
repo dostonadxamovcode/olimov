@@ -104,7 +104,7 @@ export function AuthProvider({ children }) {
                 if (cancelled) return
                 const data = snap.exists() ? snap.data() : {}
                 let role = 'user'
-                if (data?.role === 'superadmin' || user.email.toLowerCase() === 'superadmin@gmail.com') {
+                if (data?.role === 'superadmin' || isSuperAdmin(user.email)) {
                   role = 'superadmin'
                 } else if (data?.role === 'admin') {
                   role = 'admin'
@@ -118,7 +118,7 @@ export function AuthProvider({ children }) {
                 console.error('[Firestore] users onSnapshot error:')
                 console.error('code:', snapshotError?.code)
                 console.error('message:', snapshotError?.message)
-                const role = user.email.toLowerCase() === 'superadmin@gmail.com' ? 'superadmin' : 'user'
+                const role = isSuperAdmin(user.email) ? 'superadmin' : 'user'
                 setUserRole(role)
                 setUserAvatar(user.photoURL || null)
                 setLoading(false)

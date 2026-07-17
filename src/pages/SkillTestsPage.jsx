@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import SEO from '../components/SEO';
 import { toastInfo } from '../utils/errorHandler';
+import { useAuth } from '../context/AuthContext';
+import { waitForFirestoreReady } from '../utils/waitForFirestoreAuth';
 
 // ── Intersection observer hook ────────────────────────────────────────────────
 function useInView(threshold = 0.1) {
@@ -237,6 +239,7 @@ function StartModal({ skill, onClose, onConfirm }) {
   const [selected,    setSelected]    = useState(null);
   const [loadedTests, setLoadedTests] = useState([]);
   const [loading,     setLoading]     = useState(true);
+  const { loading: authLoading } = useAuth();
 
   const Icon       = skill?.icon;
   const label      = partLabel(skill?.title);
@@ -245,16 +248,24 @@ function StartModal({ skill, onClose, onConfirm }) {
 
   useEffect(() => {
     if (!skill) return;
+    if (authLoading) return;
+
     setLoading(true);
     setLoadedTests([]);
     setSelected(null);
 
+    const colName = SKILL_COL[skill.title];
+    let cancelled = false;
+
     const load = async () => {
       try {
+        await waitForFirestoreReady();
+        if (cancelled) return;
+
         const { collection, getDocs, query, orderBy } = await import('firebase/firestore');
         const { db } = await import('../firebase');
         const snap = await getDocs(
-          query(collection(db, SKILL_COL[skill.title]), orderBy('part', 'asc'))
+          query(collection(db, colName), orderBy('part', 'asc'))
         );
         const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
@@ -272,13 +283,15 @@ function StartModal({ skill, onClose, onConfirm }) {
             .map(({ rep, count }) => ({ ...rep, _count: count }))
         );
       } catch (e) {
-        console.error('StartModal load:', e);
+        console.error(`Failed loading ${colName}`);
+        console.error(e);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
     load();
-  }, [skill?.title]);
+    return () => { cancelled = true; };
+  }, [skill?.title, authLoading]);
 
   if (!skill) return null;
 

@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import { SectionLoader } from '../components/common/Loader';
 import { useAntiCheatGuard } from '../hooks/useAntiCheatGuard';
+import { useAuth } from '../context/AuthContext';
+import { waitForFirestoreReady } from '../utils/waitForFirestoreAuth';
 
 // ── Live countdown timer — isolated component to avoid re-rendering the page ─
 function LiveTimer({ initialMinutes }) {
@@ -265,6 +267,7 @@ export default function SkillReadingPage() {
   const navigate       = useNavigate();
   const [searchParams] = useSearchParams();
   const partParam      = searchParams.get('part') ?? '1';
+  const { loading: authLoading } = useAuth();
 
   const [test,        setTest]        = useState(null);
   const [loadError,   setLoadError]   = useState(false);
@@ -285,12 +288,17 @@ export default function SkillReadingPage() {
 
   // Fetch from Firestore — reuse the saved test ID on refresh, pick random otherwise.
   useEffect(() => {
+    if (authLoading) return;
+
     let cancelled = false;
     setTest(null);
     setLoadError(false);
 
     const load = async () => {
       try {
+        await waitForFirestoreReady();
+        if (cancelled) return;
+
         const { collection, getDocs, query, where, doc, getDoc } = await import('firebase/firestore');
         const { db } = await import('../firebase');
 
@@ -332,14 +340,15 @@ export default function SkillReadingPage() {
         }
       } catch (e) {
         if (!cancelled) {
-          console.error('Firestore reading test load:', e);
+          console.error('Failed loading skillReadingTests');
+          console.error(e);
           setLoadError(true);
         }
       }
     };
     load();
     return () => { cancelled = true; };
-  }, [partParam]);
+  }, [partParam, authLoading]);
   const passageRef = useRef(null);
 
   const handleChange = (index, value) => {

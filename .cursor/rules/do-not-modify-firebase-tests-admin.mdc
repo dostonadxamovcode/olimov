@@ -1,0 +1,44 @@
+---
+description: Do not modify working Firebase tests, admin users, and Firestore rules — verified Jul 2026
+alwaysApply: true
+---
+
+# DO NOT MODIFY — Firebase Tests & Admin Users (working)
+
+These files were fixed and verified. **Do not edit them** unless the user explicitly requests a change to this specific area.
+
+## Firestore rules
+
+- `firestore.rules` — especially:
+  - `users` collection (`get` / `list`, `isAdminOrAbove`, `bootstrapSuperadminEmail`)
+  - `unitTests`, `skillReadingTests`, `skillReadingPart2Tests` (public read)
+  - `siteContent`, `adminDashboard`
+
+Do not redeploy rules without explicit user approval.
+
+## Unit Tests & Skill Reading
+
+- `src/pages/PracticeSession.jsx`
+- `src/pages/UnitTest.jsx`
+- `src/pages/SkillReadingPage.jsx`
+- `src/pages/SkillReadingPart2Page.jsx`
+- `src/pages/SkillTestsPage.jsx`
+- `src/utils/waitForFirestoreAuth.js`
+- `src/services/siteContentService.js` (siteContent read error logging)
+
+## Admin dashboard & users
+
+- `src/pages/AdminPage.jsx` — `fetchUsersCount` / Students Registration card
+- `src/services/usersAdmin.js`
+- `src/services/students.js`
+- `src/components/StudentsList.jsx`
+- `src/context/AuthContext.jsx` — role resolution (`isSuperAdmin`, users onSnapshot)
+
+## When asked to change nearby code
+
+- Do not refactor, reformat, or “improve” these files opportunistically.
+- Do not change collection names (`unitTests`, `skillReadingTests`, `users`).
+- Do not remove `allow list` on `users` or merge `get`/`list` back into a single `read` rule.
+- Do not replace `fetchUsersCount` fallback or remove `usersAdmin.js`.
+
+If a task would touch these files, ask the user first or implement only outside this scope.

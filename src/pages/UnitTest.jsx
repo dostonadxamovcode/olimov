@@ -4,11 +4,14 @@ import { CheckCircle2, XCircle, BookOpen, ArrowLeft } from 'lucide-react'
 import SEO from '../components/SEO'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '../firebase'
+import { useAuth } from '../context/AuthContext'
+import { waitForFirestoreReady } from '../utils/waitForFirestoreAuth'
 import { SectionLoader } from '../components/common/Loader'
 
 export default function UnitTest() {
   const { unitId } = useParams()
   const navigate = useNavigate()
+  const { loading: authLoading } = useAuth()
   const [unit, setUnit] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -17,10 +20,17 @@ export default function UnitTest() {
   const [results, setResults] = useState(null)
 
   useEffect(() => {
+    if (authLoading) return
+
+    let cancelled = false
+
     async function fetchUnit() {
       try {
         setLoading(true)
         setError(null)
+        await waitForFirestoreReady()
+        if (cancelled) return
+
         const unitRef = doc(db, 'unitTests', unitId)
         const unitDoc = await getDoc(unitRef)
         
@@ -30,15 +40,17 @@ export default function UnitTest() {
           setError('Unit not found')
         }
       } catch (err) {
-        console.error('Error fetching unit:', err)
-        setError('Failed to load unit. Please try again.')
+        console.error('Failed loading unitTests')
+        console.error(err)
+        if (!cancelled) setError('Failed to load unit. Please try again.')
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false)
       }
     }
 
     fetchUnit()
-  }, [unitId])
+    return () => { cancelled = true }
+  }, [unitId, authLoading])
 
   const handleAnswerChange = (exerciseId, value) => {
     setAnswers(prev => ({

@@ -5,20 +5,30 @@ import { useNavigate } from 'react-router-dom'
 import SEO from '../components/SEO'
 import { collection, getDocs } from 'firebase/firestore'
 import { db } from '../firebase'
+import { useAuth } from '../context/AuthContext'
+import { waitForFirestoreReady } from '../utils/waitForFirestoreAuth'
 import { SectionLoader } from '../components/common/Loader'
 
 export default function PracticeSession() {
   const navigate = useNavigate()
   const { t } = useTranslation()
+  const { loading: authLoading } = useAuth()
   const [units, setUnits] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
+    if (authLoading) return
+
+    let cancelled = false
+
     async function fetchUnits() {
       try {
         setLoading(true)
         setError(null)
+        await waitForFirestoreReady()
+        if (cancelled) return
+
         const unitsRef = collection(db, 'unitTests')
         const querySnapshot = await getDocs(unitsRef)
         
@@ -34,15 +44,17 @@ export default function PracticeSession() {
           setError('No units found. Please create units first.')
         }
       } catch (err) {
-        console.error('Error fetching units:', err)
-        setError('Failed to load units. Please try again.')
+        console.error('Failed loading unitTests')
+        console.error(err)
+        if (!cancelled) setError('Failed to load units. Please try again.')
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false)
       }
     }
 
     fetchUnits()
-  }, [])
+    return () => { cancelled = true }
+  }, [authLoading])
 
   if (loading) {
     return (

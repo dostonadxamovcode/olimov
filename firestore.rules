@@ -6,27 +6,40 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function bootstrapSuperadminEmail() {
+      return signedIn()
+        && request.auth.token.email != null
+        && (
+          request.auth.token.email.lower() == 'superadmin@gmail.com' ||
+          request.auth.token.email.lower() == 'admin@gmail.com'
+        );
+    }
+
     function userRole() {
       return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
         ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role
         : null;
     }
 
     function isSuperadmin() {
-      return userRole() == 'superadmin';
+      return bootstrapSuperadminEmail() || userRole() == 'superadmin';
     }
 
     function isAdminOrAbove() {
-      return userRole() == 'superadmin' || userRole() == 'admin';
+      return bootstrapSuperadminEmail()
+        || userRole() == 'superadmin'
+        || userRole() == 'admin';
     }
 
     match /users/{userId} {
       allow create: if signedIn();
 
-      // User can read their own doc; superadmin/admin can read any
-      allow get:  if signedIn() && (request.auth.uid == userId || isAdminOrAbove());
+      // get — own profile OR admin/superadmin reads any single doc
+      allow get: if signedIn() && (request.auth.uid == userId || isAdminOrAbove());
+
+      // list + count() aggregation — admin/superadmin only
       allow list: if signedIn() && isAdminOrAbove();
-      allow read: if signedIn() && (request.auth.uid == userId || isAdminOrAbove());
 
       // User can update own profile — but NOT the role field
       allow update: if signedIn()
@@ -49,7 +62,33 @@ service cloud.firestore {
       allow create, update, delete: if isAdminOrAbove();
     }
 
+    // Practice & skill test content — public read, admin write
+    match /unitTests/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdminOrAbove();
+    }
+
     match /skillReadingTests/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdminOrAbove();
+    }
+
+    match /skillReadingPart2Tests/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdminOrAbove();
+    }
+
+    match /skillListeningTests/{docId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdminOrAbove();
+    }
+
+    match /skillWritingTests/{docId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdminOrAbove();
+    }
+
+    match /skillSpeakingTests/{docId} {
       allow read: if signedIn();
       allow create, update, delete: if isAdminOrAbove();
     }
@@ -101,6 +140,11 @@ service cloud.firestore {
     match /levels/{docId}        { allow read: if signedIn();       allow write: if isAdminOrAbove(); }
     match /services/{docId}      { allow read: if true;             allow write: if isSuperadmin(); }
     match /features/{docId}      { allow read: if true;             allow write: if isSuperadmin(); }
+    match /siteContent/{docId}   { allow read: if true;             allow write: if isAdminOrAbove(); }
+
+    match /adminDashboard/{docId} {
+      allow read, write: if isAdminOrAbove();
+    }
 
     // ── Catch-all: deny everything not explicitly allowed ─────────────────────
     match /{document=**} {

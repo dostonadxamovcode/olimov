@@ -104,7 +104,11 @@ function loadSiteContent() {
       if (snap.exists()) cachedContent = snap.data()
       return cachedContent
     })
-    .catch(() => null) // network error → keep defaults silently
+    .catch((err) => {
+      console.error('Failed loading siteContent')
+      console.error(err)
+      return null
+    })
 
   return fetchPromise
 }

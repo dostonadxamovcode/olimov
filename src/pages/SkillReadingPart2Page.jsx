@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import { SectionLoader } from '../components/common/Loader';
 import { useAntiCheatGuard } from '../hooks/useAntiCheatGuard';
+import { useAuth } from '../context/AuthContext';
+import { waitForFirestoreReady } from '../utils/waitForFirestoreAuth';
 
 // ── Live countdown timer ──────────────────────────────────────────────────────
 function LiveTimer({ initialMinutes }) {
@@ -301,6 +303,7 @@ function ArticleCard({ article, activeQuestion, assignedLetters, submitted, resu
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function SkillReadingPart2Page() {
   const navigate = useNavigate();
+  const { loading: authLoading } = useAuth();
 
   // null = loading, object = loaded test data
   const [activeData,     setActiveData]     = useState(null);
@@ -321,11 +324,19 @@ export default function SkillReadingPart2Page() {
 
   // ── Load from Firestore ───────────────────────────────────────────────────
   useEffect(() => {
+    if (authLoading) return;
+
+    let cancelled = false;
+
     const load = async () => {
       try {
+        await waitForFirestoreReady();
+        if (cancelled) return;
+
         const { collection, getDocs } = await import('firebase/firestore');
         const { db }                  = await import('../firebase');
         const snap = await getDocs(collection(db, 'skillReadingPart2Tests'));
+        if (cancelled) return;
         if (!snap.empty) {
           const docs   = snap.docs.map(d => ({ id: d.id, ...d.data() }));
           const picked = docs[Math.floor(Math.random() * docs.length)];
@@ -336,12 +347,14 @@ export default function SkillReadingPart2Page() {
           setLoadError(true);
         }
       } catch (e) {
-        console.error('Part2 Firestore load:', e);
-        setLoadError(true);
+        console.error('Failed loading skillReadingPart2Tests');
+        console.error(e);
+        if (!cancelled) setLoadError(true);
       }
     };
     load();
-  }, []);
+    return () => { cancelled = true; };
+  }, [authLoading]);
 
   // articleAssignments: articleId → letter[] (multiple questions can share an article)
   const articleAssignments = {};
