@@ -8,6 +8,19 @@ import { useAuth } from '../context/AuthContext'
 import { waitForFirestoreReady } from '../utils/waitForFirestoreAuth'
 import { SectionLoader } from '../components/common/Loader'
 
+const EXERCISE_INSTRUCTIONS = {
+  fill_blank: 'Complete the sentence. Fill in the blank with the correct word or form.',
+  multiple_choice: 'Choose the correct option. Select one answer from the choices below.',
+  true_false: 'Decide if the statement is True or False.',
+  negative: 'Rewrite the sentence in the negative form.',
+  question: 'Rewrite the sentence as a question.',
+}
+
+function getExerciseInstruction(exercise) {
+  if (exercise.instruction?.trim()) return exercise.instruction.trim()
+  return EXERCISE_INSTRUCTIONS[exercise.type] || 'Read the question carefully and write your answer.'
+}
+
 export default function UnitTest() {
   const { unitId } = useParams()
   const navigate = useNavigate()
@@ -231,16 +244,29 @@ export default function UnitTest() {
               <div className="premium-card p-6">
                 <h2 className="text-2xl font-bold text-white mb-2">{unit.title}</h2>
                 <p className="text-slate-400 mb-4">{unit.description}</p>
+                {unit.instructions && (
+                  <p className="text-sm text-blue-300/90 mb-3 leading-relaxed">{unit.instructions}</p>
+                )}
                 <p className="text-slate-500 text-sm">{unit.exercises.length} exercises • Beginner</p>
               </div>
 
               <div className="space-y-4">
-                {unit.exercises.map((exercise, index) => (
-                  <div key={exercise.id} className="flex items-start gap-3">
+                {unit.exercises.map((exercise, index) => {
+                  const prevType = index > 0 ? unit.exercises[index - 1].type : null
+                  const showTypeInstruction = exercise.type !== prevType
+
+                  return (
+                  <div key={exercise.id}>
+                    {showTypeInstruction && (
+                      <p className="text-sm text-blue-400/90 font-medium mb-3 mt-2 first:mt-0">
+                        {getExerciseInstruction(exercise)}
+                      </p>
+                    )}
+                  <div className="flex items-start gap-3">
                     <span className="text-slate-400 text-sm w-6 flex-shrink-0">{index + 1}.</span>
-                    
+                    <div className="flex-1 min-w-0">
+
                     {exercise.type === 'fill_blank' && (
-                      <div className="flex-1">
                         <div className="flex items-center gap-2 text-slate-300 text-base flex-wrap">
                           {exercise.question.split('____').map((part, i, arr) => (
                             <React.Fragment key={`${exercise.id}-part-${i}`}>
@@ -257,11 +283,10 @@ export default function UnitTest() {
                             </React.Fragment>
                           ))}
                         </div>
-                      </div>
                     )}
 
                     {exercise.type === 'multiple_choice' && (
-                      <div className="flex-1">
+                      <>
                         <p className="text-slate-300 text-base mb-3">{exercise.question}</p>
                         <div className="grid grid-cols-2 gap-2">
                           {exercise.options.map((option) => (
@@ -285,11 +310,11 @@ export default function UnitTest() {
                             </label>
                           ))}
                         </div>
-                      </div>
+                      </>
                     )}
 
                     {exercise.type === 'true_false' && (
-                      <div className="flex-1">
+                      <>
                         <p className="text-slate-300 text-base mb-3">{exercise.question}</p>
                         <div className="flex gap-4">
                           <label
@@ -329,11 +354,11 @@ export default function UnitTest() {
                             <span className="text-slate-300 text-sm">False</span>
                           </label>
                         </div>
-                      </div>
+                      </>
                     )}
 
                     {exercise.type === 'negative' && (
-                      <div className="flex-1">
+                      <>
                         <p className="text-slate-300 text-base mb-3">{exercise.question}</p>
                         <input
                           type="text"
@@ -342,11 +367,11 @@ export default function UnitTest() {
                           placeholder="Type the negative sentence..."
                           className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all text-sm"
                         />
-                      </div>
+                      </>
                     )}
 
                     {exercise.type === 'question' && (
-                      <div className="flex-1">
+                      <>
                         <p className="text-slate-300 text-base mb-3">{exercise.question}</p>
                         <input
                           type="text"
@@ -355,10 +380,13 @@ export default function UnitTest() {
                           placeholder="Type the question..."
                           className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all text-sm"
                         />
-                      </div>
+                      </>
                     )}
+                    </div>
                   </div>
-                ))}
+                  </div>
+                  )
+                })}
               </div>
 
               <div className="sticky bottom-0 bg-[#030712]/95 backdrop-blur-sm border-t border-white/10 p-4">
