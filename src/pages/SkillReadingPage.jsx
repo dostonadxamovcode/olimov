@@ -81,8 +81,9 @@ function ViolationOverlay({ onDismiss }) {
 
 // ── Inline blank input ────────────────────────────────────────────────────────
 function FillBlank({ index, value, onChange, submitted, isCorrect, correctAnswer }) {
+  const safeValue = value ?? '';
   const ansLen   = correctAnswer?.length ?? 6;
-  const inputLen = Math.max(value?.length ?? 0, ansLen) + 2;
+  const inputLen = Math.max(safeValue.length, ansLen) + 2;
   const width    = `${Math.max(inputLen, 8)}ch`;
 
   let boxStyle = 'relative inline-flex items-center mx-1 align-middle';
@@ -90,7 +91,7 @@ function FillBlank({ index, value, onChange, submitted, isCorrect, correctAnswer
     'rounded-lg border px-3 py-[3px] text-sm font-semibold text-center outline-none transition-all duration-200 ';
 
   if (!submitted) {
-    inputCls += value
+    inputCls += safeValue
       ? 'bg-blue-500/15 border-blue-400/50 text-white focus:border-blue-300 focus:bg-blue-500/20 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.15)]'
       : 'bg-white/[0.05] border-white/20 text-white/70 placeholder-white/20 focus:bg-blue-500/10 focus:border-blue-400/50 focus:shadow-[0_0_0_3px_rgba(59,130,246,0.12)]';
   } else {
@@ -116,7 +117,7 @@ function FillBlank({ index, value, onChange, submitted, isCorrect, correctAnswer
 
       <input
         type="text"
-        value={value}
+        value={safeValue}
         onChange={onChange}
         disabled={submitted}
         autoComplete="off"
