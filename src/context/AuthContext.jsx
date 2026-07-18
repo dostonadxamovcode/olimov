@@ -115,9 +115,10 @@ export function AuthProvider({ children }) {
                 setLoading(false)
               },
               (snapshotError) => {
-                console.error('[Firestore] users onSnapshot error:')
+                console.error('[Firestore] users onSnapshot error (reading users collection):')
                 console.error('code:', snapshotError?.code)
                 console.error('message:', snapshotError?.message)
+                console.error('stack:', snapshotError?.stack)
                 const role = isSuperAdmin(user.email) ? 'superadmin' : 'user'
                 setUserRole(role)
                 setUserAvatar(user.photoURL || null)
@@ -171,7 +172,14 @@ export function AuthProvider({ children }) {
       await setPersistence(auth, browserLocalPersistence)
       const cred = await createUserWithEmailAndPassword(auth, email, password)
       const role = email.toLowerCase() === 'superadmin@gmail.com' ? 'superadmin' : 'user'
-      await setDoc(doc(db, 'users', cred.user.uid), { email, role, createdAt: serverTimestamp() })
+      try {
+        await setDoc(doc(db, 'users', cred.user.uid), { email, role, createdAt: serverTimestamp() })
+      } catch (writeError) {
+        console.error('[Firebase Auth] Failed writing users collection during register:')
+        console.error('code:', writeError?.code)
+        console.error('message:', writeError?.message)
+        throw writeError
+      }
       return cred
     } catch (error) {
       console.error('[Firebase Auth] createUserWithEmailAndPassword failed:')
@@ -183,17 +191,41 @@ export function AuthProvider({ children }) {
 
   const googleLogin = async () => {
     try {
+      console.log('[GoogleAuth] Step 1: Loading Firebase modules')
       const { auth, db, GoogleAuthProvider, signInWithPopup, doc, setDoc, serverTimestamp } = await loadAuthClient()
+
+      console.log('[GoogleAuth] Step 2: Setting up Google provider')
       const provider = new GoogleAuthProvider()
+
+      console.log('[GoogleAuth] Step 3: Calling signInWithPopup')
       const result = await signInWithPopup(auth, provider)
       const u = result.user
-      const role = u.email.toLowerCase() === 'superadmin@gmail.com' ? 'superadmin' : 'user'
-      await setDoc(doc(db, 'users', u.uid), { email: u.email, role, createdAt: serverTimestamp() }, { merge: true })
+      console.log('[GoogleAuth] Step 4: signInWithPopup successful, user:', u.email)
+
+      console.log('[GoogleAuth] Step 5: Writing users doc with merge: true (without role to avoid permission denial)')
+      try {
+        await setDoc(
+          doc(db, 'users', u.uid),
+          {
+            email: u.email,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          },
+          { merge: true }
+        )
+        console.log('[GoogleAuth] Step 6: Users doc written successfully')
+      } catch (writeError) {
+        console.error('[GoogleAuth] Failed writing users collection:')
+        console.error('code:', writeError?.code)
+        console.error('message:', writeError?.message)
+        throw writeError
+      }
       return result
     } catch (error) {
       console.error('[Firebase Auth] signInWithPopup (Google) failed:')
       console.error('code:', error?.code)
       console.error('message:', error?.message)
+      console.error('stack:', error?.stack)
       throw error
     }
   }
@@ -232,7 +264,14 @@ export function AuthProvider({ children }) {
     if (username !== undefined) firestoreData.username = username
     if (phone !== undefined) firestoreData.phone = phone
     if (bio !== undefined) firestoreData.bio = bio
-    await setDoc(doc(db, 'users', u.uid), firestoreData, { merge: true })
+    try {
+      await setDoc(doc(db, 'users', u.uid), firestoreData, { merge: true })
+    } catch (writeError) {
+      console.error('[Firebase Auth] Failed writing users collection during updateUserProfile:')
+      console.error('code:', writeError?.code)
+      console.error('message:', writeError?.message)
+      throw writeError
+    }
 
     // 3. Sync React state so Header/Avatar updates immediately
     setCurrentUser(prev => prev ? { ...prev, ...authUpdates } : prev)

@@ -2,6 +2,15 @@
   "firestore": {
     "rules": "firestore.rules"
   },
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "Olimov",
+        "supportEmail": "support@olimov.com",
+        "authorizedDomains": ["localhost", "olimov-a5528.firebaseapp.com"]
+      }
+    }
+  },
   "functions": [
     {
       "source": "functions",
