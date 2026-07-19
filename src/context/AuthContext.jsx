@@ -93,15 +93,20 @@ export function AuthProvider({ children }) {
             setCurrentUser(user)
             setLoading(true)
 
+            console.log('[AuthStateChanged] User authenticated, uid:', user.uid)
+            console.log('[AuthStateChanged] Step 1: Initializing presence service')
             const { initializePresence } = await loadPresence()
             await initializePresence(user.uid)
+            console.log('[AuthStateChanged] Step 1: Presence service initialized')
 
             if (unsubscribeRole) unsubscribeRole()
 
+            console.log('[AuthStateChanged] Step 2: Starting users collection onSnapshot - collection: users, document:', user.uid)
             unsubscribeRole = onSnapshot(
               doc(db, 'users', user.uid),
               (snap) => {
                 if (cancelled) return
+                console.log('[AuthStateChanged] Step 2: Users collection onSnapshot received data - exists:', snap.exists())
                 const data = snap.exists() ? snap.data() : {}
                 let role = 'user'
                 if (data?.role === 'superadmin' || isSuperAdmin(user.email)) {
@@ -115,10 +120,11 @@ export function AuthProvider({ children }) {
                 setLoading(false)
               },
               (snapshotError) => {
-                console.error('[Firestore] users onSnapshot error (reading users collection):')
+                console.error('[AuthStateChanged] Failed loading users collection:')
                 console.error('code:', snapshotError?.code)
                 console.error('message:', snapshotError?.message)
-                console.error('stack:', snapshotError?.stack)
+                console.error('collection: users')
+                console.error('document: ' + user.uid)
                 const role = isSuperAdmin(user.email) ? 'superadmin' : 'user'
                 setUserRole(role)
                 setUserAvatar(user.photoURL || null)
@@ -191,33 +197,50 @@ export function AuthProvider({ children }) {
 
   const googleLogin = async () => {
     try {
-      console.log('[GoogleAuth] Step 1: Loading Firebase modules')
-      const { auth, db, GoogleAuthProvider, signInWithPopup, doc, setDoc, serverTimestamp } = await loadAuthClient()
+      console.log('[GoogleAuth] Loading Firebase modules')
+      const { auth, db, GoogleAuthProvider, signInWithPopup, doc, getDoc, setDoc, serverTimestamp } = await loadAuthClient()
 
-      console.log('[GoogleAuth] Step 2: Setting up Google provider')
+      console.log('[GoogleAuth] Setting up Google provider')
       const provider = new GoogleAuthProvider()
 
-      console.log('[GoogleAuth] Step 3: Calling signInWithPopup')
+      console.log('[STEP 1] Google login signInWithPopup starting')
       const result = await signInWithPopup(auth, provider)
       const u = result.user
-      console.log('[GoogleAuth] Step 4: signInWithPopup successful, user:', u.email)
+      console.log('[STEP 1] Google login success - user:', u.email, 'uid:', u.uid)
 
-      console.log('[GoogleAuth] Step 5: Writing users doc with merge: true (without role to avoid permission denial)')
+      console.log('[STEP 2] Reading users doc from collection: users/' + u.uid)
+      let userDoc
       try {
+        userDoc = await getDoc(doc(db, 'users', u.uid))
+        console.log('[STEP 2] Reading users doc success - exists:', userDoc.exists())
+      } catch (readError) {
+        console.error('[STEP 2] Reading users doc FAILED:')
+        console.error('code:', readError?.code)
+        console.error('message:', readError?.message)
+        console.error('collection: users')
+        console.error('document: ' + u.uid)
+        throw readError
+      }
+
+      console.log('[STEP 3] Writing users doc to collection: users/' + u.uid)
+      try {
+        const role = u.email.toLowerCase() === 'superadmin@gmail.com' ? 'superadmin' : 'user'
         await setDoc(
           doc(db, 'users', u.uid),
           {
             email: u.email,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
+            role: role,
+            createdAt: serverTimestamp()
           },
           { merge: true }
         )
-        console.log('[GoogleAuth] Step 6: Users doc written successfully')
+        console.log('[STEP 3] Writing users doc success - role set to:', role)
       } catch (writeError) {
-        console.error('[GoogleAuth] Failed writing users collection:')
+        console.error('[STEP 3] Writing users doc FAILED:')
         console.error('code:', writeError?.code)
         console.error('message:', writeError?.message)
+        console.error('collection: users')
+        console.error('document: ' + u.uid)
         throw writeError
       }
       return result

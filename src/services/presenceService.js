@@ -28,6 +28,8 @@ export const initializePresence = async (userId) => {
   if (!userId) return
 
   try {
+    console.log('[PresenceService] Initializing presence for user:', userId)
+    console.log('[PresenceService] Writing to users collection - document:', userId)
     // Set user as online with current timestamp
     const userRef = doc(db, 'users', userId)
     await setDoc(userRef, {
@@ -37,6 +39,7 @@ export const initializePresence = async (userId) => {
       displayName: auth.currentUser?.displayName,
       photoURL: auth.currentUser?.photoURL
     }, { merge: true })
+    console.log('[PresenceService] Successfully wrote to users collection')
 
     // Set up heartbeat to keep user marked as online
     startHeartbeat(userId)
@@ -46,7 +49,11 @@ export const initializePresence = async (userId) => {
 
     return true
   } catch (error) {
-    console.error('Error initializing presence:', error)
+    console.error('[PresenceService] Failed writing to users collection:')
+    console.error('code:', error?.code)
+    console.error('message:', error?.message)
+    console.error('collection: users')
+    console.error('document: ' + userId)
     return false
   }
 }

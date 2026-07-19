@@ -30,7 +30,6 @@ export default function AdminUnitTestFormPage() {
     unitNumber: '',
     title: '',
     description: '',
-    instructions: '',
     level: 'beginner',
     order: 1,
     exercises: [],
@@ -47,14 +46,13 @@ export default function AdminUnitTestFormPage() {
 
   useEffect(() => {
     const isEdit = location.pathname.includes('/edit/')
-    
+
     if (isEdit && location.state?.unit) {
       const unit = location.state.unit
       setFormData({
         unitNumber: unit.unitNumber || '',
         title: unit.title || '',
         description: unit.description || '',
-        instructions: unit.instructions || '',
         level: unit.level || 'beginner',
         order: unit.order || 1,
         exercises: unit.exercises || [],
@@ -64,23 +62,19 @@ export default function AdminUnitTestFormPage() {
 
   const validateUnitForm = () => {
     const newErrors = {}
-    
+
     if (!formData.unitNumber || formData.unitNumber.trim() === '') {
       newErrors.unitNumber = 'Unit number is required'
     }
-    
+
     if (!formData.title || formData.title.trim() === '') {
       newErrors.title = 'Title is required'
     }
-    
+
     if (!formData.description || formData.description.trim() === '') {
       newErrors.description = 'Description is required'
     }
-    
-    if (!formData.instructions || formData.instructions.trim() === '') {
-      newErrors.instructions = 'Instructions are required'
-    }
-    
+
     if (!formData.order || formData.order < 1) {
       newErrors.order = 'Order must be at least 1'
     }
@@ -134,7 +128,6 @@ export default function AdminUnitTestFormPage() {
         unitNumber: parseInt(formData.unitNumber),
         title: formData.title.trim(),
         description: formData.description.trim(),
-        instructions: formData.instructions.trim(),
         level: formData.level,
         order: parseInt(formData.order),
         exercises: formData.exercises || [],
@@ -386,24 +379,6 @@ export default function AdminUnitTestFormPage() {
                 />
                 {errors.description && (
                   <span className="label-text-alt text-error text-xs">{errors.description}</span>
-                )}
-              </div>
-
-              {/* Instructions */}
-              <div className="form-control">
-                <label className="label py-1">
-                  <span className="label-text text-xs font-medium">Instructions *</span>
-                </label>
-                <textarea
-                  name="instructions"
-                  value={formData.instructions}
-                  onChange={(e) => setFormData(prev => ({ ...prev, instructions: e.target.value }))}
-                  className={`textarea textarea-bordered textarea-sm w-full ${errors.instructions ? 'textarea-error' : ''}`}
-                  placeholder="Instructions shown to students before starting the unit"
-                  rows={3}
-                />
-                {errors.instructions && (
-                  <span className="label-text-alt text-error text-xs">{errors.instructions}</span>
                 )}
               </div>
 
