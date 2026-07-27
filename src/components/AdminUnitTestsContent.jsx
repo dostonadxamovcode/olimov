@@ -120,26 +120,21 @@ export default function AdminUnitTestsContent() {
   const tabBtn = 'inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all duration-200'
 
   return (
-    <div style={{ paddingBottom: 80 }}>
+    <div className="pb-24">
       {/* Page Title */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24 }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: '#f1f5f9' }}>Unit Tests</h1>
-          <p style={{ margin: '4px 0 0', fontSize: 13, color: '#64748b' }}>Manage grammar unit tests by level</p>
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-bold text-slate-100 sm:text-[24px]">Unit Tests</h1>
+          <p className="mt-1 text-sm text-slate-500">Manage grammar unit tests by level</p>
         </div>
-        <button onClick={() => navigate('/admin/unit-tests/add')} className={primaryBtn}>
+        <button onClick={() => navigate('/admin/unit-tests/add')} className={`${primaryBtn} w-full sm:w-auto`}>
           <Plus size={16} />
           Create Unit
         </button>
       </div>
 
       {/* Level Tabs */}
-      <div style={{
-        display: 'flex',
-        gap: 8,
-        marginBottom: 24,
-        flexWrap: 'wrap',
-      }}>
+      <div className="mb-6 flex flex-wrap gap-2">
         {LEVELS.map((level) => (
           <button
             key={level.id}
@@ -166,25 +161,8 @@ export default function AdminUnitTestsContent() {
       </div>
 
       {/* Search */}
-      <div style={{
-        display: 'flex',
-        gap: 16,
-        marginBottom: 24,
-        flexWrap: 'wrap',
-        alignItems: 'center',
-      }}>
-        <div style={{
-          flex: 1,
-          minWidth: 280,
-          maxWidth: 400,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          background: 'rgba(255,255,255,0.05)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: 10,
-          padding: '10px 14px',
-        }}>
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="flex w-full min-w-0 items-center gap-3 rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2.5 sm:max-w-md">
           <Search size={15} color="#475569" />
           <input
             type="text"
@@ -198,12 +176,7 @@ export default function AdminUnitTestsContent() {
 
       {/* Loading State */}
       {loading && (
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: 400,
-        }}>
+        <div className="flex min-h-[320px] items-center justify-center">
           <LoadingSpinner size="lg" text="Loading units..." />
         </div>
       )}
@@ -234,11 +207,7 @@ export default function AdminUnitTestsContent() {
 
       {/* Units Grid */}
       {!loading && filteredUnits.length > 0 && (
-        <div style={{
-          display: 'grid',
-          gap: 16,
-          gridTemplateColumns: 'repeat(auto-fill, minmax(min(350px, 100%), 1fr))',
-        }}>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {filteredUnits.map((unit) => {
             const unitLevel = unit.level || 'beginner'
             const levelConfig = LEVEL_CONFIG[unitLevel] || LEVEL_CONFIG.beginner
@@ -350,75 +319,23 @@ export default function AdminUnitTestsContent() {
 
       {/* Stats Bar */}
       {!loading && units.length > 0 && (
-        <div style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 220,
-          right: 0,
-          height: 64,
-          padding: '0 24px',
-          background: 'rgba(13,27,42,0.95)',
-          borderTop: '1px solid rgba(255,255,255,0.04)',
-          backdropFilter: 'blur(12px)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          zIndex: 100,
-          pointerEvents: 'auto',
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 16,
-            fontSize: 13,
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '8px 16px',
-              background: 'rgba(255,255,255,0.05)',
-              borderRadius: 8,
-              border: '1px solid rgba(255,255,255,0.04)',
-            }}>
-              <span style={{ color: '#64748b', fontWeight: 500 }}>Total Units</span>
-              <span style={{ color: '#f1f5f9', fontWeight: 600 }}>{units.length}</span>
+        <div className="fixed bottom-0 left-0 right-0 z-[100] border-t border-white/5 bg-[#0b1220]/95 px-4 py-3 backdrop-blur-md sm:left-[220px] sm:px-6">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm sm:justify-start">
+              <span className="font-medium text-slate-500">Total Units</span>
+              <span className="font-semibold text-slate-100">{units.length}</span>
             </div>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '8px 16px',
-              background: 'rgba(255,255,255,0.05)',
-              borderRadius: 8,
-              border: '1px solid rgba(255,255,255,0.04)',
-            }}>
-              <span style={{ color: '#64748b', fontWeight: 500 }}>Showing</span>
-              <span style={{ color: '#f1f5f9', fontWeight: 600 }}>{filteredUnits.length}</span>
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm sm:justify-start">
+              <span className="font-medium text-slate-500">Showing</span>
+              <span className="font-semibold text-slate-100">{filteredUnits.length}</span>
             </div>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '8px 16px',
-              background: 'rgba(255,255,255,0.05)',
-              borderRadius: 8,
-              border: '1px solid rgba(255,255,255,0.04)',
-            }}>
-              <span style={{ color: '#64748b', fontWeight: 500 }}>Level</span>
-              <span style={{ color: '#f1f5f9', fontWeight: 600 }}>{activeLevelConfig.label}</span>
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm sm:justify-start">
+              <span className="font-medium text-slate-500">Level</span>
+              <span className="font-semibold text-slate-100">{activeLevelConfig.label}</span>
             </div>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '8px 16px',
-              background: 'rgba(255,255,255,0.05)',
-              borderRadius: 8,
-              border: '1px solid rgba(255,255,255,0.04)',
-            }}>
-              <span style={{ color: '#64748b', fontWeight: 500 }}>Total Questions</span>
-              <span style={{ color: '#f1f5f9', fontWeight: 600 }}>
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm sm:justify-start">
+              <span className="font-medium text-slate-500">Total Questions</span>
+              <span className="font-semibold text-slate-100">
                 {filteredUnits.reduce((sum, unit) => sum + (unit.exercises?.length || 0), 0)}
               </span>
             </div>

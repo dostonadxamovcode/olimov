@@ -105,17 +105,17 @@ export default function UnitTestsByLevel() {
     <>
       <SEO title={title} description={description} canonical={`https://olimov.vercel.app/unit-tests/${normalizedLevel}`} />
 
-      <section className="min-h-screen site-bg pt-24 pb-16 sm:pt-28 sm:pb-20">
+      <section className="min-h-screen site-bg pt-20 pb-16 sm:pt-24 sm:pb-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-6xl">
             <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <button onClick={() => navigate('/unit-tests')} className="mb-4 inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors">
+              <div className="min-w-0">
+                <button onClick={() => navigate('/unit-tests')} className="mb-3 inline-flex items-center gap-2 text-sm text-slate-400 transition-colors hover:text-white sm:mb-4">
                   <ArrowLeft className="h-4 w-4" />
                   Back
                 </button>
-                <h1 className="mt-4 text-3xl font-bold text-white sm:text-4xl">{meta.label} Units</h1>
-                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-gray-400 sm:text-base">{meta.description}</p>
+                <h1 className="break-words text-2xl font-bold text-white sm:mt-4 sm:text-4xl">{meta.label} Units</h1>
+                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-gray-400 sm:mt-3 sm:text-base">{meta.description}</p>
               </div>
               <div className="inline-flex items-center gap-2 self-start rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-medium text-slate-400 sm:self-auto">
                 <Clock3 className="h-4 w-4 text-sky-400" />
@@ -124,24 +124,24 @@ export default function UnitTestsByLevel() {
             </div>
 
             {emptyState ? (
-              <div className="premium-card flex min-h-[280px] items-center justify-center px-6 text-center">
+              <div className="premium-card flex min-h-[240px] items-center justify-center px-4 text-center sm:px-6">
                 <div>
                   <p className="text-lg font-semibold text-white">{emptyState}</p>
                   <p className="mt-2 text-sm text-slate-400">Create units in Admin and they will appear here automatically.</p>
                 </div>
               </div>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
                 {units.map((unit) => (
-                  <article key={unit.id} className="premium-card flex flex-col gap-4 p-5 transition-all hover:-translate-y-1 hover:border-white/20">
+                  <article key={unit.id} className="premium-card flex min-w-0 flex-col gap-4 p-4 transition-all hover:-translate-y-1 hover:border-white/20 sm:p-5">
                     <div className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${meta.accent} text-lg font-bold text-white shadow-lg`}>
                       {unit.unitNumber || unit.order || 0}
                     </div>
-                    <div className="space-y-2">
-                      <h3 className="text-xl font-bold text-white">{unit.title}</h3>
-                      <p className="text-sm leading-relaxed text-slate-400">{unit.description}</p>
+                    <div className="min-w-0 space-y-2">
+                      <h3 className="break-words text-lg font-bold text-white sm:text-xl">{unit.title}</h3>
+                      <p className="break-words text-sm leading-relaxed text-slate-400">{unit.description}</p>
                     </div>
-                    <div className="flex items-center justify-between text-sm text-slate-400">
+                    <div className="flex flex-col gap-1 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
                       <span>{unit.exercises?.length || 0} Questions</span>
                       <span>Order {unit.order || unit.unitNumber || 0}</span>
                     </div>
