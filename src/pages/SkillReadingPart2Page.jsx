@@ -407,15 +407,8 @@ export default function SkillReadingPart2Page() {
   // ── Anti-cheat violation ──────────────────────────────────────────────────
   const handleViolation = useCallback(() => {
     if (!activeData) return;
-    setViolated(true);
-    const res = {};
-    activeData.questions.forEach(q => {
-      res[q.letter] = userAnswers[q.letter] === activeData.answers[q.letter];
-    });
-    setResults(res);
-    setSubmitted(true);
-    setActiveQuestion(null);
-  }, [userAnswers, activeData]);
+    navigate('/exam-terminated');
+  }, [navigate, activeData]);
 
   useAntiCheatGuard({ active: !submitted && !!activeData, onViolation: handleViolation });
 

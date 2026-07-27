@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ScrollToTop from '../components/ScrollToTop';
@@ -19,6 +19,14 @@ function PageWithFooter() {
 
 export default function MainLayout() {
   const { loading } = useAuth();
+  const location = useLocation();
+  const hideHeader = (
+    /^\/unit-tests\/[^/]+\/[^/]+$/.test(location.pathname) ||
+    location.pathname.startsWith('/skill-tests') ||
+    location.pathname.startsWith('/tests') ||
+    location.pathname.startsWith('/exam') ||
+    location.pathname.startsWith('/practice-session')
+  );
 
   if (loading) {
     return (
@@ -32,7 +40,7 @@ export default function MainLayout() {
     <div className="min-h-screen w-full site-bg flex flex-col">
       <ScrollToTop />
       <div className="flex flex-col flex-1 min-h-screen w-full">
-        <Header />
+        {!hideHeader && <Header />}
         {/* Footer only mounts after the route chunk resolves — hidden during refresh/lazy load */}
         <Suspense fallback={<PageLoader />}>
           <PageWithFooter />

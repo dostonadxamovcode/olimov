@@ -4,6 +4,7 @@ import {
   ArrowLeft, PenLine, Clock, CheckCircle2, RotateCcw, ChevronRight, Eye, EyeOff,
 } from 'lucide-react';
 import { SectionLoader } from '../components/common/Loader';
+import { useAntiCheatGuard } from '../hooks/useAntiCheatGuard';
 
 const storageKey = (task) => `skillWriting_testId_t${task}`;
 
@@ -99,6 +100,14 @@ export default function SkillWritingPage() {
 
   const handleExit  = () => { localStorage.removeItem(storageKey(taskParam)); navigate('/skill-tests'); };
   const handleReset = () => { setEssay(''); setSubmitted(false); setShowSample(false); setExpired(false); textareaRef.current?.focus(); };
+
+  const handleViolation = useCallback(() => {
+    if (!test || submitted) return;
+    localStorage.removeItem(storageKey(taskParam));
+    navigate('/exam-terminated');
+  }, [test, submitted, taskParam, navigate]);
+
+  useAntiCheatGuard({ active: !!test && !submitted, onViolation: handleViolation });
 
   if (!test) {
     return (

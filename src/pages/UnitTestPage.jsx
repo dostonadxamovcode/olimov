@@ -7,6 +7,7 @@ import { SectionLoader } from '../components/common/Loader'
 import { db } from '../firebase'
 import { useAuth } from '../context/AuthContext'
 import { waitForFirestoreReady } from '../utils/waitForFirestoreAuth'
+import { useAntiCheatGuard } from '../hooks/useAntiCheatGuard'
 
 const EXERCISE_INSTRUCTIONS = {
   fill_blank: 'Complete the sentence. Fill in the blank with the correct word or form.',
@@ -120,6 +121,22 @@ export default function UnitTestPage() {
     setResults(null)
   }
 
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1)
+      return
+    }
+
+    navigate(`/unit-tests/${level}`)
+  }
+
+  const handleViolation = () => {
+    if (!unit || submitted) return
+    navigate('/exam-terminated')
+  }
+
+  useAntiCheatGuard({ active: !!unit && !submitted, onViolation: handleViolation })
+
   if (loading) {
     return (
       <>
@@ -168,7 +185,7 @@ export default function UnitTestPage() {
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3 sm:gap-4">
               <button
-                onClick={() => navigate(`/unit-tests/${level}`)}
+                onClick={handleBack}
                 className="flex shrink-0 items-center gap-2 text-slate-400 transition-colors hover:text-white"
               >
                 <ArrowLeft className="h-4 w-4" /> Back

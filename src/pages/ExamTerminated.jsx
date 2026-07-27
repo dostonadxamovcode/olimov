@@ -10,7 +10,7 @@ export default function ExamTerminated() {
 
   const handleUnlock = () => {
     if (password === '2026') {
-      navigate('/level')
+      navigate('/')
     } else {
       setError("Parol noto'g'ri")
       setPassword('')
