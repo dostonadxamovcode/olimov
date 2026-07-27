@@ -46,6 +46,7 @@ const SkillSpeakingPage         = lazy(() => import('./pages/SkillSpeakingPage')
 const UnitTests                 = lazy(() => import('./pages/UnitTests'))
 const PracticeSession           = lazy(() => import('./pages/PracticeSession'))
 const UnitTest                  = lazy(() => import('./pages/UnitTest'))
+const UnitTestsByLevel          = lazy(() => import('./pages/UnitTestsByLevel'))
 
 function SuperadminOnlyRoute({ children }) {
   const { userRole } = useAuth()
@@ -98,9 +99,9 @@ const router = createBrowserRouter([
       { path: 'skill-tests/writing/edit/:id',     element: <LazyPage><AdminWritingFormPage /></LazyPage>   },
       { path: 'skill-tests/speaking/add',         element: <LazyPage><AdminSpeakingFormPage /></LazyPage>  },
       { path: 'skill-tests/speaking/edit/:id',    element: <LazyPage><AdminSpeakingFormPage /></LazyPage>  },
-      { path: 'unit-tests',                     element: <LazyPage><AdminPage /></LazyPage> },
       { path: 'unit-tests/add',                element: <LazyPage><AdminUnitTestFormPage /></LazyPage> },
       { path: 'unit-tests/edit/:id',            element: <LazyPage><AdminUnitTestFormPage /></LazyPage> },
+      { path: 'unit-tests',                     element: <LazyPage><AdminPage /></LazyPage> },
       { path: 'students',               element: <SuperadminOnlyRoute><LazyPage><AdminPage /></LazyPage></SuperadminOnlyRoute> },
       { path: 'edit-test/:id',          element: <LazyPage><EditTestPage /></LazyPage> },
     ],
@@ -124,6 +125,8 @@ const router = createBrowserRouter([
       { path: 'level',                  element: <LevelSelection /> },
       { path: 'result',                 element: <ResultsPage /> },
       { path: 'unit-tests',             element: <UnitTests /> },
+      { path: 'unit-tests/:level',       element: <LazyPage><UnitTestsByLevel /></LazyPage> },
+      { path: 'unit-tests/:level/:unitId', element: <LazyPage><UnitTest /></LazyPage> },
       {
         element: <ProtectedRoute />,
         children: [
@@ -145,7 +148,7 @@ const router = createBrowserRouter([
   { path: '/test-result',          element: <LazyPage><TestResultPage /></LazyPage> },
   { path: '/exam-terminated',      element: <LazyPage><ExamTerminated /></LazyPage> },
   { path: '/practice-session',     element: <LazyPage><PracticeSession /></LazyPage> },
-  { path: '/unit-test/:unitId',    element: <LazyPage><UnitTest /></LazyPage> },
+  { path: '/unit-test/:unitId',    element: <Navigate to="/unit-tests" replace /> },
 ])
 
 export default function App() {

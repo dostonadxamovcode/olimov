@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Plus,
   Trash2,
@@ -14,10 +14,11 @@ import ConfirmModal from '../components/ui/ConfirmModal'
 
 const LEVELS = [
   { id: 'beginner', label: 'Beginner', active: true },
-  { id: 'elementary', label: 'Elementary', active: false },
-  { id: 'pre-intermediate', label: 'Pre-Intermediate', active: false },
-  { id: 'intermediate', label: 'Intermediate', active: false },
-  { id: 'upper-intermediate', label: 'Upper-Intermediate', active: false },
+  { id: 'elementary', label: 'Elementary', active: true },
+  { id: 'pre-intermediate', label: 'Pre-Intermediate', active: true },
+  { id: 'intermediate', label: 'Intermediate', active: true },
+  { id: 'upper-intermediate', label: 'Upper-Intermediate', active: true },
+  { id: 'advanced', label: 'Advanced', active: true },
 ]
 
 const LEVEL_CONFIG = {
@@ -26,6 +27,7 @@ const LEVEL_CONFIG = {
   'pre-intermediate': { label: 'Pre-Intermediate', color: { background: 'rgba(139, 92, 246, 0.2)', color: '#c4b5fd', border: '1px solid rgba(139, 92, 246, 0.3)' } },
   intermediate: { label: 'Intermediate', color: { background: 'rgba(249, 115, 22, 0.2)', color: '#fdba74', border: '1px solid rgba(249, 115, 22, 0.3)' } },
   'upper-intermediate': { label: 'Upper-Intermediate', color: { background: 'rgba(244, 63, 94, 0.2)', color: '#fda4af', border: '1px solid rgba(244, 63, 94, 0.3)' } },
+  advanced: { label: 'Advanced', color: { background: 'rgba(239, 68, 68, 0.2)', color: '#fca5a5', border: '1px solid rgba(239, 68, 68, 0.3)' } },
 }
 
 export default function AdminUnitTestsContent() {

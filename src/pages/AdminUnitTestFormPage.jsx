@@ -25,7 +25,7 @@ export default function AdminUnitTestFormPage() {
   const [saving, setSaving] = useState(false)
   const [showQuestionModal, setShowQuestionModal] = useState(false)
   const [editingQuestion, setEditingQuestion] = useState(null)
-  
+
   const [formData, setFormData] = useState({
     unitNumber: '',
     title: '',
@@ -63,19 +63,27 @@ export default function AdminUnitTestFormPage() {
   const validateUnitForm = () => {
     const newErrors = {}
 
-    if (!formData.unitNumber || formData.unitNumber.trim() === '') {
-      newErrors.unitNumber = 'Unit number is required'
+    if (
+      formData.unitNumber === '' ||
+      formData.unitNumber === null ||
+      formData.unitNumber === undefined ||
+      Number.isNaN(Number(formData.unitNumber)) ||
+      Number(formData.unitNumber) < 1
+    ) {
+      newErrors.unitNumber = 'Unit number is required and must be at least 1'
     }
 
     if (!formData.title || formData.title.trim() === '') {
       newErrors.title = 'Title is required'
     }
 
-    if (!formData.description || formData.description.trim() === '') {
-      newErrors.description = 'Description is required'
-    }
-
-    if (!formData.order || formData.order < 1) {
+    if (
+      formData.order === '' ||
+      formData.order === null ||
+      formData.order === undefined ||
+      Number.isNaN(Number(formData.order)) ||
+      Number(formData.order) < 1
+    ) {
       newErrors.order = 'Order must be at least 1'
     }
 
@@ -88,12 +96,12 @@ export default function AdminUnitTestFormPage() {
       toastError('Question is required')
       return false
     }
-    
+
     if (!questionForm.answer.trim()) {
       toastError('Answer is required')
       return false
     }
-    
+
     if (questionForm.type === 'multiple_choice') {
       const validOptions = questionForm.options.filter(opt => opt.trim() !== '')
       if (validOptions.length < 2) {
@@ -105,13 +113,13 @@ export default function AdminUnitTestFormPage() {
         return false
       }
     }
-    
+
     return true
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
+
     if (!validateUnitForm()) {
       return
     }
@@ -121,7 +129,7 @@ export default function AdminUnitTestFormPage() {
     const unitId = location.pathname.split('/').pop()
 
     try {
-      const { addDoc, updateDoc, doc, collection } = await import('firebase/firestore')
+      const { addDoc, updateDoc, doc, collection, serverTimestamp } = await import('firebase/firestore')
       const { db: firestoreDb } = await import('../firebase')
 
       const unitData = {
@@ -131,7 +139,7 @@ export default function AdminUnitTestFormPage() {
         level: formData.level,
         order: parseInt(formData.order),
         exercises: formData.exercises || [],
-        updatedAt: new Date(),
+        updatedAt: serverTimestamp(),
       }
 
       if (isEdit) {
@@ -140,7 +148,7 @@ export default function AdminUnitTestFormPage() {
       } else {
         await addDoc(collection(firestoreDb, 'unitTests'), {
           ...unitData,
-          createdAt: new Date(),
+          createdAt: serverTimestamp(),
         })
         toastSuccess('Unit created successfully')
       }
@@ -148,7 +156,13 @@ export default function AdminUnitTestFormPage() {
       navigate('/admin/unit-tests')
     } catch (error) {
       console.error('Error saving unit:', error)
-      toastError(isEdit ? 'Failed to update unit' : 'Failed to create unit')
+      if (error.code === 'permission-denied') {
+        toastError('Permission denied. You must be an admin to create units.')
+      } else if (error.code === 'unavailable') {
+        toastError('Network error. Please check your connection and try again.')
+      } else {
+        toastError(isEdit ? 'Failed to update unit' : 'Failed to create unit')
+      }
     } finally {
       setSaving(false)
     }
@@ -158,9 +172,9 @@ export default function AdminUnitTestFormPage() {
     if (!validateQuestionForm()) return
 
     setSaving(true)
-    
+
     let newExercise
-    
+
     if (questionForm.type === 'fill_blank') {
       newExercise = {
         id: `q_${Date.now()}`,
@@ -198,7 +212,7 @@ export default function AdminUnitTestFormPage() {
 
   const handleEditQuestion = (exercise) => {
     setEditingQuestion(exercise)
-    
+
     if (exercise.type === 'multiple_choice') {
       setQuestionForm({
         type: exercise.type,
@@ -221,7 +235,7 @@ export default function AdminUnitTestFormPage() {
         options: ['', '', '', ''],
       })
     }
-    
+
     setShowQuestionModal(true)
   }
 
@@ -229,9 +243,9 @@ export default function AdminUnitTestFormPage() {
     if (!validateQuestionForm()) return
 
     setSaving(true)
-    
+
     let updatedExercise
-    
+
     if (questionForm.type === 'fill_blank') {
       updatedExercise = {
         id: editingQuestion.id,
@@ -258,7 +272,7 @@ export default function AdminUnitTestFormPage() {
 
     setFormData(prev => ({
       ...prev,
-      exercises: prev.exercises.map(ex => 
+      exercises: prev.exercises.map(ex =>
         ex.id === editingQuestion.id ? updatedExercise : ex
       ),
     }))
@@ -300,12 +314,12 @@ export default function AdminUnitTestFormPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-6xl px-4 py-6 h-screen overflow-hidden flex flex-col">
+    <div className="container flex flex-col h-screen max-w-6xl px-4 py-6 mx-auto overflow-hidden">
       {/* Header */}
       <div className="flex items-center gap-4 mb-6 shrink-0">
         <button
           onClick={() => navigate('/admin/unit-tests')}
-          className="btn btn-ghost btn-sm gap-2"
+          className="gap-2 btn btn-ghost btn-sm"
         >
           <ArrowLeft size={16} />
           Back to Units
@@ -320,17 +334,17 @@ export default function AdminUnitTestFormPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 overflow-hidden">
+      <div className="grid flex-1 grid-cols-1 gap-6 overflow-hidden lg:grid-cols-2">
         {/* Unit Information Card */}
-        <div className="card bg-base-100 shadow-lg rounded-2xl overflow-hidden flex flex-col">
+        <div className="flex flex-col overflow-hidden shadow-lg card bg-base-100 rounded-2xl">
           <div className="card-body">
-            <h2 className="card-title text-lg mb-4">Unit Information</h2>
-            
+            <h2 className="mb-4 text-lg card-title">Unit Information</h2>
+
             <form onSubmit={handleSubmit} className="space-y-3">
               {/* Unit Number */}
               <div className="form-control">
-                <label className="label py-1">
-                  <span className="label-text text-xs font-medium">Unit Number *</span>
+                <label className="py-1 label">
+                  <span className="text-xs font-medium label-text">Unit Number *</span>
                 </label>
                 <input
                   type="number"
@@ -342,14 +356,14 @@ export default function AdminUnitTestFormPage() {
                   placeholder="1"
                 />
                 {errors.unitNumber && (
-                  <span className="label-text-alt text-error text-xs">{errors.unitNumber}</span>
+                  <span className="text-xs label-text-alt text-error">{errors.unitNumber}</span>
                 )}
               </div>
 
               {/* Title */}
               <div className="form-control">
-                <label className="label py-1">
-                  <span className="label-text text-xs font-medium">Title *</span>
+                <label className="py-1 label">
+                  <span className="text-xs font-medium label-text">Title *</span>
                 </label>
                 <input
                   type="text"
@@ -360,14 +374,14 @@ export default function AdminUnitTestFormPage() {
                   placeholder="e.g., Present Simple"
                 />
                 {errors.title && (
-                  <span className="label-text-alt text-error text-xs">{errors.title}</span>
+                  <span className="text-xs label-text-alt text-error">{errors.title}</span>
                 )}
               </div>
 
-              {/* Description */}
+              {/* Description
               <div className="form-control">
-                <label className="label py-1">
-                  <span className="label-text text-xs font-medium">Description *</span>
+                <label className="py-1 label">
+                  <span className="text-xs font-medium label-text">Description *</span>
                 </label>
                 <textarea
                   name="description"
@@ -378,20 +392,20 @@ export default function AdminUnitTestFormPage() {
                   rows={2}
                 />
                 {errors.description && (
-                  <span className="label-text-alt text-error text-xs">{errors.description}</span>
+                  <span className="text-xs label-text-alt text-error">{errors.description}</span>
                 )}
-              </div>
+              </div> */}
 
               {/* Level */}
               <div className="form-control">
-                <label className="label py-1">
-                  <span className="label-text text-xs font-medium">Level *</span>
+                <label className="py-1 label">
+                  <span className="text-xs font-medium label-text">Level *</span>
                 </label>
                 <select
                   name="level"
                   value={formData.level}
                   onChange={(e) => setFormData(prev => ({ ...prev, level: e.target.value }))}
-                  className="select select-bordered select-sm w-full"
+                  className="w-full select select-bordered select-sm"
                 >
                   {LEVELS.map(level => (
                     <option key={level.value} value={level.value}>
@@ -403,8 +417,8 @@ export default function AdminUnitTestFormPage() {
 
               {/* Order */}
               <div className="form-control">
-                <label className="label py-1">
-                  <span className="label-text text-xs font-medium">Order *</span>
+                <label className="py-1 label">
+                  <span className="text-xs font-medium label-text">Order *</span>
                 </label>
                 <input
                   type="number"
@@ -416,13 +430,13 @@ export default function AdminUnitTestFormPage() {
                   placeholder="1"
                 />
                 {errors.order && (
-                  <span className="label-text-alt text-error text-xs">{errors.order}</span>
+                  <span className="text-xs label-text-alt text-error">{errors.order}</span>
                 )}
-                <span className="label-text-alt text-xs">Used to sort units within the same level</span>
+                <span className="text-xs label-text-alt">Used to sort units within the same level</span>
               </div>
 
               {/* Actions */}
-              <div className="flex gap-3 justify-end">
+              <div className="flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => navigate('/admin/unit-tests')}
@@ -434,7 +448,7 @@ export default function AdminUnitTestFormPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="btn btn-primary gap-2"
+                  className="gap-2 btn btn-primary"
                 >
                   {saving ? (
                     <>
@@ -454,10 +468,10 @@ export default function AdminUnitTestFormPage() {
         </div>
 
         {/* Questions Card */}
-        <div className="card bg-base-100 shadow-lg rounded-2xl overflow-hidden flex flex-col">
-          <div className="card-body overflow-y-auto">
+        <div className="flex flex-col overflow-hidden shadow-lg card bg-base-100 rounded-2xl">
+          <div className="overflow-y-auto card-body">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="card-title text-lg">
+              <h2 className="text-lg card-title">
                 Questions ({formData.exercises?.length || 0})
               </h2>
               <button
@@ -476,23 +490,23 @@ export default function AdminUnitTestFormPage() {
             {/* Questions List */}
             <div className="space-y-2">
               {(!formData.exercises || formData.exercises.length === 0) ? (
-                <div className="text-center py-12 text-slate-400">
+                <div className="py-12 text-center text-slate-400">
                   <Plus size={32} className="mx-auto mb-3 opacity-30" />
-                  <p className="text-sm mb-1">No questions yet</p>
+                  <p className="mb-1 text-sm">No questions yet</p>
                   <p className="text-xs opacity-70">Click "Add Question" to get started</p>
                 </div>
               ) : (
                 formData.exercises.map((exercise, index) => (
                   <div
                     key={exercise.id}
-                    className="card bg-base-200 border border-base-300/50 hover:border-primary/50 transition-all duration-200 rounded-lg"
+                    className="transition-all duration-200 border rounded-lg card bg-base-200 border-base-300/50 hover:border-primary/50"
                   >
-                    <div className="card-body p-3">
+                    <div className="p-3 card-body">
                       <div className="flex items-start gap-3">
                         {/* Drag Handle & Number */}
                         <div className="flex flex-col items-center gap-1 mt-0.5 shrink-0">
                           <button
-                            className="btn btn-xs btn-ghost cursor-move hover:bg-base-300 opacity-30 hover:opacity-100 transition-opacity p-1"
+                            className="p-1 transition-opacity cursor-move btn btn-xs btn-ghost hover:bg-base-300 opacity-30 hover:opacity-100"
                             title="Drag to reorder"
                           >
                             <GripVertical size={14} />
@@ -501,7 +515,7 @@ export default function AdminUnitTestFormPage() {
                             #{index + 1}
                           </span>
                         </div>
-                        
+
                         {/* Question Content */}
                         <div className="flex-1 min-w-0">
                           {/* Header */}
@@ -509,36 +523,36 @@ export default function AdminUnitTestFormPage() {
                             <span className="badge badge-primary badge-xs opacity-80">
                               {getQuestionTypeLabel(exercise.type)}
                             </span>
-                            
+
                             {/* Actions */}
                             <div className="flex gap-1">
                               <button
                                 onClick={() => handleEditQuestion(exercise)}
-                                className="btn btn-xs btn-ghost hover:bg-base-200 p-1"
+                                className="p-1 btn btn-xs btn-ghost hover:bg-base-200"
                               >
                                 <Edit2 size={12} />
                               </button>
                               <button
                                 onClick={() => handleDeleteQuestion(exercise.id)}
-                                className="btn btn-xs btn-ghost text-error hover:bg-error/10 p-1"
+                                className="p-1 btn btn-xs btn-ghost text-error hover:bg-error/10"
                               >
                                 <Trash2 size={12} />
                               </button>
                             </div>
                           </div>
-                          
+
                           {/* Question Text */}
-                          <p className="text-sm text-base-content mb-2 leading-snug">
+                          <p className="mb-2 text-sm leading-snug text-base-content">
                             {exercise.question}
                           </p>
-                          
+
                           {/* Answer */}
                           <div className="flex items-center gap-1.5">
                             <span className="badge badge-success badge-xs opacity-70">
                               Answer
                             </span>
                             <span className="text-xs text-base-content">
-                              {exercise.type === 'true_false' 
+                              {exercise.type === 'true_false'
                                 ? (exercise.answer ? 'True' : 'False')
                                 : exercise.answer}
                             </span>
@@ -550,11 +564,10 @@ export default function AdminUnitTestFormPage() {
                               {exercise.options.map((option, i) => (
                                 <span
                                   key={i}
-                                  className={`badge badge-xs ${
-                                    option === exercise.answer 
-                                      ? 'badge-success opacity-80' 
+                                  className={`badge badge-xs ${option === exercise.answer
+                                      ? 'badge-success opacity-80'
                                       : 'badge-outline badge-neutral opacity-50'
-                                  }`}
+                                    }`}
                                 >
                                   {option} {option === exercise.answer && ' ✓'}
                                 </span>
@@ -575,23 +588,23 @@ export default function AdminUnitTestFormPage() {
       {/* Question Modal */}
       {showQuestionModal && (
         <dialog className="modal modal-open">
-          <div className="modal-box max-w-2xl">
-            <h3 className="font-bold text-lg mb-4">
+          <div className="max-w-2xl modal-box">
+            <h3 className="mb-4 text-lg font-bold">
               {editingQuestion ? 'Edit Question' : 'Add Question'}
             </h3>
-            
+
             <div className="space-y-4">
               {/* Question Type */}
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text font-medium">Question Type</span>
+                  <span className="font-medium label-text">Question Type</span>
                 </label>
                 <select
                   value={questionForm.type}
                   onChange={(e) => {
                     setQuestionForm(prev => ({ ...prev, type: e.target.value, answer: '', options: ['', '', '', ''] }))
                   }}
-                  className="select select-bordered w-full"
+                  className="w-full select select-bordered"
                 >
                   {QUESTION_TYPES.map(type => (
                     <option key={type.value} value={type.value}>
@@ -604,12 +617,12 @@ export default function AdminUnitTestFormPage() {
               {/* Question */}
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text font-medium">Question *</span>
+                  <span className="font-medium label-text">Question *</span>
                 </label>
                 <textarea
                   value={questionForm.question}
                   onChange={(e) => setQuestionForm(prev => ({ ...prev, question: e.target.value }))}
-                  className="textarea textarea-bordered w-full"
+                  className="w-full textarea textarea-bordered"
                   placeholder="Enter your question..."
                   rows={3}
                 />
@@ -618,7 +631,7 @@ export default function AdminUnitTestFormPage() {
               {/* Answer */}
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text font-medium">
+                  <span className="font-medium label-text">
                     {questionForm.type === 'true_false' ? 'Correct Answer (True/False)' : 'Correct Answer *'}
                   </span>
                 </label>
@@ -644,7 +657,7 @@ export default function AdminUnitTestFormPage() {
                     type="text"
                     value={questionForm.answer}
                     onChange={(e) => setQuestionForm(prev => ({ ...prev, answer: e.target.value }))}
-                    className="input input-bordered w-full"
+                    className="w-full input input-bordered"
                     placeholder="Enter the correct answer"
                   />
                 )}
@@ -654,7 +667,7 @@ export default function AdminUnitTestFormPage() {
               {questionForm.type === 'multiple_choice' && (
                 <div className="form-control">
                   <label className="label">
-                    <span className="label-text font-medium">Options (at least 2)</span>
+                    <span className="font-medium label-text">Options (at least 2)</span>
                   </label>
                   <div className="space-y-2">
                     {questionForm.options.map((option, index) => (
@@ -671,7 +684,7 @@ export default function AdminUnitTestFormPage() {
                           placeholder={`Option ${index + 1}`}
                         />
                         {option === questionForm.answer && (
-                          <span className="badge badge-success badge-sm self-center">✓</span>
+                          <span className="self-center badge badge-success badge-sm">✓</span>
                         )}
                       </div>
                     ))}
