@@ -127,7 +127,7 @@ export default function PracticeSession() {
             {units.map((unit) => (
               <div
                 key={unit.id}
-                onClick={() => navigate(`/unit-test/${unit.id}`)}
+                onClick={() => navigate(`/unit-tests/${unit.level || 'beginner'}/${unit.id}`)}
                 className="premium-card p-6 cursor-pointer transition-all hover:border-blue-500/50 hover:bg-blue-500/5"
               >
                 <div className="flex items-center gap-3 mb-4">

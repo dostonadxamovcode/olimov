@@ -319,7 +319,7 @@ export default function AdminUnitTestFormPage() {
       <div className="flex items-center gap-4 mb-6 shrink-0">
         <button
           onClick={() => navigate('/admin/unit-tests')}
-          className="gap-2 btn btn-ghost btn-sm"
+          className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:bg-white/[0.08] hover:border-white/20"
         >
           <ArrowLeft size={16} />
           Back to Units
@@ -352,7 +352,7 @@ export default function AdminUnitTestFormPage() {
                   value={formData.unitNumber}
                   onChange={(e) => setFormData(prev => ({ ...prev, unitNumber: e.target.value }))}
                   min="1"
-                  className={`input input-bordered input-sm w-full ${errors.unitNumber ? 'input-error' : ''}`}
+                  className={`w-full rounded-xl border bg-white/[0.04] px-3 py-2 text-sm text-slate-100 outline-none transition-colors placeholder:text-slate-500 focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/20 ${errors.unitNumber ? 'border-red-500/50' : 'border-white/10'}`}
                   placeholder="1"
                 />
                 {errors.unitNumber && (
@@ -370,7 +370,7 @@ export default function AdminUnitTestFormPage() {
                   name="title"
                   value={formData.title}
                   onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                  className={`input input-bordered input-sm w-full ${errors.title ? 'input-error' : ''}`}
+                  className={`w-full rounded-xl border bg-white/[0.04] px-3 py-2 text-sm text-slate-100 outline-none transition-colors placeholder:text-slate-500 focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/20 ${errors.title ? 'border-red-500/50' : 'border-white/10'}`}
                   placeholder="e.g., Present Simple"
                 />
                 {errors.title && (
@@ -387,7 +387,7 @@ export default function AdminUnitTestFormPage() {
                   name="description"
                   value={formData.description}
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  className={`textarea textarea-bordered textarea-sm w-full ${errors.description ? 'textarea-error' : ''}`}
+                  className={`min-h-[84px] w-full rounded-xl border bg-white/[0.04] px-3 py-2 text-sm text-slate-100 outline-none transition-colors placeholder:text-slate-500 focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/20 ${errors.description ? 'border-red-500/50' : 'border-white/10'}`}
                   placeholder="Brief description of the unit content"
                   rows={2}
                 />
@@ -405,7 +405,7 @@ export default function AdminUnitTestFormPage() {
                   name="level"
                   value={formData.level}
                   onChange={(e) => setFormData(prev => ({ ...prev, level: e.target.value }))}
-                  className="w-full select select-bordered select-sm"
+                  className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-slate-100 outline-none transition-colors focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/20"
                 >
                   {LEVELS.map(level => (
                     <option key={level.value} value={level.value}>
@@ -426,7 +426,7 @@ export default function AdminUnitTestFormPage() {
                   value={formData.order}
                   onChange={(e) => setFormData(prev => ({ ...prev, order: e.target.value }))}
                   min="1"
-                  className={`input input-bordered input-sm w-full ${errors.order ? 'input-error' : ''}`}
+                  className={`w-full rounded-xl border bg-white/[0.04] px-3 py-2 text-sm text-slate-100 outline-none transition-colors placeholder:text-slate-500 focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/20 ${errors.order ? 'border-red-500/50' : 'border-white/10'}`}
                   placeholder="1"
                 />
                 {errors.order && (
@@ -441,14 +441,14 @@ export default function AdminUnitTestFormPage() {
                   type="button"
                   onClick={() => navigate('/admin/unit-tests')}
                   disabled={saving}
-                  className="btn btn-ghost"
+                  className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:bg-white/[0.08] hover:border-white/20 disabled:opacity-60"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="gap-2 btn btn-primary"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-opacity hover:opacity-95 disabled:opacity-60"
                 >
                   {saving ? (
                     <>
@@ -480,7 +480,7 @@ export default function AdminUnitTestFormPage() {
                   setEditingQuestion(null)
                   setShowQuestionModal(true)
                 }}
-                className="btn btn-primary"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-opacity hover:opacity-95"
               >
                 <Plus size={18} />
                 Add Question
@@ -506,7 +506,7 @@ export default function AdminUnitTestFormPage() {
                         {/* Drag Handle & Number */}
                         <div className="flex flex-col items-center gap-1 mt-0.5 shrink-0">
                           <button
-                            className="p-1 transition-opacity cursor-move btn btn-xs btn-ghost hover:bg-base-300 opacity-30 hover:opacity-100"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-400 opacity-40 transition-opacity hover:opacity-100 hover:bg-white/[0.07]"
                             title="Drag to reorder"
                           >
                             <GripVertical size={14} />
@@ -520,7 +520,7 @@ export default function AdminUnitTestFormPage() {
                         <div className="flex-1 min-w-0">
                           {/* Header */}
                           <div className="flex items-center justify-between mb-2">
-                            <span className="badge badge-primary badge-xs opacity-80">
+                            <span className="inline-flex items-center rounded-md border border-sky-500/20 bg-sky-500/10 px-2 py-0.5 text-[10px] font-semibold text-sky-300">
                               {getQuestionTypeLabel(exercise.type)}
                             </span>
 
@@ -528,13 +528,13 @@ export default function AdminUnitTestFormPage() {
                             <div className="flex gap-1">
                               <button
                                 onClick={() => handleEditQuestion(exercise)}
-                                className="p-1 btn btn-xs btn-ghost hover:bg-base-200"
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-sky-300 transition-colors hover:bg-sky-500/10 hover:border-sky-500/20"
                               >
                                 <Edit2 size={12} />
                               </button>
                               <button
                                 onClick={() => handleDeleteQuestion(exercise.id)}
-                                className="p-1 btn btn-xs btn-ghost text-error hover:bg-error/10"
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-red-500/20 bg-red-500/10 text-red-300 transition-colors hover:bg-red-500/20"
                               >
                                 <Trash2 size={12} />
                               </button>
@@ -548,7 +548,7 @@ export default function AdminUnitTestFormPage() {
 
                           {/* Answer */}
                           <div className="flex items-center gap-1.5">
-                            <span className="badge badge-success badge-xs opacity-70">
+                            <span className="inline-flex items-center rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">
                               Answer
                             </span>
                             <span className="text-xs text-base-content">
@@ -564,10 +564,11 @@ export default function AdminUnitTestFormPage() {
                               {exercise.options.map((option, i) => (
                                 <span
                                   key={i}
-                                  className={`badge badge-xs ${option === exercise.answer
-                                      ? 'badge-success opacity-80'
-                                      : 'badge-outline badge-neutral opacity-50'
-                                    }`}
+                                  className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-semibold ${
+                                    option === exercise.answer
+                                      ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300'
+                                      : 'border-white/10 bg-white/[0.03] text-slate-400'
+                                  }`}
                                 >
                                   {option} {option === exercise.answer && ' ✓'}
                                 </span>
@@ -604,8 +605,8 @@ export default function AdminUnitTestFormPage() {
                   onChange={(e) => {
                     setQuestionForm(prev => ({ ...prev, type: e.target.value, answer: '', options: ['', '', '', ''] }))
                   }}
-                  className="w-full select select-bordered"
-                >
+                className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-slate-100 outline-none transition-colors focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/20"
+              >
                   {QUESTION_TYPES.map(type => (
                     <option key={type.value} value={type.value}>
                       {type.label}
@@ -622,10 +623,10 @@ export default function AdminUnitTestFormPage() {
                 <textarea
                   value={questionForm.question}
                   onChange={(e) => setQuestionForm(prev => ({ ...prev, question: e.target.value }))}
-                  className="w-full textarea textarea-bordered"
-                  placeholder="Enter your question..."
-                  rows={3}
-                />
+                className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-slate-100 outline-none transition-colors focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/20"
+                placeholder="Enter your question..."
+                rows={3}
+              />
               </div>
 
               {/* Answer */}
@@ -640,24 +641,32 @@ export default function AdminUnitTestFormPage() {
                     <button
                       type="button"
                       onClick={() => setQuestionForm(prev => ({ ...prev, answer: 'true' }))}
-                      className={`btn flex-1 ${questionForm.answer === 'true' ? 'btn-success' : 'btn-outline'}`}
-                    >
-                      True
-                    </button>
+                    className={`flex-1 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-colors ${
+                      questionForm.answer === 'true'
+                        ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300'
+                        : 'border-white/10 bg-white/[0.04] text-slate-200 hover:bg-white/[0.08]'
+                    }`}
+                  >
+                    True
+                  </button>
                     <button
                       type="button"
                       onClick={() => setQuestionForm(prev => ({ ...prev, answer: 'false' }))}
-                      className={`btn flex-1 ${questionForm.answer === 'false' ? 'btn-error' : 'btn-outline'}`}
-                    >
-                      False
-                    </button>
+                    className={`flex-1 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-colors ${
+                      questionForm.answer === 'false'
+                        ? 'border-red-500/20 bg-red-500/10 text-red-300'
+                        : 'border-white/10 bg-white/[0.04] text-slate-200 hover:bg-white/[0.08]'
+                    }`}
+                  >
+                    False
+                  </button>
                   </div>
                 ) : (
                   <input
                     type="text"
                     value={questionForm.answer}
                     onChange={(e) => setQuestionForm(prev => ({ ...prev, answer: e.target.value }))}
-                    className="w-full input input-bordered"
+                    className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-slate-100 outline-none transition-colors focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/20"
                     placeholder="Enter the correct answer"
                   />
                 )}
@@ -680,11 +689,11 @@ export default function AdminUnitTestFormPage() {
                             newOptions[index] = e.target.value
                             setQuestionForm(prev => ({ ...prev, options: newOptions }))
                           }}
-                          className={`input input-bordered input-sm flex-1 ${option === questionForm.answer ? 'input-success' : ''}`}
+                          className={`w-full flex-1 rounded-xl border bg-white/[0.04] px-3 py-2 text-sm text-slate-100 outline-none transition-colors focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/20 ${option === questionForm.answer ? 'border-emerald-500/40' : 'border-white/10'}`}
                           placeholder={`Option ${index + 1}`}
                         />
                         {option === questionForm.answer && (
-                          <span className="self-center badge badge-success badge-sm">✓</span>
+                          <span className="self-center inline-flex rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">✓</span>
                         )}
                       </div>
                     ))}
@@ -703,14 +712,14 @@ export default function AdminUnitTestFormPage() {
                   setEditingQuestion(null)
                   resetQuestionForm()
                 }}
-                className="btn"
+                className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:bg-white/[0.08] hover:border-white/20"
               >
                 Cancel
               </button>
               <button
                 onClick={editingQuestion ? handleUpdateQuestion : handleAddQuestion}
                 disabled={saving}
-                className="btn btn-primary"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-opacity hover:opacity-95 disabled:opacity-60"
               >
                 {saving ? (
                   <>

@@ -114,6 +114,10 @@ export default function AdminUnitTestsContent() {
   })
 
   const activeLevelConfig = LEVEL_CONFIG[activeLevel] || LEVEL_CONFIG.beginner
+  const primaryBtn = 'inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-all duration-200 hover:opacity-95'
+  const secondaryBtn = 'inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:bg-white/[0.08] hover:border-white/20'
+  const dangerBtn = 'inline-flex items-center justify-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2.5 text-sm font-semibold text-red-300 transition-colors hover:bg-red-500/20'
+  const tabBtn = 'inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all duration-200'
 
   return (
     <div style={{ paddingBottom: 80 }}>
@@ -123,17 +127,7 @@ export default function AdminUnitTestsContent() {
           <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: '#f1f5f9' }}>Unit Tests</h1>
           <p style={{ margin: '4px 0 0', fontSize: 13, color: '#64748b' }}>Manage grammar unit tests by level</p>
         </div>
-        <button
-          onClick={() => navigate('/admin/unit-tests/add')}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 8,
-            padding: '10px 20px', borderRadius: 10,
-            background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-            border: 'none', cursor: 'pointer',
-            color: '#fff', fontWeight: 600, fontSize: 14,
-            transition: 'all 0.2s',
-          }}
-        >
+        <button onClick={() => navigate('/admin/unit-tests/add')} className={primaryBtn}>
           <Plus size={16} />
           Create Unit
         </button>
@@ -155,30 +149,17 @@ export default function AdminUnitTestsContent() {
               }
             }}
             disabled={!level.active}
-            style={{
-              padding: '10px 20px',
-              borderRadius: 8,
-              cursor: level.active ? 'pointer' : 'not-allowed',
-              background: activeLevel === level.id && level.active
-                ? 'linear-gradient(135deg, #3b82f6, #8b5cf6)'
+            className={`${tabBtn} ${
+              activeLevel === level.id && level.active
+                ? 'border-blue-500/30 bg-blue-500/15 text-white shadow-lg shadow-blue-500/10'
                 : level.active
-                ? 'rgba(255,255,255,0.05)'
-                : 'rgba(255,255,255,0.02)',
-              color: activeLevel === level.id && level.active
-                ? '#fff'
-                : level.active
-                ? '#94a3b8'
-                : '#475569',
-              fontWeight: activeLevel === level.id && level.active ? 600 : 500,
-              fontSize: 13,
-              border: level.active ? '1px solid rgba(255,255,255,0.1)' : '1px dashed rgba(255,255,255,0.05)',
-              transition: 'all 0.2s',
-              opacity: level.active ? 1 : 0.5,
-            }}
+                ? 'border-white/10 bg-white/[0.04] text-slate-300 hover:bg-white/[0.07] hover:border-white/20'
+                : 'cursor-not-allowed border-white/5 bg-white/[0.02] text-slate-600 opacity-60'
+            }`}
           >
             {level.label}
             {!level.active && (
-              <span style={{ marginLeft: 6, fontSize: 11, opacity: 0.7 }}>(Coming Soon)</span>
+              <span className="ml-1 text-[11px] opacity-70">(Coming Soon)</span>
             )}
           </button>
         ))}
@@ -210,15 +191,7 @@ export default function AdminUnitTestsContent() {
             placeholder="Search units..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              background: 'none',
-              border: 'none',
-              outline: 'none',
-              color: '#e2e8f0',
-              fontSize: 13,
-              flex: 1,
-              width: '100%',
-            }}
+            className="w-full bg-transparent text-sm text-slate-200 outline-none placeholder:text-slate-500"
           />
         </div>
       </div>
@@ -237,18 +210,12 @@ export default function AdminUnitTestsContent() {
 
       {/* Empty State */}
       {!loading && filteredUnits.length === 0 && (
-        <div style={{
-          textAlign: 'center',
-          padding: '80px 20px',
-          background: 'rgba(255,255,255,0.02)',
-          border: '1px dashed rgba(255,255,255,0.1)',
-          borderRadius: 14,
-        }}>
+        <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.03] px-6 py-20 text-center">
           <FileText size={48} color="#475569" style={{ marginBottom: 16 }} />
-          <h3 style={{ margin: '0 0 8px', fontSize: 18, color: '#f1f5f9' }}>
+          <h3 className="mb-2 text-lg font-semibold text-white">
             No Units Found
           </h3>
-          <p style={{ margin: 0, fontSize: 14, color: '#64748b', marginBottom: 24 }}>
+          <p className="mb-6 text-sm text-slate-400">
             {searchQuery
               ? 'No units match your search'
               : `No units in ${activeLevelConfig.label} level yet`}
@@ -256,19 +223,7 @@ export default function AdminUnitTestsContent() {
           {!searchQuery && (
             <button
               onClick={() => navigate('/admin/unit-tests/add')}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '12px 24px',
-                borderRadius: 10,
-                background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-                border: 'none',
-                cursor: 'pointer',
-                color: '#fff',
-                fontWeight: 600,
-                fontSize: 14,
-              }}
+              className={primaryBtn}
             >
               <Plus size={16} />
               Create First Unit
@@ -291,14 +246,7 @@ export default function AdminUnitTestsContent() {
             return (
               <div
                 key={unit.id}
-                style={{
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: 14,
-                  padding: '20px',
-                  position: 'relative',
-                  transition: 'all 0.2s',
-                }}
+                className="premium-card flex flex-col rounded-2xl border border-white/10 bg-white/[0.035] p-5 transition-all duration-200 hover:-translate-y-1 hover:border-white/20"
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = 'rgba(59,130,246,0.3)'
                   e.currentTarget.style.transform = 'translateY(-2px)'
@@ -309,38 +257,20 @@ export default function AdminUnitTestsContent() {
                 }}
               >
                 {/* Header */}
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: 10,
-                      background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 18,
-                      fontWeight: 700,
-                      color: '#fff',
-                    }}>
+                <div className="mb-4 flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 text-lg font-bold text-white shadow-lg shadow-blue-500/20">
                       {unit.unitNumber || unit.order || '—'}
                     </div>
                     <div>
-                      <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: '#f1f5f9' }}>
+                      <h3 className="m-0 text-base font-semibold text-white">
                         {unit.title || 'Untitled'}
                       </h3>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
-                        <span style={{
-                          padding: '2px 8px',
-                          borderRadius: 4,
-                          fontSize: 10,
-                          fontWeight: 600,
-                          textTransform: 'uppercase',
-                          ...levelConfig.color,
-                        }}>
+                      <div className="mt-1 flex items-center gap-2">
+                        <span className="rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase" style={levelConfig.color}>
                           {levelConfig.label}
                         </span>
-                        <span style={{ fontSize: 12, color: '#64748b' }}>
+                        <span className="text-xs text-slate-400">
                           {unit.exercises?.length || 0} questions
                         </span>
                       </div>
@@ -349,67 +279,29 @@ export default function AdminUnitTestsContent() {
                 </div>
 
                 {/* Description */}
-                <p style={{
-                  margin: '0 0 16px',
-                  fontSize: 13,
-                  color: '#94a3b8',
-                  lineHeight: 1.5,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                }}>
+                <p className="mb-4 line-clamp-2 text-sm leading-relaxed text-slate-400">
                   {unit.description || 'No description provided'}
                 </p>
 
                 {/* Instructions Preview */}
                 {unit.instructions && (
-                  <div style={{
-                    marginBottom: 16,
-                    padding: '10px 12px',
-                    background: 'rgba(59,130,246,0.05)',
-                    border: '1px solid rgba(59,130,246,0.1)',
-                    borderRadius: 8,
-                  }}>
-                    <p style={{
-                      margin: 0,
-                      fontSize: 11,
-                      color: '#60a5fa',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}>
+                  <div className="mb-4 rounded-xl border border-blue-500/10 bg-blue-500/5 px-3 py-2">
+                    <p className="truncate text-[11px] text-blue-300">
                       {unit.instructions}
                     </p>
                   </div>
                 )}
 
                 {/* Actions */}
-                <div style={{ display: 'flex', gap: 8, marginTop: 'auto' }}>
+                <div className="mt-auto flex flex-wrap gap-2">
                   <button
                     onClick={() => handleManageQuestions(unit)}
-                    style={{
-                      flex: 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 6,
-                      padding: '10px 12px',
-                      borderRadius: 8,
-                      background: 'rgba(34, 197, 94, 0.1)',
-                      border: '1px solid rgba(34, 197, 94, 0.2)',
-                      color: '#22c55e',
-                      fontSize: 12,
-                      fontWeight: 500,
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                    }}
+                    className={`${secondaryBtn} min-w-[110px] flex-1 border-emerald-500/20 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/15`}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'rgba(34, 197, 94, 0.2)'
+                      e.currentTarget.style.borderColor = 'rgba(16,185,129,0.35)'
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'rgba(34, 197, 94, 0.1)'
+                      e.currentTarget.style.borderColor = 'rgba(16,185,129,0.2)'
                     }}
                   >
                     <FileText size={14} />
@@ -417,27 +309,12 @@ export default function AdminUnitTestsContent() {
                   </button>
                   <button
                     onClick={() => handleEdit(unit)}
-                    style={{
-                      flex: 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 6,
-                      padding: '10px 12px',
-                      borderRadius: 8,
-                      background: 'rgba(59, 130, 246, 0.1)',
-                      border: '1px solid rgba(59, 130, 246, 0.2)',
-                      color: '#60a5fa',
-                      fontSize: 12,
-                      fontWeight: 500,
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                    }}
+                    className={`${secondaryBtn} min-w-[110px] flex-1 border-blue-500/20 bg-blue-500/10 text-sky-300 hover:bg-blue-500/15`}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'rgba(59, 130, 246, 0.2)'
+                      e.currentTarget.style.borderColor = 'rgba(59,130,246,0.35)'
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)'
+                      e.currentTarget.style.borderColor = 'rgba(59,130,246,0.2)'
                     }}
                   >
                     <Edit2 size={14} />
@@ -446,30 +323,14 @@ export default function AdminUnitTestsContent() {
                   <button
                     onClick={() => setPendingDelete(unit)}
                     disabled={deletingId === unit.id}
-                    style={{
-                      flex: 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 6,
-                      padding: '10px 12px',
-                      borderRadius: 8,
-                      background: 'rgba(239, 68, 68, 0.1)',
-                      border: '1px solid rgba(239, 68, 68, 0.2)',
-                      color: '#f87171',
-                      fontSize: 12,
-                      fontWeight: 500,
-                      cursor: deletingId === unit.id ? 'not-allowed' : 'pointer',
-                      opacity: deletingId === unit.id ? 0.6 : 1,
-                      transition: 'all 0.2s',
-                    }}
+                    className={`${dangerBtn} min-w-[110px] flex-1 ${deletingId === unit.id ? 'cursor-not-allowed opacity-60' : ''}`}
                     onMouseEnter={(e) => {
                       if (deletingId !== unit.id) {
-                        e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'
+                        e.currentTarget.style.borderColor = 'rgba(239,68,68,0.35)'
                       }
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'
+                      e.currentTarget.style.borderColor = 'rgba(239,68,68,0.2)'
                     }}
                   >
                     {deletingId === unit.id ? (
