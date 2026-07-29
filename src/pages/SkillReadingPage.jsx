@@ -369,12 +369,9 @@ export default function SkillReadingPage() {
   // Fired by useAntiCheatGuard when a tab/window switch is detected.
   const handleViolation = useCallback(() => {
     if (!test) return;
-    setViolated(true);
-    setResults(test.answers.map((ans, i) =>
-      (userAnswers[i] ?? '').trim().toLowerCase() === ans.toLowerCase()
-    ));
-    setSubmitted(true);
-  }, [test, userAnswers]);
+    localStorage.removeItem(storageKey(partParam));
+    navigate('/exam-terminated');
+  }, [test, partParam, navigate]);
 
   // Guard is active only while the test is loaded and in progress.
   useAntiCheatGuard({ active: !!test && !submitted, onViolation: handleViolation });

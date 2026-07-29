@@ -6,7 +6,8 @@ import { useEffect, useRef } from 'react';
  *
  * Covered events:
  *   visibilitychange → hidden   tab switch, alt-tab, window minimise
- *   pagehide                    browser back / tab close
+ *   blur                        window loses focus / other app selected
+ *   pagehide                    browser back / tab close / mobile backgrounding
  *
  * @param {object}   opts
  * @param {boolean}  opts.active        Guard is armed only when true.
@@ -38,12 +39,17 @@ export function useAntiCheatGuard({ active, onViolation, gracePeriod = 500 }) {
     const onVisibility = () => {
       if (document.visibilityState === 'hidden') trigger();
     };
+    const onBlur = () => {
+      trigger();
+    };
 
     document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('blur', onBlur);
     window.addEventListener('pagehide', trigger);
 
     return () => {
       document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('blur', onBlur);
       window.removeEventListener('pagehide', trigger);
     };
   }, [active, gracePeriod]);

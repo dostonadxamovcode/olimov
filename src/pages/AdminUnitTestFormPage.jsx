@@ -314,33 +314,33 @@ export default function AdminUnitTestFormPage() {
   }
 
   return (
-    <div className="container flex flex-col h-screen max-w-6xl px-4 py-6 mx-auto overflow-hidden">
+    <div className="container flex min-h-screen max-w-6xl flex-col overflow-hidden px-4 py-4 mx-auto sm:px-6 sm:py-6">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6 shrink-0">
+      <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-4 shrink-0">
         <button
           onClick={() => navigate('/admin/unit-tests')}
-          className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:bg-white/[0.08] hover:border-white/20"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:bg-white/[0.08] hover:border-white/20 sm:w-auto"
         >
           <ArrowLeft size={16} />
           Back to Units
         </button>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-white">
+        <div className="min-w-0 flex-1">
+          <h1 className="break-words text-xl font-bold text-white sm:text-2xl">
             {location.pathname.includes('/edit/') ? 'Edit Unit' : 'Create New Unit'}
           </h1>
-          <p className="text-sm text-slate-400">
+          <p className="mt-1 text-sm text-slate-400">
             {location.pathname.includes('/edit/') ? 'Update unit information' : 'Add a new grammar unit'}
           </p>
         </div>
       </div>
 
-      <div className="grid flex-1 grid-cols-1 gap-6 overflow-hidden lg:grid-cols-2">
+      <div className="grid flex-1 grid-cols-1 gap-4 overflow-hidden lg:grid-cols-2 lg:gap-6">
         {/* Unit Information Card */}
-        <div className="flex flex-col overflow-hidden shadow-lg card bg-base-100 rounded-2xl">
+        <div className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] shadow-lg">
           <div className="card-body">
-            <h2 className="mb-4 text-lg card-title">Unit Information</h2>
+            <h2 className="mb-4 text-lg font-semibold text-white">Unit Information</h2>
 
-            <form onSubmit={handleSubmit} className="space-y-3">
+            <form onSubmit={handleSubmit} className="space-y-4">
               {/* Unit Number */}
               <div className="form-control">
                 <label className="py-1 label">
@@ -436,19 +436,19 @@ export default function AdminUnitTestFormPage() {
               </div>
 
               {/* Actions */}
-              <div className="flex justify-end gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
                 <button
                   type="button"
                   onClick={() => navigate('/admin/unit-tests')}
                   disabled={saving}
-                  className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:bg-white/[0.08] hover:border-white/20 disabled:opacity-60"
+                  className="inline-flex w-full items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:bg-white/[0.08] hover:border-white/20 disabled:opacity-60 sm:w-auto"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-opacity hover:opacity-95 disabled:opacity-60"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-opacity hover:opacity-95 disabled:opacity-60 sm:w-auto"
                 >
                   {saving ? (
                     <>
@@ -468,10 +468,10 @@ export default function AdminUnitTestFormPage() {
         </div>
 
         {/* Questions Card */}
-        <div className="flex flex-col overflow-hidden shadow-lg card bg-base-100 rounded-2xl">
-          <div className="overflow-y-auto card-body">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg card-title">
+        <div className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] shadow-lg">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-5">
+            <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <h2 className="text-lg font-semibold text-white">
                 Questions ({formData.exercises?.length || 0})
               </h2>
               <button
@@ -480,7 +480,7 @@ export default function AdminUnitTestFormPage() {
                   setEditingQuestion(null)
                   setShowQuestionModal(true)
                 }}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-opacity hover:opacity-95"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-opacity hover:opacity-95 sm:w-auto"
               >
                 <Plus size={18} />
                 Add Question
@@ -490,7 +490,7 @@ export default function AdminUnitTestFormPage() {
             {/* Questions List */}
             <div className="space-y-2">
               {(!formData.exercises || formData.exercises.length === 0) ? (
-                <div className="py-12 text-center text-slate-400">
+                <div className="py-10 text-center text-slate-400 sm:py-12">
                   <Plus size={32} className="mx-auto mb-3 opacity-30" />
                   <p className="mb-1 text-sm">No questions yet</p>
                   <p className="text-xs opacity-70">Click "Add Question" to get started</p>
@@ -499,9 +499,9 @@ export default function AdminUnitTestFormPage() {
                 formData.exercises.map((exercise, index) => (
                   <div
                     key={exercise.id}
-                    className="transition-all duration-200 border rounded-lg card bg-base-200 border-base-300/50 hover:border-primary/50"
+                    className="transition-all duration-200 rounded-xl border border-white/10 bg-white/[0.04] hover:border-sky-500/30"
                   >
-                    <div className="p-3 card-body">
+                    <div className="p-3 sm:p-4">
                       <div className="flex items-start gap-3">
                         {/* Drag Handle & Number */}
                         <div className="flex flex-col items-center gap-1 mt-0.5 shrink-0">
@@ -517,9 +517,9 @@ export default function AdminUnitTestFormPage() {
                         </div>
 
                         {/* Question Content */}
-                        <div className="flex-1 min-w-0">
+                        <div className="min-w-0 flex-1">
                           {/* Header */}
-                          <div className="flex items-center justify-between mb-2">
+                          <div className="mb-2 flex items-start justify-between gap-2">
                             <span className="inline-flex items-center rounded-md border border-sky-500/20 bg-sky-500/10 px-2 py-0.5 text-[10px] font-semibold text-sky-300">
                               {getQuestionTypeLabel(exercise.type)}
                             </span>
@@ -542,16 +542,16 @@ export default function AdminUnitTestFormPage() {
                           </div>
 
                           {/* Question Text */}
-                          <p className="mb-2 text-sm leading-snug text-base-content">
+                          <p className="mb-2 break-words text-sm leading-snug text-slate-100">
                             {exercise.question}
                           </p>
 
                           {/* Answer */}
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex flex-wrap items-center gap-1.5">
                             <span className="inline-flex items-center rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">
                               Answer
                             </span>
-                            <span className="text-xs text-base-content">
+                            <span className="break-words text-xs text-slate-300">
                               {exercise.type === 'true_false'
                                 ? (exercise.answer ? 'True' : 'False')
                                 : exercise.answer}
@@ -560,7 +560,7 @@ export default function AdminUnitTestFormPage() {
 
                           {/* Multiple Choice Options */}
                           {exercise.type === 'multiple_choice' && exercise.options && (
-                            <div className="flex flex-wrap gap-1 mt-2">
+                            <div className="mt-2 flex flex-wrap gap-1">
                               {exercise.options.map((option, i) => (
                                 <span
                                   key={i}
@@ -589,8 +589,8 @@ export default function AdminUnitTestFormPage() {
       {/* Question Modal */}
       {showQuestionModal && (
         <dialog className="modal modal-open">
-          <div className="max-w-2xl modal-box">
-            <h3 className="mb-4 text-lg font-bold">
+          <div className="modal-box w-[calc(100vw-1.5rem)] max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 bg-[#0f172a] p-4 sm:w-full sm:p-6">
+            <h3 className="mb-4 text-lg font-bold text-white">
               {editingQuestion ? 'Edit Question' : 'Add Question'}
             </h3>
 
@@ -598,7 +598,7 @@ export default function AdminUnitTestFormPage() {
               {/* Question Type */}
               <div className="form-control">
                 <label className="label">
-                  <span className="font-medium label-text">Question Type</span>
+                  <span className="font-medium text-slate-200">Question Type</span>
                 </label>
                 <select
                   value={questionForm.type}
@@ -618,7 +618,7 @@ export default function AdminUnitTestFormPage() {
               {/* Question */}
               <div className="form-control">
                 <label className="label">
-                  <span className="font-medium label-text">Question *</span>
+                  <span className="font-medium text-slate-200">Question *</span>
                 </label>
                 <textarea
                   value={questionForm.question}
@@ -632,12 +632,12 @@ export default function AdminUnitTestFormPage() {
               {/* Answer */}
               <div className="form-control">
                 <label className="label">
-                  <span className="font-medium label-text">
+                  <span className="font-medium text-slate-200">
                     {questionForm.type === 'true_false' ? 'Correct Answer (True/False)' : 'Correct Answer *'}
                   </span>
                 </label>
                 {questionForm.type === 'true_false' ? (
-                  <div className="flex gap-3">
+                  <div className="flex flex-col gap-3 sm:flex-row">
                     <button
                       type="button"
                       onClick={() => setQuestionForm(prev => ({ ...prev, answer: 'true' }))}
@@ -676,11 +676,11 @@ export default function AdminUnitTestFormPage() {
               {questionForm.type === 'multiple_choice' && (
                 <div className="form-control">
                   <label className="label">
-                    <span className="font-medium label-text">Options (at least 2)</span>
+                    <span className="font-medium text-slate-200">Options (at least 2)</span>
                   </label>
                   <div className="space-y-2">
                     {questionForm.options.map((option, index) => (
-                      <div key={index} className="flex gap-2">
+                      <div key={index} className="flex flex-col gap-2 sm:flex-row">
                         <input
                           type="text"
                           value={option}
@@ -705,21 +705,21 @@ export default function AdminUnitTestFormPage() {
               )}
             </div>
 
-            <div className="modal-action">
+            <div className="modal-action mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
               <button
                 onClick={() => {
                   setShowQuestionModal(false)
                   setEditingQuestion(null)
                   resetQuestionForm()
                 }}
-                className="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:bg-white/[0.08] hover:border-white/20"
+                className="inline-flex w-full items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:bg-white/[0.08] hover:border-white/20 sm:w-auto"
               >
                 Cancel
               </button>
               <button
                 onClick={editingQuestion ? handleUpdateQuestion : handleAddQuestion}
                 disabled={saving}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-opacity hover:opacity-95 disabled:opacity-60"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-opacity hover:opacity-95 disabled:opacity-60 sm:w-auto"
               >
                 {saving ? (
                   <>

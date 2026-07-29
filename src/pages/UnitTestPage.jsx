@@ -7,6 +7,7 @@ import { SectionLoader } from '../components/common/Loader'
 import { db } from '../firebase'
 import { useAuth } from '../context/AuthContext'
 import { waitForFirestoreReady } from '../utils/waitForFirestoreAuth'
+import { useAntiCheatGuard } from '../hooks/useAntiCheatGuard'
 
 const EXERCISE_INSTRUCTIONS = {
   fill_blank: 'Complete the sentence. Fill in the blank with the correct word or form.',
@@ -120,6 +121,22 @@ export default function UnitTestPage() {
     setResults(null)
   }
 
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1)
+      return
+    }
+
+    navigate(`/unit-tests/${level}`)
+  }
+
+  const handleViolation = () => {
+    if (!unit || submitted) return
+    navigate('/exam-terminated')
+  }
+
+  useAntiCheatGuard({ active: !!unit && !submitted, onViolation: handleViolation })
+
   if (loading) {
     return (
       <>
@@ -164,18 +181,17 @@ export default function UnitTestPage() {
         canonical={`https://olimov.vercel.app/unit-tests/${level}/${unitId}`}
       />
       <div className="min-h-screen site-bg">
-        <div className="sticky top-0 z-40 border-b border-white/10 bg-[#030712]/95 px-4 py-4 backdrop-blur-sm sm:px-6">
-          <div className="mx-auto flex max-w-7xl items-center justify-between">
-            <div className="flex items-center gap-4">
+        <div className="sticky top-0 z-40 border-b border-white/10 bg-[#030712]/95 px-4 py-3 backdrop-blur-sm sm:px-6 sm:py-4">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
               <button
-                onClick={() => navigate(`/unit-tests/${level}`)}
-                className="flex items-center gap-2 text-slate-400 transition-colors hover:text-white"
+                onClick={handleBack}
+                className="flex shrink-0 items-center gap-2 text-slate-400 transition-colors hover:text-white"
               >
                 <ArrowLeft className="h-4 w-4" /> Back
               </button>
-              <div className="h-6 w-px bg-white/10 hidden sm:block" />
-              <h1 className="hidden text-xl font-bold text-white sm:block">{unit.title}</h1>
-              <h1 className="text-base font-bold text-white sm:hidden">{unit.title}</h1>
+              <div className="hidden h-6 w-px bg-white/10 sm:block" />
+              <h1 className="truncate text-base font-bold text-white sm:text-xl">{unit.title}</h1>
             </div>
           </div>
         </div>
@@ -183,25 +199,25 @@ export default function UnitTestPage() {
         <main className="mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
           {submitted && results ? (
             <div className="space-y-6">
-              <div className="premium-card p-6 text-center">
+              <div className="premium-card p-4 text-center sm:p-6">
                 <div className="mb-4">
-                  <div className={`text-6xl font-bold ${results.percentage >= 70 ? 'text-green-400' : results.percentage >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
+                  <div className={`text-5xl font-bold sm:text-6xl ${results.percentage >= 70 ? 'text-green-400' : results.percentage >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
                     {results.percentage}%
                   </div>
                   <p className="text-lg text-slate-400">
                     {results.correct} / {results.total} correct
                   </p>
                 </div>
-                <div className="flex justify-center gap-4">
+                <div className="flex flex-col justify-center gap-3 sm:flex-row sm:gap-4">
                   <button
                     onClick={handleReset}
-                    className="rounded-lg bg-blue-500/20 px-6 py-3 text-blue-400 transition-colors hover:bg-blue-500/30"
+                    className="w-full rounded-lg bg-blue-500/20 px-6 py-3 text-blue-400 transition-colors hover:bg-blue-500/30 sm:w-auto"
                   >
                     Try Again
                   </button>
                   <button
                     onClick={() => navigate(`/unit-tests/${level}`)}
-                    className="rounded-lg bg-white/5 px-6 py-3 text-slate-300 transition-colors hover:bg-white/10"
+                    className="w-full rounded-lg bg-white/5 px-6 py-3 text-slate-300 transition-colors hover:bg-white/10 sm:w-auto"
                   >
                     Back to Units
                   </button>
@@ -217,13 +233,13 @@ export default function UnitTestPage() {
                     <span className="w-6 flex-shrink-0 text-sm text-slate-400">{result.index + 1}.</span>
                     {result.isCorrect ? <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-400" /> : <XCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-400" />}
                     <div className="flex-1">
-                      <p className="mb-1 text-sm text-white">{result.question}</p>
-                      <div className="flex gap-4 text-xs">
-                        <span className="text-slate-400">
+                      <p className="mb-1 break-words text-sm text-white">{result.question}</p>
+                      <div className="flex flex-col gap-1 text-xs sm:flex-row sm:gap-4">
+                        <span className="break-words text-slate-400">
                           Your answer: <span className={result.isCorrect ? 'text-green-400' : 'text-red-400'}>{result.userAnswer || 'Not answered'}</span>
                         </span>
                         {!result.isCorrect && (
-                          <span className="text-slate-400">
+                          <span className="break-words text-slate-400">
                             Correct: <span className="text-green-400">{result.correctAnswer}</span>
                           </span>
                         )}
@@ -235,9 +251,9 @@ export default function UnitTestPage() {
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="premium-card p-6">
-                <h2 className="mb-2 text-2xl font-bold text-white">{unit.title}</h2>
-                <p className="mb-4 text-slate-400">{unit.description}</p>
+              <div className="premium-card p-4 sm:p-6">
+                <h2 className="mb-2 break-words text-xl font-bold text-white sm:text-2xl">{unit.title}</h2>
+                <p className="mb-4 break-words text-slate-400">{unit.description}</p>
                 {unit.instructions && <p className="mb-3 text-sm leading-relaxed text-blue-300/90">{unit.instructions}</p>}
                 <p className="text-sm text-slate-500">{validExercises.length} exercises • {unit.level || 'beginner'}</p>
               </div>
@@ -258,17 +274,17 @@ export default function UnitTestPage() {
                         <span className="w-6 flex-shrink-0 text-sm text-slate-400">{filteredIndex + 1}.</span>
                         <div className="min-w-0 flex-1">
                           {exercise.type === 'fill_blank' && (
-                            <div className="flex flex-wrap items-center gap-2 text-base text-slate-300">
+                            <div className="flex flex-wrap items-center gap-2 text-sm text-slate-300 sm:text-base">
                               {exercise.question.split('____').map((part, i, arr) => (
                                 <React.Fragment key={`${exercise.id}-part-${i}`}>
-                                  <span>{part}</span>
+                                  <span className="break-words">{part}</span>
                                   {i < arr.length - 1 && (
                                     <input
                                       type="text"
                                       value={answers[exercise.id] || ''}
                                       onChange={(e) => handleAnswerChange(exercise.id, e.target.value)}
                                       placeholder="____"
-                                      className="w-32 rounded border border-white/20 bg-white/5 px-2 py-1 text-center text-white placeholder-slate-500 transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                      className="w-full max-w-[10rem] rounded border border-white/20 bg-white/5 px-2 py-1 text-center text-white placeholder-slate-500 transition-all focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:w-32"
                                     />
                                   )}
                                 </React.Fragment>
@@ -278,12 +294,12 @@ export default function UnitTestPage() {
 
                           {exercise.type === 'multiple_choice' && (
                             <>
-                              <p className="mb-3 text-base text-slate-300">{exercise.question}</p>
+                              <p className="mb-3 break-words text-base text-slate-300">{exercise.question}</p>
                               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                                 {exercise.options.map((option) => (
                                   <label
                                     key={`${exercise.id}-option-${option}`}
-                                    className={`flex cursor-pointer items-center gap-2 rounded-lg border p-2 transition-all ${answers[exercise.id] === option ? 'border-blue-500/50 bg-blue-500/20' : 'border-white/10 bg-white/5 hover:bg-white/10'}`}
+                                    className={`flex min-w-0 cursor-pointer items-center gap-2 rounded-lg border p-2 transition-all ${answers[exercise.id] === option ? 'border-blue-500/50 bg-blue-500/20' : 'border-white/10 bg-white/5 hover:bg-white/10'}`}
                                   >
                                     <input
                                       type="radio"
@@ -293,7 +309,7 @@ export default function UnitTestPage() {
                                       onChange={() => handleAnswerChange(exercise.id, option)}
                                       className="h-4 w-4 text-blue-400 focus:ring-blue-500/50"
                                     />
-                                    <span className="text-sm text-slate-300">{option}</span>
+                                    <span className="min-w-0 break-words text-sm text-slate-300">{option}</span>
                                   </label>
                                 ))}
                               </div>
@@ -302,9 +318,9 @@ export default function UnitTestPage() {
 
                           {exercise.type === 'true_false' && (
                             <>
-                              <p className="mb-3 text-base text-slate-300">{exercise.question}</p>
-                              <div className="flex gap-4">
-                                <label className={`flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2 transition-all ${answers[exercise.id] === 'true' ? 'border-blue-500/50 bg-blue-500/20' : 'border-white/10 bg-white/5 hover:bg-white/10'}`}>
+                              <p className="mb-3 break-words text-base text-slate-300">{exercise.question}</p>
+                              <div className="flex flex-col gap-3 sm:flex-row">
+                                <label className={`flex w-full cursor-pointer items-center gap-2 rounded-lg border px-4 py-2 transition-all sm:w-auto ${answers[exercise.id] === 'true' ? 'border-blue-500/50 bg-blue-500/20' : 'border-white/10 bg-white/5 hover:bg-white/10'}`}>
                                   <input
                                     type="radio"
                                     name={`exercise-${exercise.id}`}
@@ -315,7 +331,7 @@ export default function UnitTestPage() {
                                   />
                                   <span className="text-sm text-slate-300">True</span>
                                 </label>
-                                <label className={`flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-2 transition-all ${answers[exercise.id] === 'false' ? 'border-blue-500/50 bg-blue-500/20' : 'border-white/10 bg-white/5 hover:bg-white/10'}`}>
+                                <label className={`flex w-full cursor-pointer items-center gap-2 rounded-lg border px-4 py-2 transition-all sm:w-auto ${answers[exercise.id] === 'false' ? 'border-blue-500/50 bg-blue-500/20' : 'border-white/10 bg-white/5 hover:bg-white/10'}`}>
                                   <input
                                     type="radio"
                                     name={`exercise-${exercise.id}`}

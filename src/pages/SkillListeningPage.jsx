@@ -249,10 +249,9 @@ export default function SkillListeningPage() {
 
   const handleViolation = useCallback(() => {
     if (!test) return;
-    setViolated(true);
-    setResults(test.answers.map((ans, i) => (userAnswers[i] ?? '').trim().toLowerCase() === ans.toLowerCase()));
-    setSubmitted(true);
-  }, [test, userAnswers]);
+    localStorage.removeItem(storageKey(partParam));
+    navigate('/exam-terminated');
+  }, [test, partParam, navigate]);
 
   useAntiCheatGuard({ active: !!test && !submitted, onViolation: handleViolation });
 

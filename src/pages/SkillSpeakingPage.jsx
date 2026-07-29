@@ -6,6 +6,7 @@ import {
   XCircle, ArrowRight, Star, Loader2,
 } from 'lucide-react';
 import { SectionLoader } from '../components/common/Loader';
+import { useAntiCheatGuard } from '../hooks/useAntiCheatGuard';
 import { analyzeIELTSSpeaking } from '../services/geminiAI';
 
 const SpeechRecognition = typeof window !== 'undefined' ? (window.SpeechRecognition || window.webkitSpeechRecognition) : null;
@@ -42,7 +43,7 @@ function TimerDisplay({ seconds, isLow }) {
 }
 
 // ── Part 2: Cue card view with prepare → speak flow ──────────────────────────
-function Part2View({ test, onDone, onFinish }) {
+function Part2View({ test, onDone, onFinish, onViolation }) {
   const [phase, setPhase] = useState('prepare'); // 'prepare' | 'speak' | 'done'
   const prepSecs  = test.preparationTime ?? 60;
   const speakSecs = (test.timeLimit ?? 2) * 60;
@@ -166,6 +167,14 @@ function Part2View({ test, onDone, onFinish }) {
     };
   }, [phase, timer, startSpeak, stopListening, onFinish]);
 
+  const handleViolation = useCallback(() => {
+    if (phase === 'done') return;
+    stopListening();
+    onViolation?.();
+  }, [phase, stopListening, onViolation]);
+
+  useAntiCheatGuard({ active: phase !== 'done', onViolation: handleViolation });
+
   return (
     <div className="space-y-4">
       {/* Cue card */}
@@ -229,7 +238,7 @@ function Part2View({ test, onDone, onFinish }) {
 }
 
 // ── Parts 1 & 3: Questions list with per-question timer ───────────────────────
-function QuestionsView({ test, onDone, onFinish }) {
+function QuestionsView({ test, onDone, onFinish, onViolation }) {
   const [currentIdx, setCurrentIdx]   = useState(0);
   const [answering,  setAnswering]    = useState(false);
   const [done,       setDone]         = useState(false);
@@ -373,6 +382,14 @@ function QuestionsView({ test, onDone, onFinish }) {
       timer.reset(perQuestionSecs);
     }
   }, [timer.seconds, answering, perQuestionSecs, stopListening]);
+
+  const handleViolation = useCallback(() => {
+    if (done) return;
+    stopListening();
+    onViolation?.();
+  }, [done, stopListening, onViolation]);
+
+  useAntiCheatGuard({ active: !done, onViolation: handleViolation });
 
   if (done) {
     return (
@@ -629,6 +646,11 @@ export default function SkillSpeakingPage() {
     navigate('/skill-tests');
   }, [partParam, navigate]);
 
+  const handleViolation = useCallback(() => {
+    localStorage.removeItem(storageKey(partParam));
+    navigate('/exam-terminated');
+  }, [partParam, navigate]);
+
   const analyzeTranscript = useCallback(async (textToAnalyze) => {
     const text = textToAnalyze !== undefined ? textToAnalyze : transcript;
     if (!text || !text.trim()) {
@@ -714,8 +736,8 @@ export default function SkillSpeakingPage() {
       {/* Content */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 pb-20">
         {isPart2
-          ? <Part2View test={test} onDone={handleExit} onFinish={handleFinish} />
-          : <QuestionsView test={test} onDone={handleExit} onFinish={handleFinish} />
+          ? <Part2View test={test} onDone={handleExit} onFinish={handleFinish} onViolation={handleViolation} />
+          : <QuestionsView test={test} onDone={handleExit} onFinish={handleFinish} onViolation={handleViolation} />
         }
         
         {/* Analysis Results */}
