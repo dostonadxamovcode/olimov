@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { getDocs, collection } from 'firebase/firestore'
 import { db } from '../firebase'
 import { useTranslation } from 'react-i18next'
-import { Sprout, BookOpen, TrendingUp, ChartBar as BarChart2, Trophy as Award, Star } from 'lucide-react'
+import { Sprout, BookOpen, TrendingUp, ChartBar as BarChart2, Trophy as Award, Star, UserPlus, LogIn } from 'lucide-react'
 import { Spinner } from '../components/common/Loader'
 import SEO from '../components/SEO'
+import { useAuth } from '../context/AuthContext'
 
 const QUESTION_COUNT = 50
 
@@ -32,14 +33,20 @@ const LEVELS = [
 export default function LevelSelection() {
   const { t } = useTranslation()
   const navigate   = useNavigate()
+  const { currentUser } = useAuth()
   const [selected,   setSelected]   = useState(null)
   const [fetching,   setFetching]   = useState(false)
   const [fetchError, setFetchError] = useState('')
+  const [showAuthModal, setShowAuthModal] = useState(false)
 
   const handleCardClick = (level) => { setFetchError(''); setSelected(level) }
 
   const handleConfirm = async () => {
     if (!selected) return
+    if (!currentUser) {
+      setShowAuthModal(true)
+      return
+    }
     setFetching(true)
     setFetchError('')
     try {
@@ -187,6 +194,40 @@ export default function LevelSelection() {
                     : t('levels.start')}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showAuthModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="max-w-md w-full bg-slate-800/90 backdrop-blur-xl rounded-3xl p-8 border border-slate-700 shadow-2xl text-center">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-violet-500 to-cyan-400 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-violet-500/30">
+              <UserPlus className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-3">Authentication Required</h2>
+            <p className="text-slate-400 mb-6">To take this test, you need to sign in to your account. Please log in or register to continue.</p>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => navigate('/login')}
+                className="flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-500/20 transition-opacity hover:opacity-90"
+              >
+                <LogIn className="w-4 h-4" />
+                Log In
+              </button>
+              <button
+                onClick={() => navigate('/register')}
+                className="flex items-center justify-center gap-2 w-full rounded-xl bg-white/5 border border-slate-600 py-3 text-sm font-semibold text-slate-300 hover:bg-white/10 transition-colors"
+              >
+                <UserPlus className="w-4 h-4" />
+                Register
+              </button>
+              <button
+                onClick={() => setShowAuthModal(false)}
+                className="w-full rounded-xl py-2 text-sm text-slate-500 hover:text-slate-400 transition-colors"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>

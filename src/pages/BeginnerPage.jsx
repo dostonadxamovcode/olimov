@@ -1,20 +1,30 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ClipboardList, Clock, AlertCircle, ArrowLeft, BookOpen } from 'lucide-react'
+import { ClipboardList, Clock, AlertCircle, ArrowLeft, BookOpen, UserPlus, LogIn } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { LoadingSpinner } from '../components/ui/SkeletonLoader'
 import { useLevelTests } from '../hooks/useLevelTests'
+import { useAuth } from '../context/AuthContext'
 
 export default function BeginnerPage() {
   const { t } = useTranslation()
   const { tests: allDocs, loading, error } = useLevelTests('a1')
+  const { currentUser } = useAuth()
   const tests = allDocs.filter(d => !d.type && d.isPublished)
 
   const [selectedTest, setSelectedTest] = useState(null)
   const [showConfirmation, setShowConfirmation] = useState(false)
+  const [showAuthModal, setShowAuthModal] = useState(false)
   const navigate = useNavigate()
 
-  const handleStartTest = (test) => { setSelectedTest(test); setShowConfirmation(true) }
+  const handleStartTest = (test) => {
+    if (!currentUser) {
+      setShowAuthModal(true)
+      return
+    }
+    setSelectedTest(test)
+    setShowConfirmation(true)
+  }
   const handleConfirmStart = () => { if (selectedTest) navigate(`/tests/${selectedTest.id}`) }
   const handleCancelStart = () => { setSelectedTest(null); setShowConfirmation(false) }
 
@@ -52,6 +62,40 @@ export default function BeginnerPage() {
           <div className="flex items-center gap-3 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-red-300">
             <AlertCircle className="w-5 h-5 shrink-0" />
             <p>{error}</p>
+          </div>
+        )}
+
+        {showAuthModal && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="max-w-md w-full bg-slate-800/90 backdrop-blur-xl rounded-3xl p-8 border border-slate-700 shadow-2xl text-center">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-teal-400 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-500/30">
+                <UserPlus className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-3">Authentication Required</h2>
+              <p className="text-slate-400 mb-6">To take this test, you need to sign in to your account. Please log in or register to continue.</p>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => navigate('/login')}
+                  className="flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition-opacity hover:opacity-90"
+                >
+                  <LogIn className="w-4 h-4" />
+                  Log In
+                </button>
+                <button
+                  onClick={() => navigate('/register')}
+                  className="flex items-center justify-center gap-2 w-full rounded-xl bg-white/5 border border-slate-600 py-3 text-sm font-semibold text-slate-300 hover:bg-white/10 transition-colors"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  Register
+                </button>
+                <button
+                  onClick={() => setShowAuthModal(false)}
+                  className="w-full rounded-xl py-2 text-sm text-slate-500 hover:text-slate-400 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
