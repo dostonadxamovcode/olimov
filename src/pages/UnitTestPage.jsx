@@ -164,23 +164,13 @@ export default function UnitTestPage() {
         canonical={`https://olimov.vercel.app/unit-tests/${level}/${unitId}`}
       />
       <div className="min-h-screen site-bg">
-        <div className="sticky top-0 z-40 border-b border-white/10 bg-[#030712]/95 px-4 py-4 backdrop-blur-sm sm:px-6">
-          <div className="mx-auto flex max-w-7xl items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => navigate(`/unit-tests/${level}`)}
-                className="flex items-center gap-2 text-slate-400 transition-colors hover:text-white"
-              >
-                <ArrowLeft className="h-4 w-4" /> Back
-              </button>
-              <div className="h-6 w-px bg-white/10 hidden sm:block" />
-              <h1 className="hidden text-xl font-bold text-white sm:block">{unit.title}</h1>
-              <h1 className="text-base font-bold text-white sm:hidden">{unit.title}</h1>
-            </div>
-          </div>
-        </div>
-
         <main className="mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
+          <button
+            onClick={() => navigate(`/unit-tests/${level}`)}
+            className="mb-6 flex items-center gap-2 text-slate-400 transition-colors hover:text-white"
+          >
+            <ArrowLeft className="h-4 w-4" /> Back
+          </button>
           {submitted && results ? (
             <div className="space-y-6">
               <div className="premium-card p-6 text-center">

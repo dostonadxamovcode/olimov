@@ -126,7 +126,6 @@ const router = createBrowserRouter([
       { path: 'result',                 element: <ResultsPage /> },
       { path: 'unit-tests',             element: <UnitTests /> },
       { path: 'unit-tests/:level',       element: <LazyPage><UnitTestsByLevel /></LazyPage> },
-      { path: 'unit-tests/:level/:unitId', element: <LazyPage><UnitTest /></LazyPage> },
       {
         element: <ProtectedRoute />,
         children: [
@@ -138,6 +137,7 @@ const router = createBrowserRouter([
       { path: '*',      element: <NotFound /> },
     ],
   },
+  { path: '/unit-tests/:level/:unitId', element: <LazyPage><UnitTest /></LazyPage> },
   { path: '/skill-tests/reading',        element: <LazyPage><SkillReadingPage /></LazyPage>      },
   { path: '/skill-tests/reading-part2', element: <LazyPage><SkillReadingPart2Page /></LazyPage>  },
   { path: '/skill-tests/listening',     element: <LazyPage><SkillListeningPage /></LazyPage>    },
