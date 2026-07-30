@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, ChevronRight, Clock3, Layers3 } from 'lucide-react'
+import { ArrowLeft, ChevronRight, Clock3, Layers3, UserPlus, LogIn } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { collection, getDocs } from 'firebase/firestore'
 import SEO from '../components/SEO'
@@ -20,10 +20,11 @@ const LEVEL_META = {
 export default function UnitTestsByLevel() {
   const { level } = useParams()
   const navigate = useNavigate()
-  const { loading: authLoading } = useAuth()
+  const { loading: authLoading, currentUser } = useAuth()
   const [units, setUnits] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [showAuthModal, setShowAuthModal] = useState(false)
 
   const normalizedLevel = level?.toLowerCase()
   const meta = LEVEL_META[normalizedLevel]
@@ -61,6 +62,12 @@ export default function UnitTestsByLevel() {
     }
   }, [authLoading, normalizedLevel])
 
+  useEffect(() => {
+    if (!authLoading && !currentUser && !loading && units.length > 0) {
+      setShowAuthModal(true)
+    }
+  }, [authLoading, currentUser, loading, units.length])
+
   const title = meta ? `${meta.label} Units` : 'Units'
   const description = meta?.description || 'Browse units by level.'
 
@@ -69,6 +76,46 @@ export default function UnitTestsByLevel() {
     if (units.length === 0) return 'No units available yet'
     return null
   }, [meta, units.length])
+
+  if (showAuthModal) {
+    return (
+      <>
+        <SEO title="Authentication Required" description="Sign in to view tests" canonical={`https://olimov.vercel.app/unit-tests/${normalizedLevel || ''}`} />
+        <div className="min-h-screen site-bg flex items-center justify-center px-4">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" />
+          <div className="relative z-50 premium-card p-8 max-w-md w-full mx-auto text-center">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/30">
+              <UserPlus className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-3">Authentication Required</h2>
+            <p className="text-slate-400 mb-6">To view and take tests, you need to sign in to your account. Please log in or register to continue.</p>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => navigate('/login')}
+                className="flex items-center justify-center gap-2 w-full rounded-lg bg-gradient-to-r from-blue-500 to-cyan-600 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-opacity hover:opacity-90"
+              >
+                <LogIn className="w-4 h-4" />
+                Log In
+              </button>
+              <button
+                onClick={() => navigate('/register')}
+                className="flex items-center justify-center gap-2 w-full rounded-lg bg-white/5 border border-white/10 py-3 text-sm font-semibold text-slate-300 hover:bg-white/10 transition-colors"
+              >
+                <UserPlus className="w-4 h-4" />
+                Register
+              </button>
+              <button
+                onClick={() => navigate('/unit-tests')}
+                className="w-full rounded-lg py-2 text-sm text-slate-500 hover:text-slate-400 transition-colors"
+              >
+                Back to Unit Tests
+              </button>
+            </div>
+          </div>
+        </div>
+      </>
+    )
+  }
 
   if (loading) {
     return (

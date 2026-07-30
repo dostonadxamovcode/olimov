@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, CheckCircle2, XCircle } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, XCircle, UserPlus, LogIn } from 'lucide-react'
 import { doc, getDoc } from 'firebase/firestore'
 import SEO from '../components/SEO'
 import { SectionLoader } from '../components/common/Loader'
@@ -22,13 +22,14 @@ function getExerciseInstruction(exercise) {
 export default function UnitTestPage() {
   const { level, unitId } = useParams()
   const navigate = useNavigate()
-  const { loading: authLoading } = useAuth()
+  const { loading: authLoading, currentUser } = useAuth()
   const [unit, setUnit] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [answers, setAnswers] = useState({})
   const [submitted, setSubmitted] = useState(false)
   const [results, setResults] = useState(null)
+  const [showAuthModal, setShowAuthModal] = useState(false)
 
   useEffect(() => {
     if (authLoading) return
@@ -67,6 +68,12 @@ export default function UnitTestPage() {
       cancelled = true
     }
   }, [authLoading, level, unitId])
+
+  useEffect(() => {
+    if (!authLoading && !currentUser && !loading && unit) {
+      setShowAuthModal(true)
+    }
+  }, [authLoading, currentUser, loading, unit])
 
   const handleAnswerChange = (exerciseId, value) => {
     setAnswers((prev) => ({
@@ -155,6 +162,46 @@ export default function UnitTestPage() {
     ['fill_blank', 'multiple_choice', 'true_false'].includes(exercise.type),
   )
   const allAnswered = validExercises.every((ex) => answers[ex.id])
+
+  if (showAuthModal) {
+    return (
+      <>
+        <SEO title="Authentication Required" description="Sign in to take the test" canonical={`https://olimov.vercel.app/unit-tests/${level}/${unitId}`} />
+        <div className="min-h-screen site-bg flex items-center justify-center px-4">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" />
+          <div className="relative z-50 premium-card p-8 max-w-md w-full mx-auto text-center">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/30">
+              <UserPlus className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-3">Authentication Required</h2>
+            <p className="text-slate-400 mb-6">To take this test, you need to sign in to your account. Please log in or register to continue.</p>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => navigate('/login')}
+                className="flex items-center justify-center gap-2 w-full rounded-lg bg-gradient-to-r from-blue-500 to-cyan-600 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-opacity hover:opacity-90"
+              >
+                <LogIn className="w-4 h-4" />
+                Log In
+              </button>
+              <button
+                onClick={() => navigate('/register')}
+                className="flex items-center justify-center gap-2 w-full rounded-lg bg-white/5 border border-white/10 py-3 text-sm font-semibold text-slate-300 hover:bg-white/10 transition-colors"
+              >
+                <UserPlus className="w-4 h-4" />
+                Register
+              </button>
+              <button
+                onClick={() => navigate(`/unit-tests/${level}`)}
+                className="w-full rounded-lg py-2 text-sm text-slate-500 hover:text-slate-400 transition-colors"
+              >
+                Back to Units
+              </button>
+            </div>
+          </div>
+        </div>
+      </>
+    )
+  }
 
   return (
     <>
