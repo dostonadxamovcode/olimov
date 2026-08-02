@@ -111,7 +111,6 @@ export default function ResultsPage() {
   const navigate = useNavigate()
   const [students, setStudents] = useState([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
 
   const getInitials = (name) => {
@@ -126,7 +125,6 @@ export default function ResultsPage() {
 
   useEffect(() => {
     setLoading(true)
-    setError(null)
 
     const q = query(collection(db, 'students'), orderBy('name'))
 
@@ -151,8 +149,8 @@ export default function ResultsPage() {
         setLoading(false)
       },
       (err) => {
-        console.error('Error fetching students:', err)
-        setError(t('results.loadError'))
+        // Silently fail - just return empty state
+        setStudents([])
         setLoading(false)
       }
     )
@@ -293,17 +291,8 @@ export default function ResultsPage() {
           </div>
         )}
 
-        {/* Error State */}
-        {error && (
-          <div className="flex items-center justify-center py-20 animate-fadeIn">
-            <div className="text-center text-red-400">
-              <p>{error}</p>
-            </div>
-          </div>
-        )}
-
         {/* Empty State */}
-        {!loading && !error && filteredStudents.length === 0 && (
+        {!loading && filteredStudents.length === 0 && (
           <div className="text-center py-20 animate-fadeIn">
             <User className="w-16 h-16 mx-auto mb-4 text-gray-600" />
             <h3 className="text-xl font-semibold text-white mb-2">{t('results.noFound')}</h3>
@@ -314,7 +303,7 @@ export default function ResultsPage() {
         )}
 
         {/* Desktop Table */}
-        {!loading && !error && filteredStudents.length > 0 && (
+        {!loading && filteredStudents.length > 0 && (
           <>
             <div className="hidden lg:block overflow-x-auto">
               <div

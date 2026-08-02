@@ -121,7 +121,7 @@ service cloud.firestore {
 
     // students collection (CEFR student records) — admin and above
     match /students/{docId} {
-      allow read: if isAdminOrAbove();
+      allow read, list: if isAdminOrAbove();
       allow create, update, delete: if isAdminOrAbove();
     }
 

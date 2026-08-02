@@ -68,7 +68,7 @@ export default function BeginnerPage() {
         {showAuthModal && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="max-w-md w-full bg-slate-800/90 backdrop-blur-xl rounded-3xl p-8 border border-slate-700 shadow-2xl text-center">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-teal-400 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-500/30">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/30">
                 <UserPlus className="w-8 h-8 text-white" />
               </div>
               <h2 className="text-2xl font-bold text-white mb-3">Authentication Required</h2>
@@ -76,7 +76,7 @@ export default function BeginnerPage() {
               <div className="flex flex-col gap-3">
                 <button
                   onClick={() => navigate('/login')}
-                  className="flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition-opacity hover:opacity-90"
+                  className="flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-opacity hover:opacity-90"
                 >
                   <LogIn className="w-4 h-4" />
                   Log In

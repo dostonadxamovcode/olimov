@@ -105,8 +105,7 @@ function loadSiteContent() {
       return cachedContent
     })
     .catch((err) => {
-      console.error('Failed loading siteContent')
-      console.error(err)
+      // Silently fail - use default content
       return null
     })
 

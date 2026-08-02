@@ -87,7 +87,7 @@ export default function LevelSelection() {
         canonical="https://olimov.vercel.app/level"
       />
     <div className="level-selection-page relative min-h-screen site-bg overflow-hidden flex flex-col items-center px-4 py-16 mt-[80px]">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -left-40 w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-full bg-violet-700/20 blur-[60px] md:blur-[120px]" />
         <div className="absolute -bottom-40 -right-40 w-[300px] h-[300px] md:w-[500px] md:h-[500px] rounded-full bg-cyan-700/20 blur-[60px] md:blur-[120px]" />
         <svg className="absolute inset-0 w-full h-full opacity-[0.04]" xmlns="http://www.w3.org/2000/svg">
@@ -98,20 +98,20 @@ export default function LevelSelection() {
 
       <div className="relative z-10 w-full max-w-5xl">
         <div className="animate-fadeIn">
-          <div className="animate-fadeInUp text-center mb-12 mt-8">
+          <div className="mt-8 mb-12 text-center animate-fadeInUp">
             <span className="inline-block mb-4 px-4 py-1.5 rounded-full text-xs font-semibold tracking-widest uppercase bg-white/5 border border-white/10 text-slate-400">
               {t('levels.badge')}
             </span>
-            <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
+            <h1 className="mb-4 text-4xl font-bold text-white sm:text-5xl">
               {t('levels.title')}{' '}
-              <span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">{t('levels.highlight')}</span>
+              <span className="text-transparent bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text">{t('levels.highlight')}</span>
             </h1>
-            <p className="text-slate-400 text-base sm:text-lg max-w-xl mx-auto">
+            <p className="max-w-xl mx-auto text-base text-slate-400 sm:text-lg">
               {t('levels.subtitle')}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {LEVELS.map((level) => {
               const Icon = level.icon
               return (
@@ -126,10 +126,10 @@ export default function LevelSelection() {
                   </div>
                   <div className="flex items-center gap-2 mb-2">
                     <span className={`text-xs font-bold px-2 py-0.5 rounded-md ${level.badge}`}>{level.label}</span>
-                    <h3 className="text-white font-semibold text-base">{t('levels.' + level.code + '.name')}</h3>
+                    <h3 className="text-base font-semibold text-white">{t('levels.' + level.code + '.name')}</h3>
                   </div>
-                  <p className="text-slate-400 text-sm leading-relaxed">{t('levels.' + level.code + '.desc')}</p>
-                  <div className="mt-4 flex items-center gap-1 text-xs font-medium text-slate-500 group-hover:text-white transition-colors duration-200">
+                  <p className="text-sm leading-relaxed text-slate-400">{t('levels.' + level.code + '.desc')}</p>
+                  <div className="flex items-center gap-1 mt-4 text-xs font-medium transition-colors duration-200 text-slate-500 group-hover:text-white">
                     {t('levels.viewTests')}
                     <svg className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
@@ -150,31 +150,31 @@ export default function LevelSelection() {
           />
           <div className={`relative w-full max-w-sm rounded-3xl bg-gradient-to-br ${selected.gradient} p-px shadow-2xl`}>
             <div className={`rounded-3xl bg-gradient-to-br ${selected.gradient} p-8 overflow-hidden`}>
-              <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10 blur-2xl pointer-events-none" />
+              <div className="absolute w-40 h-40 rounded-full pointer-events-none -top-10 -right-10 bg-white/10 blur-2xl" />
               <div className="flex justify-center mb-6">
-                <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-xl">
+                <div className="flex items-center justify-center w-20 h-20 shadow-xl rounded-2xl bg-white/20 backdrop-blur-sm">
                   {(() => { const Icon = selected.icon; return <Icon size={36} className="text-white" strokeWidth={1.8} /> })()}
                 </div>
               </div>
-              <div className="text-center mb-6">
-                <span className="inline-block px-3 py-1 rounded-full bg-white/20 text-white/80 text-xs font-bold tracking-widest uppercase mb-3">
+              <div className="mb-6 text-center">
+                <span className="inline-block px-3 py-1 mb-3 text-xs font-bold tracking-widest uppercase rounded-full bg-white/20 text-white/80">
                   {selected.label}
                 </span>
                 <h2 className="text-3xl font-bold text-white">{t('levels.' + selected.code + '.name')}</h2>
-                <p className="text-white/70 text-sm mt-1">{t('levels.' + selected.code + '.desc')}</p>
+                <p className="mt-1 text-sm text-white/70">{t('levels.' + selected.code + '.desc')}</p>
               </div>
               <div className="flex gap-3 mb-6">
-                <div className="flex-1 rounded-2xl bg-black/20 backdrop-blur-sm px-4 py-3 text-center">
+                <div className="flex-1 px-4 py-3 text-center rounded-2xl bg-black/20 backdrop-blur-sm">
                   <p className="text-2xl font-bold text-white">30</p>
                   <p className="text-white/60 text-xs mt-0.5">{t('levels.questions')}</p>
                 </div>
-                <div className="flex-1 rounded-2xl bg-black/20 backdrop-blur-sm px-4 py-3 text-center">
+                <div className="flex-1 px-4 py-3 text-center rounded-2xl bg-black/20 backdrop-blur-sm">
                   <p className="text-2xl font-bold text-white">4</p>
                   <p className="text-white/60 text-xs mt-0.5">{t('levels.questionTypes')}</p>
                 </div>
               </div>
               {fetchError && (
-                <p className="text-white/90 text-xs mb-4 bg-black/20 rounded-xl px-4 py-3 text-center">{fetchError}</p>
+                <p className="px-4 py-3 mb-4 text-xs text-center text-white/90 bg-black/20 rounded-xl">{fetchError}</p>
               )}
               <div className="flex gap-3">
                 <button
@@ -200,31 +200,31 @@ export default function LevelSelection() {
       )}
 
       {showAuthModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="max-w-md w-full bg-slate-800/90 backdrop-blur-xl rounded-3xl p-8 border border-slate-700 shadow-2xl text-center">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-violet-500 to-cyan-400 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-violet-500/30">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md p-8 text-center border shadow-2xl bg-slate-800/90 backdrop-blur-xl rounded-3xl border-slate-700">
+            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-6 rounded-full shadow-lg bg-gradient-to-br from-blue-500 to-cyan-500 shadow-blue-500/30">
               <UserPlus className="w-8 h-8 text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-white mb-3">Authentication Required</h2>
-            <p className="text-slate-400 mb-6">To take this test, you need to sign in to your account. Please log in or register to continue.</p>
+            <h2 className="mb-3 text-2xl font-bold text-white">Authentication Required</h2>
+            <p className="mb-6 text-slate-400">To take this test, you need to sign in to your account. Please log in or register to continue.</p>
             <div className="flex flex-col gap-3">
               <button
                 onClick={() => navigate('/login')}
-                className="flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-500/20 transition-opacity hover:opacity-90"
+                className="flex items-center justify-center w-full gap-2 py-3 text-sm font-semibold text-white transition-opacity shadow-lg rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 shadow-blue-500/20 hover:opacity-90"
               >
                 <LogIn className="w-4 h-4" />
                 Log In
               </button>
               <button
                 onClick={() => navigate('/register')}
-                className="flex items-center justify-center gap-2 w-full rounded-xl bg-white/5 border border-slate-600 py-3 text-sm font-semibold text-slate-300 hover:bg-white/10 transition-colors"
+                className="flex items-center justify-center w-full gap-2 py-3 text-sm font-semibold transition-colors border rounded-xl bg-white/5 border-slate-600 text-slate-300 hover:bg-white/10"
               >
                 <UserPlus className="w-4 h-4" />
                 Register
               </button>
               <button
                 onClick={() => setShowAuthModal(false)}
-                className="w-full rounded-xl py-2 text-sm text-slate-500 hover:text-slate-400 transition-colors"
+                className="w-full py-2 text-sm transition-colors rounded-xl text-slate-500 hover:text-slate-400"
               >
                 Cancel
               </button>

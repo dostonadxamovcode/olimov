@@ -84,7 +84,7 @@ export default function UnitTestsByLevel() {
         <div className="min-h-screen site-bg flex items-center justify-center px-4">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" />
           <div className="relative z-50 premium-card p-8 max-w-md w-full mx-auto text-center">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/30">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/30">
               <UserPlus className="w-8 h-8 text-white" />
             </div>
             <h2 className="text-2xl font-bold text-white mb-3">Authentication Required</h2>
@@ -92,7 +92,7 @@ export default function UnitTestsByLevel() {
             <div className="flex flex-col gap-3">
               <button
                 onClick={() => navigate('/login')}
-                className="flex items-center justify-center gap-2 w-full rounded-lg bg-gradient-to-r from-blue-500 to-cyan-600 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-opacity hover:opacity-90"
+                className="flex items-center justify-center gap-2 w-full rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-opacity hover:opacity-90"
               >
                 <LogIn className="w-4 h-4" />
                 Log In

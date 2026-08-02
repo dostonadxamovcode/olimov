@@ -133,7 +133,7 @@ export default function ExamPage() {
   const { testId }  = useParams()
   const navigate    = useNavigate()
   const location    = useLocation()
-  const { user }    = useAuth()
+  const { user, currentUser } = useAuth()
 
   const [test,            setTest]            = useState(null)
   const [levelId,         setLevelId]         = useState(null)
@@ -143,6 +143,7 @@ export default function ExamPage() {
   const [selected,        setSelected]        = useState({})
   const [submitting,      setSubmitting]      = useState(false)
   const [showExitConfirm, setShowExitConfirm] = useState(false)
+  const [showAuthModal,   setShowAuthModal]   = useState(false)
 
   const { display: timerDisplay, secs } = useTimer(60 * 60)
 
@@ -161,6 +162,12 @@ export default function ExamPage() {
 
   useAntiCheatGuard({ active: !loading && !!test, onViolation: terminateExam })
   // --- END EXAM SECURITY ---
+
+  useEffect(() => {
+    if (!loading && !currentUser && test) {
+      setShowAuthModal(true)
+    }
+  }, [loading, currentUser, test])
 
   useEffect(() => {
     const fetchTest = async () => {
@@ -303,6 +310,43 @@ export default function ExamPage() {
       </div>
     </div>
   )
+
+  if (showAuthModal) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" />
+        <div className="relative z-50 bg-slate-800/90 backdrop-blur-xl rounded-3xl p-8 max-w-md w-full mx-auto text-center border border-slate-700 shadow-2xl">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/30">
+            <UserPlus className="w-8 h-8 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-3">Authentication Required</h2>
+          <p className="text-slate-400 mb-6">To take this test, you need to sign in to your account. Please log in or register to continue.</p>
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={() => navigate('/login')}
+              className="flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-opacity hover:opacity-90"
+            >
+              <LogIn className="w-4 h-4" />
+              Log In
+            </button>
+            <button
+              onClick={() => navigate('/register')}
+              className="flex items-center justify-center gap-2 w-full rounded-xl bg-white/5 border border-slate-600 py-3 text-sm font-semibold text-slate-300 hover:bg-white/10 transition-colors"
+            >
+              <UserPlus className="w-4 h-4" />
+              Register
+            </button>
+            <button
+              onClick={() => navigate('/level')}
+              className="w-full rounded-xl py-2 text-sm text-slate-500 hover:text-slate-400 transition-colors"
+            >
+              Back to Levels
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const questions = test?.questions ?? []
   const total     = questions.length
